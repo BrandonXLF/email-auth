@@ -54,20 +54,19 @@ function save_keys( $keys ) {
 	$filesystem = new \WP_Filesystem_Direct( false );
 	$filesystem->put_contents(
 		ABSPATH . '/eauth-keys.php',
-		<<<PHP
-		<?php
-		/**
-		 * Private DKIM keys for the Email Auth plugin.
-		 *
-		 * @package Email Auth
-		*/
+		"<?php
+/**
+ * Private DKIM keys for the Email Auth plugin.
+ *
+ * @package Email Auth
+*/
 
-		if ( ! defined( 'ABSPATH' ) ) {
-			exit;
-		}
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 
-		define('EAUTH_PRIVATE_KEYS', $str_keys);
-		PHP,
+define('EAUTH_PRIVATE_KEYS', $str_keys);
+",
 		0640
 	);
 }
