@@ -1,0 +1,11 @@
+{
+	"devDependencies": {
+		"@wordpress/eslint-plugin": "^22.0.0",
+		"eslint": "^8.57.1",
+		"prettier": "^3.4.2"
+	},
+	"scripts": {
+		"lint": "eslint admin/js/**",
+		"lint:fix": "eslint admin/js/** --fix"
+	}
+}

@@ -1,0 +1,116 @@
+#eauth-wrap h1 {
+	padding-bottom: 0;
+}
+
+#eauth-wrap h2 {
+	margin: 3em 0 1em;
+	padding: 0.5em;
+	border-bottom: 1px solid black;
+	background: linear-gradient(0.25turn, #ffffff, #00000000);
+}
+
+#eauth-wrap h2[data-status="pass"] {
+	background: linear-gradient(0.25turn, #00ff0020, #00000000);
+}
+
+#eauth-wrap h2[data-status="error"] {
+	background: linear-gradient(0.25turn, #ff000020, #00000000);
+}
+
+#eauth-wrap h2[data-status="partial"] {
+	background: linear-gradient(0.25turn, #ffff0020, #00000000);
+}
+
+#eauth-wrap h2[data-status="unknown"] {
+	background: linear-gradient(0.25turn, #88888820, #00000000);
+}
+
+#eauth-wrap h3 {
+	margin: 1.5em 0 0.5em;
+}
+
+#eauth-wrap h4 {
+	margin: 0.5em 0;
+}
+
+#eauth-wrap ul {
+	margin: 0;
+}
+
+.eauth-dns-record > dt {
+	margin-top: 1em;
+	font-weight: 600;
+}
+
+.eauth-dns-record > dd {
+	margin: 0.5em 0 0;
+	background: white;
+	padding: 0.5em;
+	border-radius: 0.5em;
+	word-break: break-all;
+}
+
+#eauth-wrap {
+	max-width: 750px;
+}
+
+#eauth-options > :not(h1):not(h2):not(h3) {
+	margin: 1em 0;
+}
+
+.eauth-dkim-key > button {
+	cursor: pointer;
+	border: none;
+	background: none;
+	padding: 0;
+}
+
+#eauth-wrap ul > li::before {
+	content: '-';
+	margin-right: 0.5em;
+}
+
+.eauth-status {
+	font-size: 125%;
+	line-height: 1.5;
+}
+
+#eauth-toc ul {
+	margin: 0;
+	gap: 1em;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+#eauth-toc li {
+	margin: 0;
+}
+
+#eauth-toc li:before {
+	display: none;
+}
+
+.eauth-email-input {
+	display: inline-flex;
+	gap: 0.5em;
+	flex-wrap: wrap;
+}
+
+.eauth-address-input {
+	display: inline-flex;
+	flex-direction: column;
+}
+
+.eauth-radio-options > :not(:first-child) {
+	margin-top: 0.5em;
+}
+
+.eauth-constant,
+.eauth-variable {
+	font-style: unset;
+}
+
+.eauth-constant .value,
+.eauth-variable .value {
+	font-family: monospace;
+}
