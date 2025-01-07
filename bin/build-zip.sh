@@ -8,7 +8,9 @@ mv vendor vendor-backup
 composer install --no-dev
 
 cd $TOP_DIR
-zip -r email-auth.$VERSION.zip admin includes vendor LICENSE readme.txt email-auth.php uninstall.php
+cd ..
+zip -r email-auth/email-auth.$VERSION.zip email-auth/admin email-auth/includes email-auth/vendor email-auth/LICENSE email-auth/readme.txt email-auth/email-auth.php email-auth/uninstall.php
 
+cd email-auth
 rm -r vendor
 mv vendor-backup vendor
