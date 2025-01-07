@@ -40,6 +40,7 @@ Set the address and name emails are sent from along with the address replies sho
 
 1. Upload this folder to your plugin directory (`wp-content/plugins`)
 2. Activate the plugin through the "Plugins" menu in WordPress
+3. Visit "Settings" > "Email Auth" to configure the plugin
 
 ## Developing
 

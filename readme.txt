@@ -48,6 +48,7 @@ Set the address and name emails are sent from along with the address replies sho
 1. Navigate to the "Add New Plugin" menu item
 2. Click "Upload Plugin" and upload the zip file
 3. Activate the plugin through the "Plugins" menu in WordPress
+4. Visit "Settings" > "Email Auth" to configure the plugin
 
 == Changelog ==
 
