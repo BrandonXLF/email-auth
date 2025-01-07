@@ -15,6 +15,27 @@ Configure the DKIM selector, SPF, DMARC, bounce address, from address, and reply
 
 Email Auth allows you to configure the DKIM selector, SPF, DMARC, bounce address, from address, and reply-to address of emails sent by WordPress through the default PHPMailer.
 
+=  DKIM Selector =
+
+Create, upload, download, and delete private and public keys for use with DKIM with an intuitive interface.
+Configure emails to use a DKIM selector and configure which domain should be used with DKIM.
+
+= SPF =
+
+Create a new SPF record for your envelope domain, validate an existing record, or view recommendations for how to improve your SPF configuration.
+
+= DMARC =
+
+Validate your DMARC DNS record settings and view comments about your current configuration.
+
+= Bounce Address = 
+
+Set your bounce address to ensure emails are being sent from the right domain to avoid having your emails rejected or marked as spam.
+
+= From Address and Reply-To Address = 
+
+Set the address and name emails are sent from along with the address replies should be sent to.
+
 == Installation ==
 
 = Requirements =
