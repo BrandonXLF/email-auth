@@ -43,6 +43,11 @@ function get_keys() {
  * @param array[string]string $keys The private keys.
  */
 function save_keys( $keys ) {
+	if ( empty( $keys ) ) {
+		wp_delete_file( ABSPATH . '/eauth-keys.php' );
+		return;
+	}
+
 	// Not used for debugging.
 	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
 	$str_keys = var_export( $keys, true );
