@@ -196,10 +196,7 @@ register_rest_route(
 				);
 			}
 
-			// SERVER_ADDR is populated by the server.
-			// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			$ip = wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' );
-
+			$ip           = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' ) );
 			$environment  = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
 			$checker      = new \SPFLib\Checker();
 			$check_result = $checker->check( $environment );

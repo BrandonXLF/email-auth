@@ -14,13 +14,21 @@ if ( ! defined( 'ABSPATH' ) ) {
 register_setting(
 	'eauth_settings',
 	'eauth_from_address',
-	[ 'default' => '' ]
+	[
+		'default'           => '',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_email',
+	]
 );
 
 register_setting(
 	'eauth_settings',
 	'eauth_from_address_name',
-	[ 'default' => '' ]
+	[
+		'default'           => '',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+	]
 );
 
 register_setting(
@@ -36,41 +44,69 @@ register_setting(
 register_setting(
 	'eauth_settings',
 	'eauth_reply_to',
-	[ 'default' => '' ]
+	[
+		'default'           => '',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_email',
+	]
 );
 
 register_setting(
 	'eauth_settings',
 	'eauth_reply_to_name',
-	[ 'default' => '' ]
+	[
+		'default'           => '',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+	]
 );
 
 register_setting(
 	'eauth_settings',
 	'eauth_bounce_address_mode',
-	[ 'default' => 'from' ]
+	[
+		'default'           => 'from',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+	]
 );
 
 register_setting(
 	'eauth_settings',
 	'eauth_bounce_address',
-	[ 'default' => '' ]
+	[
+		'default'           => '',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_email',
+	]
 );
 
 register_setting(
 	'eauth_settings',
 	'eauth_dkim_selector',
-	[ 'default' => '' ]
+	[
+		'default'           => '',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+	]
 );
 
 register_setting(
 	'eauth_settings',
 	'eauth_dkim_domain',
-	[ 'default' => 'from' ]
+	[
+		'default'           => 'from',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+	]
 );
 
 register_setting(
 	'eauth_settings',
 	'eauth_dkim_domain_custom',
-	[ 'default' => '' ]
+	[
+		'default'           => '',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+	]
 );

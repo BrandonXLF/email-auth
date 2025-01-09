@@ -15,8 +15,7 @@ Email Auth allows you to configure the DKIM selector, SPF, DMARC, bounce address
 
 =  DKIM Selector =
 
-Create, upload, download, and delete private and public keys for use with DKIM with an intuitive interface.
-Configure emails to use a DKIM selector and configure which domain should be used with DKIM.
+Create, upload, download, and delete private and public keys for use with DKIM with an intuitive interface. Configure emails to use a DKIM selector and configure which domain should be used with DKIM.
 
 = SPF =
 
@@ -34,6 +33,10 @@ Set your bounce address to ensure emails are being sent from the right domain to
 
 Set the address and name emails are sent from along with the address replies should be sent to.
 
+== External services ==
+
+This plugin connects to an online list from [publicsuffix.org](https://publicsuffix.org/) to determine which organizational domain should be searched when obtaining DMARC DNS records. For example, if the domain wordpress.brandonfowler.me does not have a DMARC record, then brandonfowler.me will be checked for a DMARC record. No user information is sent when requesting the list and its usage is subject to the [Mozilla Public License Version 2.0](https://mozilla.org/MPL/2.0/).
+
 == Installation ==
 
 = Requirements =
@@ -50,6 +53,6 @@ Set the address and name emails are sent from along with the address replies sho
 
 == Changelog ==
 
-== 1.0.0 ==
+= 1.0.0 =
 
 Initial release.

@@ -77,6 +77,7 @@ function add_email_error( &$errors, $type, $message ) {
 add_action(
 	'pre_set_transient_settings_errors',
 	function ( $value ) {
+		// Set internally by WordPress.
 		global $option_page;
 
 		// We are being called from options.php (sets $option_page) after nonce has been verified.
