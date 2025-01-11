@@ -12,6 +12,31 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Get the path of a config file for the current site.
+ *
+ * @param string $file The config file name.
+ * @param bool   $make True if the path should be created if it does not exist.
+ * @return string The path of the config file.
+ */
+function get_config_dir( $file = '', $make = true ) {
+	$path = wp_upload_dir()['basedir'] . '/email-auth';
+
+	if ( $make ) {
+		wp_mkdir_p( $path );
+	}
+
+	if ( ! empty( $file ) ) {
+		$path .= '/' . $file;
+	}
+
+	return $path;
+}
+
+/**
+ * Get the path of the dkim-keys.php file.
+ */
+
+/**
  * Get the email domain for the current WordPress installation.
  *
  * @return string The email domain.
@@ -30,8 +55,10 @@ function get_domain() {
  * Get the known private keys from storag.
  */
 function get_keys() {
-	if ( file_exists( ABSPATH . '/eauth-keys.php' ) ) {
-		include ABSPATH . '/eauth-keys.php';
+	$keys_path = get_config_dir( 'dkim-keys.php', false );
+
+	if ( file_exists( $keys_path ) ) {
+		include $keys_path;
 	}
 
 	return defined( constant_name: 'EAUTH_PRIVATE_KEYS' ) ? EAUTH_PRIVATE_KEYS : [];
@@ -43,8 +70,10 @@ function get_keys() {
  * @param array[string]string $keys The private keys.
  */
 function save_keys( $keys ) {
+	$keys_path = get_config_dir( 'dkim-keys.php' );
+
 	if ( empty( $keys ) ) {
-		wp_delete_file( ABSPATH . '/eauth-keys.php' );
+		wp_delete_file( $keys_path );
 		return;
 	}
 
@@ -58,7 +87,7 @@ function save_keys( $keys ) {
 
 	$filesystem = new \WP_Filesystem_Direct( false );
 	$filesystem->put_contents(
-		ABSPATH . '/eauth-keys.php',
+		$keys_path,
 		"<?php
 /**
  * Private DKIM keys for the Email Auth plugin.
