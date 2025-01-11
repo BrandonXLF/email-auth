@@ -52,7 +52,9 @@ function get_domain() {
 }
 
 /**
- * Get the known private keys from storag.
+ * Get the known private keys from storage.
+ *
+ * @return array[string]string $keys The private keys.
  */
 function get_keys() {
 	$keys_path = get_config_dir( 'dkim-keys.php', false );
