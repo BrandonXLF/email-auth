@@ -9,7 +9,7 @@ composer install --no-dev
 
 cd $TOP_DIR
 cd ..
-zip -r email-auth/email-auth.$VERSION.zip email-auth/admin email-auth/includes \
+zip -0 -r email-auth/email-auth.$VERSION.zip email-auth/admin email-auth/includes \
 	email-auth/vendor email-auth/LICENSE email-auth/readme.txt email-auth/email-auth.php \
 	email-auth/uninstall.php email-auth/composer.json \
 	-x **/bin

@@ -12,8 +12,9 @@ svn co https://plugins.svn.wordpress.org/email-auth svn-repo
 
 # Archive main branch to SVN trunk
 mkdir build
-git archive --format tar HEAD | tar x --directory="build"
-rsync -rc build/ svn-repo/trunk/ --delete
+bin/build-zip.sh
+unzip email-auth.$VERSION.zip -d build
+rsync -rc build/email-auth/ svn-repo/trunk/ --delete
 rm -r build
 
 cd svn-repo
