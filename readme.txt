@@ -41,7 +41,7 @@ This plugin connects to an online list from [publicsuffix.org](https://publicsuf
 
 == Contribute ==
 
-Checkout [the plugin's github](https://github.com/BrandonXLF/email-auth) to learn more about how you can contribute to the plugin's development.
+Check out [the GitHub repository](https://github.com/BrandonXLF/email-auth) to learn more about how you can contribute to the plugin's development.
 
 == Installation ==
 
