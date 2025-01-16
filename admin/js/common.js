@@ -93,7 +93,7 @@ class EmailAuthPlugin extends EventTarget {
 			.add(
 				jQuery('<ul>').append(
 					comments.map((comment) =>
-						jQuery('<li>').text(
+						jQuery('<li>').html(
 							comment.level
 								? `${EmailAuthPlugin.EMOJIS[comment.level]} ${comment.desc}`
 								: comment.desc
