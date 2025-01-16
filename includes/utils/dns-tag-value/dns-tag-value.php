@@ -26,7 +26,7 @@ function get_map( $domain, $filter = '__return_true' ) {
 	$cname = dns_get_record( $domain, DNS_CNAME );
 
 	if ( count( $cname ) ) {
-		return get_map( $cname[0]['target'] );
+		return get_map( $cname[0]['target'], $filter );
 	}
 
 	$records = dns_get_record( $domain, DNS_TXT );
