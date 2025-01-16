@@ -33,9 +33,13 @@ Set your bounce address to ensure emails are being sent from the right domain to
 
 Set the address and name emails are sent from along with the address replies should be sent to.
 
-== External services ==
+== External Services ==
 
 This plugin connects to an online list from [publicsuffix.org](https://publicsuffix.org/) to determine which organizational domain should be searched when obtaining DMARC DNS records. For example, if the domain wordpress.brandonfowler.me does not have a DMARC record, then brandonfowler.me will be checked for a DMARC record. No user information is sent when requesting the list and its usage is subject to the [Mozilla Public License Version 2.0](https://mozilla.org/MPL/2.0/).
+
+== Contribute ==
+
+Checkout [the plugin's github](https://github.com/BrandonXLF/email-auth) to learn more about how you can contribute to the plugin's development.
 
 == Installation ==
 
