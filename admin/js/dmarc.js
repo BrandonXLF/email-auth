@@ -7,7 +7,9 @@ jQuery(($) => {
 		() => `${eauthDmarcApi.check}/${EmailAuthPlugin.instance.fromDomain}`,
 		null,
 		(res, status) => {
-			status.append('*');
+			if (res.footnote) {
+				status.append('*');
+			}
 
 			return [
 				res.footnote &&
