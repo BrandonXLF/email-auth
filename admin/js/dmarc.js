@@ -16,6 +16,11 @@ jQuery(($) => {
 					$('<div>')
 						.attr('id', 'eauth-dkim-footnote')
 						.html(`* ${res.footnote}`),
+				EmailAuthPlugin.createCheckedDomain(
+					EmailAuthPlugin.instance.fromDomain,
+					'#from-address',
+					'From Address'
+				),
 				EmailAuthPlugin.createCommentList(
 					res.warnings.map((desc) => ({
 						level: 'warning',

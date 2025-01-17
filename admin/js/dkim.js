@@ -25,6 +25,7 @@ jQuery(($) => {
 			}
 		},
 		(res) => [
+			EmailAuthPlugin.createCheckedDomain(res.host),
 			$('<h3>').text('DNS Record'),
 			$('<details>').append(
 				$('<summary>').append('Show DNS Record'),

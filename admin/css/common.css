@@ -1,3 +1,7 @@
+#eauth-wrap {
+	max-width: 750px;
+}
+
 #eauth-wrap h1 {
 	padding-bottom: 0;
 }
@@ -37,42 +41,9 @@
 	margin: 0;
 }
 
-.eauth-dns-record > dt {
-	margin-top: 1em;
-	font-weight: 600;
-}
-
-.eauth-dns-record > dd {
-	margin: 0.5em 0 0;
-	background: white;
-	padding: 0.5em;
-	border-radius: 0.5em;
-	word-break: break-all;
-}
-
-#eauth-wrap {
-	max-width: 750px;
-}
-
-#eauth-options > :not(h1):not(h2):not(h3) {
-	margin: 1em 0;
-}
-
-.eauth-dkim-key > button {
-	cursor: pointer;
-	border: none;
-	background: none;
-	padding: 0;
-}
-
 #eauth-wrap ul > li::before {
 	content: '-';
 	margin-right: 0.5em;
-}
-
-.eauth-status {
-	font-size: 125%;
-	line-height: 1.5;
 }
 
 #eauth-toc ul {
@@ -90,6 +61,48 @@
 	display: none;
 }
 
+.eauth-dns-record > dt {
+	margin-top: 1em;
+	font-weight: 600;
+}
+
+.eauth-dns-record > dd {
+	margin: 0.5em 0 0;
+	background: white;
+	padding: 0.5em;
+	border-radius: 0.5em;
+	word-break: break-all;
+}
+
+#eauth-options > :not(h1):not(h2):not(h3) {
+	margin: 1em 0;
+}
+
+#eauth-options .eauth-pre-output-static {
+	margin-bottom: 0;
+}
+
+#eauth-options .eauth-pre-output-static + .eauth-output {
+	margin-top: 0;
+}
+
+.eauth-status {
+	font-size: 125%;
+	line-height: 1.5;
+}
+
+.eauth-static > div,
+.eauth-output > div {
+	margin: 0.5em 0;
+}
+
+.eauth-dkim-key > button {
+	cursor: pointer;
+	border: none;
+	background: none;
+	padding: 0;
+}
+
 .eauth-email-input {
 	display: inline-flex;
 	gap: 0.5em;
@@ -105,12 +118,12 @@
 	margin-top: 0.5em;
 }
 
-.eauth-constant,
+.eauth-value,
 .eauth-variable {
 	font-style: unset;
 }
 
-.eauth-constant .value,
+.eauth-value,
 .eauth-variable .value {
 	font-family: monospace;
 }

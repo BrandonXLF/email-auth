@@ -115,6 +115,25 @@ class EmailAuthPlugin extends EventTarget {
 			);
 	}
 
+	static createCheckedDomain(domain, sourceLink, sourceName) {
+		const el = jQuery('<div>');
+
+		el.append(
+			'Domain: ',
+			jQuery('<span>').addClass('eauth-value').text(domain)
+		);
+
+		if (sourceLink) {
+			el.append(
+				' (from ',
+				jQuery('<a>').attr('href', sourceLink).text(sourceName),
+				')'
+			);
+		}
+
+		return el;
+	}
+
 	fromDomain;
 	bounceDomain;
 	fromAddress;

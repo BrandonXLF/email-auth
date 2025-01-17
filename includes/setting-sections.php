@@ -203,7 +203,7 @@ add_section(
 		);
 		?>
 		<div id="eauth-dkim-status" class="eauth-status"></div>
-		<div>
+		<div class="eauth-pre-output-static">
 			<label>
 				Selector:
 				<select name="eauth_dkim_selector">
@@ -230,7 +230,7 @@ add_section(
 			[
 				'wp'     => function () {
 					?>
-					<span>Use WordPress's domain<span class="eauth-constant"> - <span class="value"><?php echo esc_html( get_domain() ); ?></span></span></span>
+					<span>Use WordPress's domain - <span class="eauth-value"><?php echo esc_html( get_domain() ); ?></span></span>
 					<?php
 				},
 				'from'   => function () {
