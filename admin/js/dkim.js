@@ -69,9 +69,10 @@ jQuery(($) => {
 	);
 
 	selectorSelect.on('change', showDns);
-	EmailAuthPlugin.instance.addEventListener('fromdomainchange', showDns);
 
 	async function loadKeys() {
+		$('#eauth-dkim-manager').text('Loading keys...');
+
 		const keys = await (
 			await EmailAuthPlugin.request(eauthDkimApi.keys)
 		).json();
@@ -85,7 +86,10 @@ jQuery(($) => {
 
 		selectorSelect.val(selectorValue);
 		selectorSelect.val(selectorSelect.val());
-		showDns();
+
+		if (selectorSelect.val() !== selectorValue) {
+			showDns();
+		}
 
 		$('#eauth-dkim-manager')
 			.empty()
@@ -126,7 +130,7 @@ jQuery(($) => {
 			);
 	}
 
-	loadKeys();
+	loadKeys(true);
 
 	$('#eauth-dkim-upload').on('click', async () => {
 		const selector = $('#dkim-new-name').val();
