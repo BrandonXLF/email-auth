@@ -26,14 +26,16 @@ function is_dmarc_record( $record ) {
  * Transform the given exception to a failure return.
  *
  * @param DNSTagValue\Exception $e The exception.
+ * @param string                $org The organizational domain.
  * @return array{ pass: bool, reason: string }
  */
-function dmarc_failure( &$e ) {
+function dmarc_failure( &$e, $org = null ) {
 	return [
 		'pass'     => false,
 		'reason'   => $e->getMessage(),
 		'warnings' => [],
 		'infos'    => [],
+		'org'      => $org,
 	];
 }
 
@@ -41,19 +43,19 @@ function dmarc_failure( &$e ) {
  * Check DMARC for a given domain.
  *
  * @param string $domain The domain.
- * @param bool   $org True if the domain is a known organizational domain.
+ * @param bool   $is_org True if the domain is a derived organizational domain.
  */
-function check_dmarc( $domain, $org = false ) {
+function check_dmarc( $domain, $is_org = false ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
-	$dmarc = null;
 
-	try {
-		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record' );
-	} catch ( DNSTagValue\MissingException $e ) {
-		if ( $org ) {
-			return dmarc_failure( $e );
-		}
+	/**
+	 * @var string $org_domain Organizational domain if different from the base domain.
+	 */
+	$org_domain = null;
 
+	if ( $is_org ) {
+		$org_domain = $domain;
+	} else {
 		$org_domain_map = get_transient( 'eauth_org_domain_map' ) ?: [];
 		$org_domain     = $org_domain_map[ $domain ] ?? null;
 
@@ -72,19 +74,29 @@ function check_dmarc( $domain, $org = false ) {
 		}
 
 		if ( $org_domain === $domain ) {
-			return dmarc_failure( $e );
+			$org_domain = null;
+		}
+	}
+
+	$dmarc = null;
+
+	try {
+		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record' );
+	} catch ( DNSTagValue\MissingException $e ) {
+		if ( ! $org_domain || $org_domain === $domain ) {
+			return dmarc_failure( $e, $org_domain );
 		}
 
 		return check_dmarc( $org_domain, true );
 	} catch ( DNSTagValue\Exception $e ) {
-		return dmarc_failure( $e );
+		return dmarc_failure( $e, $org_domain );
 	}
 
 	$warnings = [];
 	$infos    = [];
 	$footnote = null;
 
-	$policy = $org
+	$policy = $is_org
 		? ( $dmarc['sp'] ?? $dmarc['p'] ?? 'none' )
 		: ( $dmarc['p'] ?? 'none' );
 
@@ -118,5 +130,6 @@ function check_dmarc( $domain, $org = false ) {
 		'warnings' => $warnings,
 		'infos'    => $infos,
 		'footnote' => $footnote,
+		'org'      => $org_domain,
 	];
 }

@@ -115,13 +115,20 @@ class EmailAuthPlugin extends EventTarget {
 			);
 	}
 
-	static createCheckedDomain(domain, sourceLink, sourceName) {
+	static createCheckedDomain(domain, sourceLink, sourceName, fallbackDomain) {
 		const el = jQuery('<div>');
 
 		el.append(
 			'Domain: ',
 			jQuery('<span>').addClass('eauth-value').text(domain)
 		);
+
+		if (fallbackDomain) {
+			el.append(
+				' with fallback ',
+				jQuery('<span>').addClass('eauth-value').text(fallbackDomain)
+			);
+		}
 
 		if (sourceLink) {
 			el.append(

@@ -19,15 +19,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int    $type The type of record to fetch.
  * @return array
  *
- * @throws InvalidException DNS error occurred.
+ * @throws MissingException Record could not be fetch.
  */
 function get_record_throws( $domain, $type = DNS_ANY ) {
 	// Not for debugging.
 	// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
 	set_error_handler(
 		function ( $_, $msg ) use ( &$error ) {
-			require_once __DIR__ . '/class-invalidexception.php';
-			$error = new InvalidException( 'Could not retrieve DNS record. ' . $msg );
+			require_once __DIR__ . '/class-missingexception.php';
+			$error = new MissingException( 'Could not retrieve DNS record. ' . $msg );
 			return true;
 		},
 		E_WARNING
@@ -42,8 +42,8 @@ function get_record_throws( $domain, $type = DNS_ANY ) {
 	}
 
 	if ( false === $res ) {
-		require_once __DIR__ . '/class-invalidexception.php';
-		throw new InvalidException( 'Could not retrieve DNS record.' );
+		require_once __DIR__ . '/class-missingexception.php';
+		throw new MissingException( 'Could not retrieve DNS record.' );
 	}
 
 	return $res;
@@ -56,8 +56,8 @@ function get_record_throws( $domain, $type = DNS_ANY ) {
  * @param callable $filter The function to use to filter DNS TXT records.
  * @return array[string]string The map of tag-value pairs.
  *
- * @throws InvalidException Record could not be fetch or too many records.
- * @throws MissingException No record found.
+ * @throws InvalidException Too many records.
+ * @throws MissingException Record could not be fetch or no record present.
  */
 function get_map( $domain, $filter = '__return_true' ) {
 	// Error will be thrown by DNS retrieval below.
@@ -69,16 +69,10 @@ function get_map( $domain, $filter = '__return_true' ) {
 	}
 
 	$records = get_record_throws( $domain, DNS_TXT );
-
-	if ( false === $records ) {
-		require_once __DIR__ . '/class-invalidexception.php';
-		throw new InvalidException( 'Could not retrieve DNS record.' );
-	}
-
 	$records = array_filter( $records, $filter );
 
 	if ( count( $records ) > 1 ) {
-		// Per RFC 6375 3.6.2.2 and RFC 7489 6.6.3.
+		// Per RFC 6376 3.6.2.2 and RFC 7489 6.6.3.
 		require_once __DIR__ . '/class-invalidexception.php';
 		throw new InvalidException( 'Multiple TXT records found, only one should be present.' );
 	}
