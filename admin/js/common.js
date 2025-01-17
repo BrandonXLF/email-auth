@@ -207,17 +207,17 @@ class EmailAuthPlugin extends EventTarget {
 			if (!res.pass) {
 				status.text(`${EmailAuthPlugin.EMOJIS.error} ${res.reason}`);
 				heading.attr('data-status', 'error');
-			} else if (res.pass === 'partial') {
-				status.text(
-					`${EmailAuthPlugin.EMOJIS.partial} Configured with warnings.`
-				);
-				heading.attr('data-status', 'partial');
 			} else if (
 				alignment?.getDomain &&
 				alignment.getDomain() !== this.fromDomain
 			) {
 				status.text(
 					`${EmailAuthPlugin.EMOJIS.partial} ${alignment.type} domain and from address domain do not match, so the from address domain cannot be verified through ${checkType}.`
+				);
+				heading.attr('data-status', 'partial');
+			} else if (res.pass === 'partial') {
+				status.text(
+					`${EmailAuthPlugin.EMOJIS.partial} Configured with warnings.`
 				);
 				heading.attr('data-status', 'partial');
 			} else {
