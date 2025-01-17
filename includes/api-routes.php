@@ -159,84 +159,97 @@ register_rest_route(
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
-			$domain     = $request['domain'];
-			$record     = ( new \SPFLib\Decoder() )->getRecordFromDomain( $domain );
-			$has_issues = false;
-			$comments   = [];
+			$domain               = $request['domain'];
+			$ip                   = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' ) );
+			$environment          = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
+			$checker              = new \SPFLib\Checker();
+			$check_result         = $checker->check( $environment );
+			$code                 = $check_result->getCode();
+			$intentional_non_pass = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
+
+			$code_reasons = array_map(
+				function ( $msg ) {
+					return [
+						'level' => 'error',
+						'desc'  => $msg,
+					];
+				},
+				$check_result->getMessages()
+			);
+
+			if ( $intentional_non_pass && $check_result->getMatchedMechanism() ) {
+				$code_reasons[] = [
+					'level' => 'error',
+					'desc'  => 'Non-pass caused by: <code>' . $check_result->getMatchedMechanism() . '</code>',
+				];
+			}
+
+			try {
+				$record = ( new \SPFLib\Decoder() )->getRecordFromDomain( $domain );
+			} catch ( \Exception $e ) {
+				$record = null;
+			}
+
+			$validity    = [];
+			$invalid     = false;
+			$rec_reasons = [];
 
 			if ( $record ) {
 				$validator = new \SPFLib\OnlineSemanticValidator();
-
-				$comments = $validator->validateRecord( $record );
-				$comments = array_map(
-					function ( &$issue ) use ( &$has_issues ) {
-						if ( $issue->getLevel() === \SPFLib\Issue::LEVEL_FATAL ) {
-								$has_issues = true;
+				$validity  = array_merge(
+					array_map(
+						function ( $issue ) use ( &$invalid ) {
+							if ( $issue->getLevel() === \SPFLib\Semantic\Issue::LEVEL_FATAL ) {
+								$invalid = true;
 
 								return [
 									'level' => 'error',
 									'desc'  => $issue->getDescription(),
 								];
-						}
+							}
 
-						if ( $issue->getLevel() === \SPFLib\Issue::LEVEL_WARNING ) {
-							$has_issues = true;
+							if ( $issue->getLevel() === \SPFLib\Semantic\Issue::LEVEL_WARNING ) {
+								$invalid = true;
+
+								return [
+									'level' => 'warning',
+									'desc'  => $issue->getDescription(),
+								];
+							}
 
 							return [
-								'level' => 'warning',
-								'desc'  => $issue->getDescription(),
+								'desc' => $issue->getDescription(),
 							];
-						}
-
-						return [
-							'desc' => $issue->getDescription(),
-						];
-					},
-					$comments
+						},
+						$validator->validateRecord( $record )
+					)
 				);
-			}
 
-			$ip           = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' ) );
-			$environment  = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
-			$checker      = new \SPFLib\Checker();
-			$check_result = $checker->check( $environment );
-			$code         = $check_result->getCode();
-			$rec_reasons  = [];
-
-			if ( 'none' === $code ) {
-				$has_issues = true;
-
-				$comments[] = [
-					'level' => 'error',
-					'desc'  => 'Could not retrive DNS records.',
-				];
-			}
-
-			if ( $record ) {
 				$terms = $record->getTerms();
 
-				if ( 'fail' === $code || 'softfail' === $code || 'neutral' === $code ) {
-					$new_record = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, get_domain() );
-
-					$record->clearTerms();
+				if ( $intentional_non_pass ) {
+					$rec_record = new \SPFLib\Record();
+					$new_term   = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, get_domain() );
 
 					foreach ( $terms as &$term ) {
-						if ( $new_record && ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
-							$record->addTerm( $new_record );
-							$new_record = null;
+						if ( $new_term && ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
+							$rec_record->addTerm( $new_term );
+							$new_term = null;
 						}
 
-						$record->addTerm( $term );
+						$rec_record->addTerm( $term );
 					}
 
-					if ( $new_record ) {
-						$record->addTerm( $new_record );
+					if ( $new_term ) {
+						$rec_record->addTerm( $new_term );
 					}
 
 					$rec_reasons[] = [
 						'level' => 'error',
 						'desc'  => 'Website host is not included in a pass case of the SPF record.',
 					];
+				} else {
+					$rec_record = clone $record;
 				}
 
 				$has_all = false;
@@ -249,7 +262,7 @@ register_rest_route(
 				}
 
 				if ( ! $has_all ) {
-					$record->addTerm( new \SPFLib\Term\Mechanism\AllMechanism( \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL ) );
+					$rec_record->addTerm( new \SPFLib\Term\Mechanism\AllMechanism( \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL ) );
 
 					$rec_reasons[] = [
 						'level' => 'warning',
@@ -259,12 +272,14 @@ register_rest_route(
 			}
 
 			return [
-				'pass'        => 'pass' === $code ? ( $has_issues || $rec_reasons ? 'partial' : true ) : false,
-				'reason'      => 'pass' !== $code ? 'SPF check did not pass.' : null,
-				'code'        => $code,
-				'comments'    => $comments,
-				'rec_dns'     => count( $rec_reasons ) ? strval( $record ) : null,
-				'rec_reasons' => $rec_reasons,
+				'pass'         => 'pass' === $code ? ( $invalid || $rec_reasons ? 'partial' : true ) : false,
+				'reason'       => 'pass' !== $code ? 'SPF check did not pass.' : null,
+				'code'         => $code,
+				'code_reasons' => $code_reasons,
+				'cur_rec'      => (string) $record,
+				'cur_validity' => $validity,
+				'rec_dns'      => count( $rec_reasons ) ? (string) $rec_record : null,
+				'rec_reasons'  => $rec_reasons,
 			];
 		},
 		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
