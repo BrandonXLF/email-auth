@@ -20,11 +20,10 @@ jQuery(($) => {
 					'#bounce-address',
 					'Bounce Address'
 				),
-				$('<h3>').text('Test Result'),
-				$('<div>').append('Code: ', $('<code>').text(res.code)),
+				$('<div>').append('Result code: ', $('<code>').text(res.code)),
 				EmailAuthPlugin.createCommentList(
 					res.code_reasons,
-					'Problems',
+					'Details',
 					'h4'
 				),
 			];
