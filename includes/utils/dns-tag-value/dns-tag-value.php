@@ -13,9 +13,46 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 /**
+ * Get a DNS record, turning warnings raised by dns_get_record into exceptions.
+ *
+ * @param string $domain The hostname to query.
+ * @param int    $type The type of record to fetch.
+ * @return array
+ *
+ * @throws InvalidException DNS error occurred.
+ */
+function get_record_throws( $domain, $type = DNS_ANY ) {
+	// Not for debugging.
+	// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+	set_error_handler(
+		function ( $_, $msg ) use ( &$error ) {
+			require_once __DIR__ . '/class-invalidexception.php';
+			$error = new InvalidException( 'Could not retrieve DNS record. ' . $msg );
+			return true;
+		},
+		E_WARNING
+	);
+
+	$res = dns_get_record( $domain, $type );
+
+	restore_error_handler();
+
+	if ( isset( $error ) ) {
+		throw $error;
+	}
+
+	if ( false === $res ) {
+		require_once __DIR__ . '/class-invalidexception.php';
+		throw new InvalidException( 'Could not retrieve DNS record.' );
+	}
+
+	return $res;
+}
+
+/**
  * Get the DNS tag-value map for a given domain for DKIM and DMARC.
  *
- * @param sring    $domain The domain to get the DNS records from.
+ * @param string   $domain The domain to get the DNS records from.
  * @param callable $filter The function to use to filter DNS TXT records.
  * @return array[string]string The map of tag-value pairs.
  *
@@ -23,19 +60,22 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @throws MissingException No record found.
  */
 function get_map( $domain, $filter = '__return_true' ) {
-	$cname = dns_get_record( $domain, DNS_CNAME );
+	// Error will be thrown by DNS retrieval below.
+	// phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
+	$cname = @dns_get_record( $domain, DNS_CNAME );
 
-	if ( count( $cname ) ) {
+	if ( $cname && count( $cname ) ) {
 		return get_map( $cname[0]['target'], $filter );
 	}
 
-	$records = dns_get_record( $domain, DNS_TXT );
-	$records = array_filter( $records, $filter );
+	$records = get_record_throws( $domain, DNS_TXT );
 
 	if ( false === $records ) {
 		require_once __DIR__ . '/class-invalidexception.php';
-		throw new InvalidException( 'Could not get DNS record.' );
+		throw new InvalidException( 'Could not retrieve get DNS record.' );
 	}
+
+	$records = array_filter( $records, $filter );
 
 	if ( count( $records ) > 1 ) {
 		// Per RFC 6375 3.6.2.2 and RFC 7489 6.6.3.
