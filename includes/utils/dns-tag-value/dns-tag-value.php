@@ -72,7 +72,7 @@ function get_map( $domain, $filter = '__return_true' ) {
 
 	if ( false === $records ) {
 		require_once __DIR__ . '/class-invalidexception.php';
-		throw new InvalidException( 'Could not retrieve get DNS record.' );
+		throw new InvalidException( 'Could not retrieve DNS record.' );
 	}
 
 	$records = array_filter( $records, $filter );
