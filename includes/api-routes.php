@@ -179,7 +179,6 @@ register_rest_route(
 
 			if ( $intentional_non_pass && $check_result->getMatchedMechanism() ) {
 				$code_reasons[] = [
-					'level' => 'error',
 					'desc'  => 'Non-pass caused by: <code>' . $check_result->getMatchedMechanism() . '</code>',
 				];
 			}

@@ -56,24 +56,20 @@ jQuery(($) => {
 				);
 			}
 
-			if (res.rec_dns || res.pass) {
+			if (res.rec_dns) {
 				out.push($('<h3>').text('Suggested DNS Record'));
 
-				if (res.rec_dns) {
-					out.push(
-						EmailAuthPlugin.createTxtRecord(
-							EmailAuthPlugin.instance.bounceDomain,
-							res.rec_dns
-						),
-						EmailAuthPlugin.createCommentList(
-							res.rec_reasons,
-							'Reasons',
-							'h4'
-						)
-					);
-				} else {
-					out.push($('<div>').text('Current SPF DNS record OK.'));
-				}
+				out.push(
+					EmailAuthPlugin.createTxtRecord(
+						EmailAuthPlugin.instance.bounceDomain,
+						res.rec_dns
+					),
+					EmailAuthPlugin.createCommentList(
+						res.rec_reasons,
+						'Reasons',
+						'h4'
+					)
+				);
 			}
 
 			return out;
