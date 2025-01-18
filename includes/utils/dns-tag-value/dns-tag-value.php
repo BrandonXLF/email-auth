@@ -60,14 +60,6 @@ function get_record_throws( $domain, $type = DNS_ANY ) {
  * @throws MissingException Record could not be fetch or no record present.
  */
 function get_map( $domain, $filter = '__return_true' ) {
-	// Error will be thrown by DNS retrieval below.
-	// phpcs:disable WordPress.PHP.NoSilencedErrors.Discouraged
-	$cname = @dns_get_record( $domain, DNS_CNAME );
-
-	if ( $cname && count( $cname ) ) {
-		return get_map( $cname[0]['target'], $filter );
-	}
-
 	$records = get_record_throws( $domain, DNS_TXT );
 	$records = array_filter( $records, $filter );
 
