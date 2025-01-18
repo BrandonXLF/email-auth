@@ -22,8 +22,16 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @throws MissingException Record could not be fetch.
  */
 function get_record_throws( $domain, $type = DNS_ANY ) {
+	// phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+	try {
+		$domain = \MLocati\IDNA\DomainName::fromName( $domain )->getPunycode();
+	} catch ( \MLocati\IDNA\Exception\Exception $_ ) {
+		// Keep domain name as is.
+	}
+	// phpcs:enable
+
 	// Not for debugging.
-	// phpcs:disable WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
+	// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler
 	set_error_handler(
 		function ( $_, $msg ) use ( &$error ) {
 			require_once __DIR__ . '/class-missingexception.php';
