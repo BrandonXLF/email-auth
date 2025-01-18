@@ -2,7 +2,7 @@
 /**
  * The options page the Email Auth plugin.
  *
- * @package Email Auth.
+ * @package Email Auth
  */
 
 namespace EmailAuthPlugin;

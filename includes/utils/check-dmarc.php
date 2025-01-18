@@ -2,7 +2,7 @@
 /**
  * Check if the given DNS TXT record matches a DMARC record.
  *
- * @package Email Auth.
+ * @package Email Auth
  */
 
 namespace EmailAuthPlugin;
