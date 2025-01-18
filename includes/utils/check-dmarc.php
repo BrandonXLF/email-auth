@@ -49,7 +49,7 @@ function check_dmarc( $domain, $is_org = false ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
 
 	/**
-	 * @var string $org_domain Organizational domain if different from the base domain.
+	 * Organizational domain if different from the base domain.
 	 */
 	$org_domain = null;
 
