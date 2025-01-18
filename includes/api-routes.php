@@ -159,13 +159,13 @@ register_rest_route(
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
-			$domain               = $request['domain'];
-			$ip                   = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' ) );
-			$environment          = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
-			$checker              = new \SPFLib\Checker();
-			$check_result         = $checker->check( $environment );
-			$code                 = $check_result->getCode();
-			$intentional_non_pass = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
+			$domain        = $request['domain'];
+			$ip            = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' ) );
+			$environment   = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
+			$checker       = new \SPFLib\Checker();
+			$check_result  = $checker->check( $environment );
+			$code          = $check_result->getCode();
+			$full_non_pass = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
 
 			$code_reasons = array_map(
 				function ( $msg ) {
@@ -177,7 +177,7 @@ register_rest_route(
 				$check_result->getMessages()
 			);
 
-			if ( $intentional_non_pass && $check_result->getMatchedMechanism() ) {
+			if ( $full_non_pass && $check_result->getMatchedMechanism() ) {
 				$code_reasons[] = [
 					'desc' => 'Non-pass caused by: <code>' . $check_result->getMatchedMechanism() . '</code>',
 				];
@@ -226,7 +226,7 @@ register_rest_route(
 
 				$terms = $record->getTerms();
 
-				if ( $intentional_non_pass ) {
+				if ( $full_non_pass ) {
 					$rec_record = new \SPFLib\Record();
 					$new_term   = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, get_domain() );
 
