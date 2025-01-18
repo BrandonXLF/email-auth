@@ -92,8 +92,17 @@ function get_map( $domain, $filter = '__return_true' ) {
 	$tags  = [];
 
 	foreach ( $parts as $part ) {
-		list( $key, $val ) = explode( '=', trim( $part ), 2 );
-		$tags[ $key ]      = $val;
+		$part = trim( $part );
+		$pos  = strpos( $part, '=' );
+
+		if ( false === $pos ) {
+			continue;
+		}
+
+		$key = substr( $part, 0, $pos );
+		$val = substr( $part, $pos + 1 );
+
+		$tags[ $key ] = $val;
 	}
 
 	return $tags;
