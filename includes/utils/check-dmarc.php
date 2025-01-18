@@ -44,6 +44,7 @@ function dmarc_failure( &$e, $org = null ) {
  *
  * @param string $domain The domain.
  * @param bool   $is_org True if the domain is a derived organizational domain.
+ * @return array
  */
 function check_dmarc( $domain, $is_org = false ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
