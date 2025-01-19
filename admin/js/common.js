@@ -190,12 +190,6 @@ class EmailAuthPlugin extends EventTarget {
 		);
 	}
 
-	setStatus(checkType, statusEl, headingEl, status, msg) {
-		statusEl.text(msg);
-		headingEl.attr('data-status', status);
-		this.dispatchEvent(new CustomEvent(`${checkType}`));
-	}
-
 	makeChecker(
 		headingId,
 		checkType,
@@ -208,14 +202,77 @@ class EmailAuthPlugin extends EventTarget {
 		const status = heading.nextUntil('.eauth-status + *').last();
 		const output = heading.nextUntil('.eauth-output + *').last();
 
+		let destroyAlignmentListener;
+
 		function addFootnote(text) {
 			status.append('*');
 			output.prepend(`* ${text}`);
 		}
 
+		const showAlignmentStatus = (
+			alignmentDomain,
+			alignedStatus,
+			alignedMessage
+		) => {
+			if (this.fromDomain !== alignmentDomain) {
+				status
+					.empty()
+					.append(
+						`${EmailAuthPlugin.EMOJIS.partial} `,
+						jQuery('<a>')
+							.attr('href', domain.link)
+							.text(domain.type),
+						domain.typeHasDomain ? '' : ' domain',
+						' (',
+						jQuery('<span>')
+							.addClass('eauth-value')
+							.text(alignmentDomain),
+						') and ',
+						jQuery('<a>')
+							.attr('href', '#from-address')
+							.text('From Address'),
+						' domain (',
+						jQuery('<span>')
+							.addClass('eauth-value')
+							.text(this.fromDomain),
+						`) do not match, so the from address domain cannot be verified through ${checkType}.`
+					);
+				heading.attr('data-status', 'partial');
+
+				return;
+			}
+
+			status.text(alignedMessage);
+			heading.attr('data-status', alignedStatus);
+		};
+
+		const alignmentStatus = (
+			alignmentDomain,
+			alignedStatus,
+			alignedMessage
+		) => {
+			if (!alignmentDomain) {
+				status.text(alignedMessage);
+				heading.attr('data-status', alignedStatus);
+				return;
+			}
+
+			const listener = () =>
+				showAlignmentStatus(
+					alignmentDomain,
+					alignedStatus,
+					alignedMessage
+				);
+
+			listener();
+			this.addEventListener('fromdomainchange', listener);
+			return () => this.removeEventListener('fromdomainchange', listener);
+		};
+
 		return async () => {
 			status.empty();
 			output.empty();
+			destroyAlignmentListener?.();
 
 			const preCheckRes = preCheck?.();
 
@@ -229,6 +286,7 @@ class EmailAuthPlugin extends EventTarget {
 			}
 
 			status.text(`Loading ${checkType} record...`);
+			heading.attr('data-status', '');
 
 			const raw = await EmailAuthPlugin.request(getRequestUrl());
 			const res = await raw.json();
@@ -237,41 +295,18 @@ class EmailAuthPlugin extends EventTarget {
 			if (!res.pass) {
 				status.text(`${EmailAuthPlugin.EMOJIS.error} ${res.reason}`);
 				heading.attr('data-status', 'error');
-			} else if (
-				domainName.alignment &&
-				domainName.alignment !== this.fromDomain
-			) {
-				status
-					.empty()
-					.append(
-						`${EmailAuthPlugin.EMOJIS.partial} `,
-						jQuery('<a>')
-							.attr('href', domain.link)
-							.text(domain.type),
-						domain.typeHasDomain ? '' : ' domain',
-						' (',
-						jQuery('<span>')
-							.addClass('eauth-value')
-							.text(domainName.alignment),
-						') and ',
-						jQuery('<a>')
-							.attr('href', '#from-address')
-							.text('From Address'),
-						' domain (',
-						jQuery('<span>')
-							.addClass('eauth-value')
-							.text(this.fromDomain),
-						`) do not match, so the from address domain cannot be verified through ${checkType}.`
-					);
-				heading.attr('data-status', 'partial');
 			} else if (res.pass === 'partial') {
-				status.text(
+				destroyAlignmentListener = alignmentStatus(
+					domainName.alignment,
+					'partial',
 					`${EmailAuthPlugin.EMOJIS.partial} Configured with warnings.`
 				);
-				heading.attr('data-status', 'partial');
 			} else {
-				status.text(`${EmailAuthPlugin.EMOJIS.pass} Configured.`);
-				heading.attr('data-status', 'pass');
+				destroyAlignmentListener = alignmentStatus(
+					domainName.alignment,
+					'pass',
+					`${EmailAuthPlugin.EMOJIS.pass} Configured.`
+				);
 			}
 
 			output
