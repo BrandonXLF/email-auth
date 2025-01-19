@@ -39,6 +39,178 @@ class EAUTHRadioDependentListener {
 	}
 }
 
+class EAUTHChecker {
+	static createCheckedDomain(domain, sourceLink, sourceName, fallbackDomain) {
+		const el = jQuery('<div>');
+
+		el.append(
+			'Domain: ',
+			jQuery('<span>').addClass('eauth-value').text(domain)
+		);
+
+		if (fallbackDomain) {
+			el.append(
+				' with fallback ',
+				jQuery('<span>').addClass('eauth-value').text(fallbackDomain)
+			);
+		}
+
+		el.append(
+			' (from ',
+			jQuery('<a>').attr('href', sourceLink).text(sourceName),
+			')'
+		);
+
+		return el;
+	}
+
+	static getStatusDesc(pass) {
+		if (pass === null || pass === undefined) {
+			return 'unknown';
+		}
+
+		if (typeof pass === 'string') {
+			return pass;
+		}
+
+		return pass ? 'pass' : 'error';
+	}
+
+	constructor(
+		plugin,
+		headingId,
+		checkType,
+		getRequestUrl,
+		preCheck,
+		process,
+		domain
+	) {
+		this.plugin = plugin;
+		this.heading = jQuery(`#${headingId}`);
+		this.checkType = checkType;
+		this.getRequestUrl = getRequestUrl;
+		this.preCheck = preCheck;
+		this.process = process;
+		this.domain = domain;
+		this.status = this.heading.nextUntil('.eauth-status + *').last();
+		this.output = this.heading.nextUntil('.eauth-output + *').last();
+		this.boundCheck = this.#check.bind(this);
+		this.boundAddFootnote = this.#addFootnote.bind(this);
+	}
+
+	showAlignmentStatus(alignmentDomain, alignedStatus, alignedMessage) {
+		if (this.plugin.fromDomain !== alignmentDomain) {
+			this.status
+				.empty()
+				.append(
+					`${EmailAuthPlugin.EMOJIS.partial} `,
+					jQuery('<a>')
+						.attr('href', this.domain.link)
+						.text(this.domain.type),
+					this.domain.typeHasDomain ? '' : ' domain',
+					' (',
+					jQuery('<span>')
+						.addClass('eauth-value')
+						.text(alignmentDomain),
+					') and ',
+					jQuery('<a>')
+						.attr('href', '#from-address')
+						.text('From Address'),
+					' domain (',
+					jQuery('<span>')
+						.addClass('eauth-value')
+						.text(this.plugin.fromDomain),
+					`) do not match, so the from address domain cannot be verified through ${this.checkType}.`
+				);
+			this.heading.attr('data-status', 'partial');
+
+			return;
+		}
+
+		this.status.text(alignedMessage);
+		this.heading.attr('data-status', alignedStatus);
+	}
+
+	alignmentStatus(alignmentDomain, alignedStatus, alignedMessage) {
+		if (!alignmentDomain) {
+			this.status.text(alignedMessage);
+			this.heading.attr('data-status', alignedStatus);
+			return;
+		}
+
+		const listener = () =>
+			this.showAlignmentStatus(
+				alignmentDomain,
+				alignedStatus,
+				alignedMessage
+			);
+
+		listener();
+		this.plugin.addEventListener('fromdomainchange', listener);
+
+		return () =>
+			this.plugin.removeEventListener('fromdomainchange', listener);
+	}
+
+	#addFootnote(text) {
+		this.status.append('*');
+		this.output.prepend(`* ${text}`);
+	}
+
+	async #check() {
+		this.status.empty();
+		this.output.empty();
+		this.destroyAlignmentListener?.();
+
+		const preCheckRes = this.preCheck?.();
+
+		if (preCheckRes) {
+			const desc = EAUTHChecker.getStatusDesc(preCheckRes.pass);
+			this.status.text(
+				`${EmailAuthPlugin.EMOJIS[desc]} ${preCheckRes.reason}`
+			);
+			this.heading.attr('data-status', desc);
+			return;
+		}
+
+		this.status.text(`Loading ${this.checkType} record...`);
+		this.heading.attr('data-status', '');
+
+		const raw = await EmailAuthPlugin.request(this.getRequestUrl());
+		const res = await raw.json();
+		const domainName = this.domain.get(res);
+
+		if (!res.pass) {
+			this.status.text(`${EmailAuthPlugin.EMOJIS.error} ${res.reason}`);
+			this.heading.attr('data-status', 'error');
+		} else if (res.pass === 'partial') {
+			this.destroyAlignmentListener = this.alignmentStatus(
+				domainName.alignment,
+				'partial',
+				`${EmailAuthPlugin.EMOJIS.partial} Configured with warnings.`
+			);
+		} else {
+			this.destroyAlignmentListener = this.alignmentStatus(
+				domainName.alignment,
+				'pass',
+				`${EmailAuthPlugin.EMOJIS.pass} Configured.`
+			);
+		}
+
+		this.output
+			.empty()
+			.append(
+				EAUTHChecker.createCheckedDomain(
+					domainName.record,
+					this.domain.link,
+					this.domain.type,
+					this.domain.getFallback?.(res)
+				)
+			)
+			.append(this.process(res, this.boundAddFootnote));
+	}
+}
+
 class EmailAuthPlugin extends EventTarget {
 	static EMOJIS = {
 		// Heading statuses
@@ -71,18 +243,6 @@ class EmailAuthPlugin extends EventTarget {
 		return fetch(url, options);
 	}
 
-	static getStatusDesc(pass) {
-		if (pass === null || pass === undefined) {
-			return 'unknown';
-		}
-
-		if (typeof pass === 'string') {
-			return pass;
-		}
-
-		return pass ? 'pass' : 'error';
-	}
-
 	static createCommentList(comments, title, headingTag = 'h3') {
 		if (!comments.length) {
 			return;
@@ -113,30 +273,6 @@ class EmailAuthPlugin extends EventTarget {
 				),
 				jQuery('<dd>').text(record)
 			);
-	}
-
-	static createCheckedDomain(domain, sourceLink, sourceName, fallbackDomain) {
-		const el = jQuery('<div>');
-
-		el.append(
-			'Domain: ',
-			jQuery('<span>').addClass('eauth-value').text(domain)
-		);
-
-		if (fallbackDomain) {
-			el.append(
-				' with fallback ',
-				jQuery('<span>').addClass('eauth-value').text(fallbackDomain)
-			);
-		}
-
-		el.append(
-			' (from ',
-			jQuery('<a>').attr('href', sourceLink).text(sourceName),
-			')'
-		);
-
-		return el;
 	}
 
 	fromDomain;
@@ -198,129 +334,15 @@ class EmailAuthPlugin extends EventTarget {
 		process,
 		domain
 	) {
-		const heading = jQuery(`#${headingId}`);
-		const status = heading.nextUntil('.eauth-status + *').last();
-		const output = heading.nextUntil('.eauth-output + *').last();
-
-		let destroyAlignmentListener;
-
-		function addFootnote(text) {
-			status.append('*');
-			output.prepend(`* ${text}`);
-		}
-
-		const showAlignmentStatus = (
-			alignmentDomain,
-			alignedStatus,
-			alignedMessage
-		) => {
-			if (this.fromDomain !== alignmentDomain) {
-				status
-					.empty()
-					.append(
-						`${EmailAuthPlugin.EMOJIS.partial} `,
-						jQuery('<a>')
-							.attr('href', domain.link)
-							.text(domain.type),
-						domain.typeHasDomain ? '' : ' domain',
-						' (',
-						jQuery('<span>')
-							.addClass('eauth-value')
-							.text(alignmentDomain),
-						') and ',
-						jQuery('<a>')
-							.attr('href', '#from-address')
-							.text('From Address'),
-						' domain (',
-						jQuery('<span>')
-							.addClass('eauth-value')
-							.text(this.fromDomain),
-						`) do not match, so the from address domain cannot be verified through ${checkType}.`
-					);
-				heading.attr('data-status', 'partial');
-
-				return;
-			}
-
-			status.text(alignedMessage);
-			heading.attr('data-status', alignedStatus);
-		};
-
-		const alignmentStatus = (
-			alignmentDomain,
-			alignedStatus,
-			alignedMessage
-		) => {
-			if (!alignmentDomain) {
-				status.text(alignedMessage);
-				heading.attr('data-status', alignedStatus);
-				return;
-			}
-
-			const listener = () =>
-				showAlignmentStatus(
-					alignmentDomain,
-					alignedStatus,
-					alignedMessage
-				);
-
-			listener();
-			this.addEventListener('fromdomainchange', listener);
-			return () => this.removeEventListener('fromdomainchange', listener);
-		};
-
-		return async () => {
-			status.empty();
-			output.empty();
-			destroyAlignmentListener?.();
-
-			const preCheckRes = preCheck?.();
-
-			if (preCheckRes) {
-				const desc = EmailAuthPlugin.getStatusDesc(preCheckRes.pass);
-				status.text(
-					`${EmailAuthPlugin.EMOJIS[desc]} ${preCheckRes.reason}`
-				);
-				heading.attr('data-status', desc);
-				return;
-			}
-
-			status.text(`Loading ${checkType} record...`);
-			heading.attr('data-status', '');
-
-			const raw = await EmailAuthPlugin.request(getRequestUrl());
-			const res = await raw.json();
-			const domainName = domain.get(res);
-
-			if (!res.pass) {
-				status.text(`${EmailAuthPlugin.EMOJIS.error} ${res.reason}`);
-				heading.attr('data-status', 'error');
-			} else if (res.pass === 'partial') {
-				destroyAlignmentListener = alignmentStatus(
-					domainName.alignment,
-					'partial',
-					`${EmailAuthPlugin.EMOJIS.partial} Configured with warnings.`
-				);
-			} else {
-				destroyAlignmentListener = alignmentStatus(
-					domainName.alignment,
-					'pass',
-					`${EmailAuthPlugin.EMOJIS.pass} Configured.`
-				);
-			}
-
-			output
-				.empty()
-				.append(
-					EmailAuthPlugin.createCheckedDomain(
-						domainName.record,
-						domain.link,
-						domain.type,
-						domain.getFallback?.(res)
-					)
-				)
-				.append(process(res, addFootnote));
-		};
+		return new EAUTHChecker(
+			this,
+			headingId,
+			checkType,
+			getRequestUrl,
+			preCheck,
+			process,
+			domain
+		);
 	}
 }
 

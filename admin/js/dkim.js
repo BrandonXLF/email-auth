@@ -5,7 +5,7 @@ jQuery(($) => {
 
 	let dkimDomain;
 
-	const showDns = EmailAuthPlugin.instance.makeChecker(
+	const checker = EmailAuthPlugin.instance.makeChecker(
 		'dkim',
 		'DKIM',
 		() => `${eauthDkimApi.keys}/${selectorSelect.val()}/dns/${dkimDomain}`,
@@ -43,7 +43,7 @@ jQuery(($) => {
 		'eauth_dkim_domain',
 		(val) => {
 			dkimDomain = val;
-			showDns();
+			checker.boundCheck();
 		},
 		{
 			wp: {
@@ -67,7 +67,7 @@ jQuery(($) => {
 		}
 	);
 
-	selectorSelect.on('change', showDns);
+	selectorSelect.on('change', checker.boundCheck);
 
 	async function loadKeys() {
 		$('#eauth-dkim-manager').text('Loading keys...');
@@ -87,7 +87,7 @@ jQuery(($) => {
 		selectorSelect.val(selectorSelect.val());
 
 		if (selectorSelect.val() !== selectorValue) {
-			showDns();
+			checker.boundCheck();
 		}
 
 		$('#eauth-dkim-manager')
@@ -129,7 +129,7 @@ jQuery(($) => {
 			);
 	}
 
-	loadKeys(true);
+	loadKeys();
 
 	$('#eauth-dkim-upload').on('click', async () => {
 		const selector = $('#dkim-new-name').val();

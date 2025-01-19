@@ -1,7 +1,7 @@
 /* global eauthDmarcApi */
 
 jQuery(() => {
-	const check = EmailAuthPlugin.instance.makeChecker(
+	const checker = EmailAuthPlugin.instance.makeChecker(
 		'dmarc',
 		'DMARC',
 		() => `${eauthDmarcApi.check}/${EmailAuthPlugin.instance.fromDomain}`,
@@ -35,6 +35,9 @@ jQuery(() => {
 		}
 	);
 
-	check();
-	EmailAuthPlugin.instance.addEventListener('fromdomainchange', check);
+	checker.boundCheck();
+	EmailAuthPlugin.instance.addEventListener(
+		'fromdomainchange',
+		checker.boundCheck
+	);
 });

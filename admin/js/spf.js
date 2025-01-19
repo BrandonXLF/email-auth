@@ -1,7 +1,7 @@
 /* global eauthSpfApi */
 
 jQuery(($) => {
-	const check = EmailAuthPlugin.instance.makeChecker(
+	const checker = EmailAuthPlugin.instance.makeChecker(
 		'spf',
 		'SPF',
 		() => `${eauthSpfApi.check}/${EmailAuthPlugin.instance.bounceDomain}`,
@@ -83,6 +83,9 @@ jQuery(($) => {
 		}
 	);
 
-	check();
-	EmailAuthPlugin.instance.addEventListener('bouncedomainchange', check);
+	checker.boundCheck();
+	EmailAuthPlugin.instance.addEventListener(
+		'bouncedomainchange',
+		checker.boundCheck
+	);
 });
