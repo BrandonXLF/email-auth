@@ -50,6 +50,10 @@ Set the address and name emails are sent from along with the address replies sho
 
 Composer and npm are required to install dependencies. Once they are installed, run `composer install` and `npm install` to install dependencies.
 
+### Running tests
+
+Once Composer dependencies are installed, run `composer run test` to run tests.
+
 ### Code sniffing
 
 #### PHP
