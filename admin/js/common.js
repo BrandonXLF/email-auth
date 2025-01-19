@@ -249,11 +249,19 @@ class EmailAuthPlugin extends EventTarget {
 							.attr('href', domain.link)
 							.text(domain.type),
 						domain.typeHasDomain ? '' : ' domain',
-						' and ',
+						' (',
+						jQuery('<span>')
+							.addClass('eauth-value')
+							.text(domainName.alignment),
+						') and ',
 						jQuery('<a>')
 							.attr('href', '#from-address')
 							.text('From Address'),
-						` domain do not match, so the from address domain cannot be verified through ${checkType}.`
+						' domain (',
+						jQuery('<span>')
+							.addClass('eauth-value')
+							.text(this.fromDomain),
+						`) do not match, so the from address domain cannot be verified through ${checkType}.`
 					);
 				heading.attr('data-status', 'partial');
 			} else if (res.pass === 'partial') {
