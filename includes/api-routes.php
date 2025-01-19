@@ -161,7 +161,7 @@ register_rest_route(
 			$ip     = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' ) );
 
 			require_once __DIR__ . '/utils/check-spf.php';
-			return check_spf( $domain, $ip );
+			return check_spf( $domain, $ip, get_domain() );
 		},
 		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
 	]

@@ -10,13 +10,15 @@ namespace EmailAuthPlugin;
 /**
  * Check the SPF record for a domain.
  *
- * @param string $domain The domain.
- * @param string $ip The IP of the sending server.
+ * @param string               $domain The domain to check.
+ * @param string               $ip The IP of the sending server.
+ * @param string               $server_domain The domain of the sending server.
+ * @param \SPFLib\DNS\Resolver $dns_resolver The DNS resolver.
  * @return array
  */
-function check_spf( $domain, $ip ) {
+function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	$environment   = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
-	$checker       = new \SPFLib\Checker();
+	$checker       = new \SPFLib\Checker( $dns_resolver );
 	$check_result  = $checker->check( $environment );
 	$code          = $check_result->getCode();
 	$full_non_pass = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
@@ -38,7 +40,7 @@ function check_spf( $domain, $ip ) {
 	}
 
 	try {
-		$record = ( new \SPFLib\Decoder() )->getRecordFromDomain( $domain );
+		$record = ( new \SPFLib\Decoder( $dns_resolver ) )->getRecordFromDomain( $domain );
 	} catch ( \Exception $e ) {
 		$record = null;
 	}
@@ -82,7 +84,7 @@ function check_spf( $domain, $ip ) {
 
 		if ( $full_non_pass ) {
 			$rec_record = new \SPFLib\Record();
-			$new_term   = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, get_domain() );
+			$new_term   = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, $server_domain );
 
 			foreach ( $terms as &$term ) {
 				if ( $new_term && ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
@@ -131,7 +133,7 @@ function check_spf( $domain, $ip ) {
 		'reason'       => 'pass' !== $code ? 'SPF check did not pass.' : null,
 		'code'         => $code,
 		'code_reasons' => $code_reasons,
-		'cur_rec'      => (string) $record,
+		'cur_rec'      => $record ? (string) $record : null,
 		'cur_validity' => $validity,
 		'rec_dns'      => count( $rec_reasons ) ? (string) $rec_record : null,
 		'rec_reasons'  => $rec_reasons,

@@ -14,16 +14,17 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Check if the public key is set for a domain.
  *
- * @param string $domain The domain.
- * @param string $pub The public key.
+ * @param string   $domain The domain.
+ * @param string   $pub The public key.
+ * @param callable $txt_resolver Function to get TXT records with.
  * @return array{ pass: bool, reason: string | null }
  */
-function check_dkim_dns( $domain, $pub ) {
+function check_dkim_dns( $domain, $pub, $txt_resolver = null ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
 	$dkim = null;
 
 	try {
-		$dkim = DNSTagValue\get_map( $domain );
+		$dkim = DNSTagValue\get_map( $domain, null, $txt_resolver );
 	} catch ( DNSTagValue\Exception $e ) {
 		return [
 			'pass'   => false,

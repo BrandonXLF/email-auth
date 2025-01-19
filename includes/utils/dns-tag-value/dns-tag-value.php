@@ -19,7 +19,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * @param int    $type The type of record to fetch.
  * @return array
  *
- * @throws MissingException Record could not be fetch.
+ * @throws MissingException Record could not be fetched.
  */
 function get_record_throws( $domain, $type = DNS_ANY ) {
 	// phpcs:disable Generic.CodeAnalysis.EmptyStatement.DetectedCatch
@@ -57,19 +57,34 @@ function get_record_throws( $domain, $type = DNS_ANY ) {
 	return $res;
 }
 
+/** Default function for retrieving DNS TXT records.
+ *
+ * @param string $domain The hostname to query.
+ * @return array
+ *
+ * @throws MissingException Record could not be fetched.
+ */
+function get_txt_record( $domain ) {
+	return get_record_throws( $domain, DNS_TXT );
+}
+
 /**
  * Get the DNS tag-value map for a given domain for DKIM and DMARC.
  *
  * @param string   $domain The domain to get the DNS records from.
- * @param callable $filter The function to use to filter DNS TXT records.
+ * @param callable $filter Function to use to filter DNS TXT records.
+ * @param callable $txt_resolver Function to get TXT records with.
  * @return array[string]string The map of tag-value pairs.
  *
  * @throws InvalidException Too many records.
  * @throws MissingException Record could not be fetch or no record present.
  */
-function get_map( $domain, $filter = '__return_true' ) {
-	$records = get_record_throws( $domain, DNS_TXT );
-	$records = array_filter( $records, $filter );
+function get_map( $domain, $filter = null, $txt_resolver = null ) {
+	$records = call_user_func( $txt_resolver ?? __NAMESPACE__ . '\get_txt_record', $domain );
+
+	if ( $filter ) {
+		$records = array_filter( $records, $filter );
+	}
 
 	if ( count( $records ) > 1 ) {
 		// Per RFC 6376 3.6.2.2 and RFC 7489 6.6.3.

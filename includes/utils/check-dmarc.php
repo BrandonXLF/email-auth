@@ -35,18 +35,23 @@ function dmarc_failure( &$e, $org = null ) {
 		'reason'   => $e->getMessage(),
 		'warnings' => [],
 		'infos'    => [],
+		'footnote' => null,
 		'org'      => $org,
 	];
 }
 
 /**
- * Check DMARC for a given domain.
+ * Internal, recursive function to check DMARC for a given domain.
  *
- * @param string $domain The domain.
- * @param bool   $is_org True if the domain is a derived organizational domain.
+ * @access private
+ *
+ * @param string   $domain The domain.
+ * @param bool     $is_org True if the domain is a derived organizational domain.
+ * @param callable $txt_resolver Function to get TXT records with.
+ * @param callable $fallback_resolver Function to resolve the fallback organizational domain.
  * @return array
  */
-function check_dmarc( $domain, $is_org = false ) {
+function _check_dmarc( $domain, $is_org, $txt_resolver = null, $fallback_resolver = null ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
 
 	/**
@@ -57,38 +62,20 @@ function check_dmarc( $domain, $is_org = false ) {
 	if ( $is_org ) {
 		$org_domain = $domain;
 	} else {
-		$org_domain_map = get_transient( 'eauth_org_domain_map' ) ?: [];
-		$org_domain     = $org_domain_map[ $domain ] ?? null;
-
-		if ( ! $org_domain ) {
-			$file   = wp_remote_get( 'https://publicsuffix.org/list/public_suffix_list.dat' )['body'];
-			$list   = \Pdp\Rules::fromString( $file );
-			$result = $list->resolve( $domain );
-
-			$org_domain = $result->registrableDomain()->toString();
-
-			set_transient(
-				'eauth_org_domain_map',
-				[ $domain => $org_domain ],
-				24 * HOUR_IN_SECONDS
-			);
-		}
-
-		if ( $org_domain === $domain ) {
-			$org_domain = null;
-		}
+		require_once __DIR__ . '/fallback-domain.php';
+		$org_domain = call_user_func( $fallback_resolver ?? __NAMESPACE__ . '\fallback_domain', $domain );
 	}
 
 	$dmarc = null;
 
 	try {
-		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record' );
+		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record', $txt_resolver );
 	} catch ( DNSTagValue\MissingException $e ) {
 		if ( ! $org_domain || $org_domain === $domain ) {
 			return dmarc_failure( $e, $org_domain );
 		}
 
-		return check_dmarc( $org_domain, true );
+		return _check_dmarc( $org_domain, true, $txt_resolver, $fallback_resolver );
 	} catch ( DNSTagValue\Exception $e ) {
 		return dmarc_failure( $e, $org_domain );
 	}
@@ -133,4 +120,16 @@ function check_dmarc( $domain, $is_org = false ) {
 		'footnote' => $footnote,
 		'org'      => $org_domain,
 	];
+}
+
+/**
+ * Check DMARC for a given domain.
+ *
+ * @param string   $domain The domain.
+ * @param callable $txt_resolver Function to get TXT records with.
+ * @param callable $fallback_resolver Function to resolve the fallback organizational domain.
+ * @return array
+ */
+function check_dmarc( $domain, $txt_resolver = null, $fallback_resolver = null ) {
+	return _check_dmarc( $domain, false, $txt_resolver, $fallback_resolver );
 }
