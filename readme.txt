@@ -3,7 +3,7 @@ Contributors: brandonxlf
 Tags: email
 Donate link: https://www.brandonfowler.me/donate/
 Tested up to: 6.7
-Stable tag: 1.1.0
+Stable tag: 1.2.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,13 @@ Check out [the GitHub repository](https://github.com/BrandonXLF/email-auth) to l
 4. Visit "Settings" > "Email Auth" to configure the plugin
 
 == Changelog ==
+
+= 1.2.0 =
+
+- Show relevant DNS domain for each test
+- Reformat SPF section
+- Prevent DKIM from loading unnecessarily
+- Support entry concatenation for DMARC
 
 = 1.1.0 =
 
