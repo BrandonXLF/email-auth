@@ -82,6 +82,14 @@ function get_txt_record( $domain ) {
 function get_map( $domain, $filter = null, $txt_resolver = null ) {
 	$records = call_user_func( $txt_resolver ?? __NAMESPACE__ . '\get_txt_record', $domain );
 
+	foreach ( $records as &$record ) {
+		if ( isset( $record['entries'] ) ) {
+			$record['txt'] = implode( '', $record['entries'] );
+		}
+	}
+
+	unset( $record );
+
 	if ( $filter ) {
 		$records = array_filter( $records, $filter );
 	}
@@ -98,13 +106,8 @@ function get_map( $domain, $filter = null, $txt_resolver = null ) {
 	}
 
 	$record = $records[0];
-
-	if ( isset( $record['entries'] ) ) {
-		$record['txt'] = implode( '', $record['entries'] );
-	}
-
-	$parts = array_filter( explode( ';', trim( $record['txt'] ) ) );
-	$tags  = [];
+	$parts  = array_filter( explode( ';', trim( $record['txt'] ) ) );
+	$tags   = [];
 
 	foreach ( $parts as $part ) {
 		$part = trim( $part );

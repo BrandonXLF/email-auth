@@ -68,6 +68,28 @@ class CheckDmarcTest extends TestCase {
 		);
 	}
 
+	public function testEntries() {
+		$t_resolve = $this->makeTxtResolver( '_dmarc.example.com', [ 'entries' => [ 'v=DMA', 'RC1' ] ] );
+		$f_resolve = $this->makeFallbackResolver();
+		$res       = check_dmarc( 'example.com', $t_resolve, $f_resolve );
+
+		$this->assertEquals(
+			[
+				'pass'     => 'partial',
+				'warnings' => [
+					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
+				],
+				'infos'    => [
+					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
+					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+				],
+				'footnote' => null,
+				'org'      => null,
+			],
+			$res
+		);
+	}
+
 	public function testQuarantine() {
 		$t_resolve = $this->makeTxtResolver( '_dmarc.example.com', [ 'txt' => 'v=DMARC1; p=quarantine' ] );
 		$f_resolve = $this->makeFallbackResolver();
