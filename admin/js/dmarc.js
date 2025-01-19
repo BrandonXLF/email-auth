@@ -1,27 +1,17 @@
 /* global eauthDmarcApi */
 
-jQuery(($) => {
+jQuery(() => {
 	const check = EmailAuthPlugin.instance.makeChecker(
 		'dmarc',
 		'DMARC',
 		() => `${eauthDmarcApi.check}/${EmailAuthPlugin.instance.fromDomain}`,
 		null,
-		(res, status) => {
+		(res, addFootnote) => {
 			if (res.footnote) {
-				status.append('*');
+				addFootnote(res.footnote);
 			}
 
 			return [
-				res.footnote &&
-					$('<div>')
-						.attr('id', 'eauth-dkim-footnote')
-						.html(`* ${res.footnote}`),
-				EmailAuthPlugin.createCheckedDomain(
-					`_dmarc.${EmailAuthPlugin.instance.fromDomain}`,
-					'#from-address',
-					'From Address',
-					res.org && `_dmarc.${res.org}`
-				),
 				EmailAuthPlugin.createCommentList(
 					res.warnings.map((desc) => ({
 						level: 'warning',
@@ -34,6 +24,14 @@ jQuery(($) => {
 					'Comments'
 				),
 			];
+		},
+		{
+			get: () => ({
+				record: `_dmarc.${EmailAuthPlugin.instance.fromDomain}`,
+			}),
+			getFallback: (res) => res.org && `_dmarc.${res.org}`,
+			type: 'From Address',
+			link: '#from-address',
 		}
 	);
 

@@ -130,13 +130,11 @@ class EmailAuthPlugin extends EventTarget {
 			);
 		}
 
-		if (sourceLink) {
-			el.append(
-				' (from ',
-				jQuery('<a>').attr('href', sourceLink).text(sourceName),
-				')'
-			);
-		}
+		el.append(
+			' (from ',
+			jQuery('<a>').attr('href', sourceLink).text(sourceName),
+			')'
+		);
 
 		return el;
 	}
@@ -204,11 +202,16 @@ class EmailAuthPlugin extends EventTarget {
 		getRequestUrl,
 		preCheck,
 		process,
-		{ alignment } = {}
+		domain
 	) {
 		const heading = jQuery(`#${headingId}`);
 		const status = heading.nextUntil('.eauth-status + *').last();
 		const output = heading.nextUntil('.eauth-output + *').last();
+
+		function addFootnote(text) {
+			status.append('*');
+			output.prepend(`* ${text}`);
+		}
 
 		return async () => {
 			status.empty();
@@ -229,17 +232,29 @@ class EmailAuthPlugin extends EventTarget {
 
 			const raw = await EmailAuthPlugin.request(getRequestUrl());
 			const res = await raw.json();
+			const domainName = domain.get(res);
 
 			if (!res.pass) {
 				status.text(`${EmailAuthPlugin.EMOJIS.error} ${res.reason}`);
 				heading.attr('data-status', 'error');
 			} else if (
-				alignment?.getDomain &&
-				alignment.getDomain() !== this.fromDomain
+				domainName.alignment &&
+				domainName.alignment !== this.fromDomain
 			) {
-				status.text(
-					`${EmailAuthPlugin.EMOJIS.partial} ${alignment.type} domain and from address domain do not match, so the from address domain cannot be verified through ${checkType}.`
-				);
+				status
+					.empty()
+					.append(
+						`${EmailAuthPlugin.EMOJIS.partial} `,
+						jQuery('<a>')
+							.attr('href', domain.link)
+							.text(domain.type),
+						domain.typeHasDomain ? '' : ' domain',
+						' and ',
+						jQuery('<a>')
+							.attr('href', '#from-address')
+							.text('From Address'),
+						` domain do not match, so the from address domain cannot be verified through ${checkType}.`
+					);
 				heading.attr('data-status', 'partial');
 			} else if (res.pass === 'partial') {
 				status.text(
@@ -251,7 +266,17 @@ class EmailAuthPlugin extends EventTarget {
 				heading.attr('data-status', 'pass');
 			}
 
-			output.empty().append(process(res, status));
+			output
+				.empty()
+				.append(
+					EmailAuthPlugin.createCheckedDomain(
+						domainName.record,
+						domain.link,
+						domain.type,
+						domain.getFallback?.(res)
+					)
+				)
+				.append(process(res, addFootnote));
 		};
 	}
 }

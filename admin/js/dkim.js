@@ -25,7 +25,6 @@ jQuery(($) => {
 			}
 		},
 		(res) => [
-			EmailAuthPlugin.createCheckedDomain(res.host),
 			$('<h3>').text('DNS Record'),
 			$('<details>').append(
 				$('<summary>').append('Show DNS Record'),
@@ -33,10 +32,10 @@ jQuery(($) => {
 			),
 		],
 		{
-			alignment: {
-				getDomain: () => dkimDomain,
-				type: 'DKIM',
-			},
+			get: (res) => ({ alignment: dkimDomain, record: res.host }),
+			type: 'DKIM Domain',
+			link: '#dkim-domain',
+			typeHasDomain: true,
 		}
 	);
 

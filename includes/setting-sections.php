@@ -220,7 +220,7 @@ add_section(
 			<button type="button" id="eauth-dkim-upload" class="button">Upload Key</button>
 			<button type="button" id="eauth-dkim-create" class="button">Create Key</button>
 		</div>
-		<h3>DKIM Domain</h3>
+		<h3 id="dkim-domain">DKIM Domain</h3>
 		<div>
 			The DKIM domain is the domain that is verified through the DKIM check. If it does not match the "From" address, then the email may be rejected or displayed differently.
 		</div>

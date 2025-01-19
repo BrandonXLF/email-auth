@@ -15,11 +15,6 @@ jQuery(($) => {
 		},
 		(res) => {
 			const out = [
-				EmailAuthPlugin.createCheckedDomain(
-					EmailAuthPlugin.instance.bounceDomain,
-					'#bounce-address',
-					'Bounce Address'
-				),
 				$('<div>').append('Result code: ', $('<code>').text(res.code)),
 				EmailAuthPlugin.createCommentList(
 					res.code_reasons,
@@ -79,10 +74,12 @@ jQuery(($) => {
 			return out;
 		},
 		{
-			alignment: {
-				getDomain: () => EmailAuthPlugin.instance.bounceDomain,
-				type: 'Bounce',
-			},
+			get: () => ({
+				alignment: EmailAuthPlugin.instance.bounceDomain,
+				record: EmailAuthPlugin.instance.bounceDomain,
+			}),
+			type: 'Bounce Address',
+			link: '#bounce-address',
 		}
 	);
 
