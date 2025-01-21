@@ -42,8 +42,23 @@ register_rest_route(
 			$name = $obj['name'];
 
 			if ( ! $name ) {
-				http_response_code( 500 );
-				return 'No name given via body.';
+				return new \WP_REST_Response(
+					[
+						'error' => 'No name given.',
+					],
+					500
+				);
+			}
+
+			$keys = get_keys();
+
+			if ( array_key_exists( $name, $keys ) ) {
+				return new \WP_REST_Response(
+					[
+						'error' => 'A key with that name already exists.',
+					],
+					500
+				);
 			}
 
 			if ( array_key_exists( 'key', $obj ) ) {
@@ -59,14 +74,31 @@ register_rest_route(
 			}
 
 			if ( ! $pk ) {
-				http_response_code( 500 );
-				return 'Failed to create private key.';
+				$error = 'Failed to create private key.';
+
+				// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+				while ( $msg = openssl_error_string() ) {
+					$error .= "\nOpenSSL error: $msg";
+				}
+
+				return new \WP_REST_Response( [ 'error' => $error ], 500 );
 			}
 
-			openssl_pkey_export( $pk, $private_string );
+			$exported = openssl_pkey_export( $pk, $private_string );
+
+			if ( ! $exported ) {
+				$error = 'Failed to export private key.';
+
+				// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+				while ( $msg = openssl_error_string() ) {
+					$error .= "\nOpenSSL error: $msg";
+				}
+
+				return new \WP_REST_Response( [ 'error' => $error ], 500 );
+			}
 
 			$keys = array_merge(
-				get_keys(),
+				$keys,
 				[
 					$name => trim( $private_string ),
 				]

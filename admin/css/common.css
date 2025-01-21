@@ -127,3 +127,11 @@
 .eauth-variable .value {
 	font-family: monospace;
 }
+
+#eauth-dkim-manager-error {
+	white-space: pre-wrap;
+}
+
+#eauth-dkim-manager-error:empty {
+	display: none;
+}

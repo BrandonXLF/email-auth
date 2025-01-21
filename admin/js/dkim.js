@@ -117,10 +117,13 @@ jQuery(($) => {
 									return;
 								}
 
+								$('#eauth-dkim-manager-error').empty();
+
 								await EmailAuthPlugin.request(
 									`${eauthDkimApi.keys}/${selector}`,
 									'DELETE'
 								);
+
 								await loadKeys();
 							}
 						)
@@ -131,37 +134,41 @@ jQuery(($) => {
 
 	loadKeys();
 
+	async function postKey(body) {
+		$('#eauth-dkim-manager-error').empty();
+
+		const res = await EmailAuthPlugin.request(eauthDkimApi.keys, 'POST', {
+			headers: {
+				'Content-Type': 'application/json',
+			},
+			body: JSON.stringify(body),
+		});
+
+		if (!res.ok) {
+			const json = await res.json();
+
+			$('#eauth-dkim-manager-error').text(json.error);
+		}
+
+		await loadKeys();
+	}
+
 	$('#eauth-dkim-upload').on('click', async () => {
 		const selector = $('#dkim-new-name').val();
 
 		const fileInput = $('<input type="file">');
 		fileInput.click();
 
-		fileInput.on('change', async () => {
-			await EmailAuthPlugin.request(eauthDkimApi.keys, 'POST', {
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				body: JSON.stringify({
-					name: selector,
-					key: await fileInput.prop('files')[0].text(),
-				}),
-			});
-
-			await loadKeys();
-		});
+		fileInput.on('change', async () =>
+			postKey({
+				name: selector,
+				key: await fileInput.prop('files')[0].text(),
+			})
+		);
 	});
 
 	$('#eauth-dkim-create').on('click', async () => {
 		const selector = $('#dkim-new-name').val();
-
-		await EmailAuthPlugin.request(eauthDkimApi.keys, 'POST', {
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify({ name: selector }),
-		});
-
-		await loadKeys();
+		postKey({ name: selector });
 	});
 });
