@@ -125,7 +125,7 @@ register_rest_route(
 			header( "Content-Disposition: attachment; filename=\"$name.pem\"" );
 			header( 'Content-Type: application/x-pem-file' );
 
-			// Output is not HTML, so escaping is not nessessary.
+			// Output is not HTML, so escaping is not necessary.
 			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 			echo $keys[ $name ];
 
