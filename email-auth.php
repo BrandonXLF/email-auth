@@ -11,7 +11,7 @@
  * Plugin Name:       Email Auth
  * Plugin URI:        https://www.brandonfowler.me/email-auth/
  * Description:       Configure the DKIM selector, SPF, DMARC, bounce address, from address, and reply-to address of emails sent by WordPress.
- * Version:           1.2.1
+ * Version:           1.2.2-dev1
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Brandon Fowler
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'EAUTH_PLUGIN_FILE', __FILE__ );
-define( 'EAUTH_PLUGIN_VERSION', '1.2.1' );
+define( 'EAUTH_PLUGIN_VERSION', '1.2.2-dev1' );
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/includes/utils/common.php';
