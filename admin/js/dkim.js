@@ -24,13 +24,14 @@ jQuery(($) => {
 				};
 			}
 		},
-		(res) => [
-			$('<h3>').text('DNS Record'),
-			$('<details>').append(
-				$('<summary>').append('Show DNS Record'),
-				EmailAuthPlugin.createTxtRecord(res.host, res.dns)
-			),
-		],
+		(res) =>
+			res.dns && [
+				$('<h3>').text('DNS Record'),
+				$('<details>').append(
+					$('<summary>').append('Show DNS Record'),
+					EmailAuthPlugin.createTxtRecord(res.host, res.dns)
+				),
+			],
 		{
 			get: (res) => ({ alignment: dkimDomain, record: res.host }),
 			type: 'DKIM Domain',
@@ -68,6 +69,10 @@ jQuery(($) => {
 	);
 
 	selectorSelect.on('change', checker.boundCheck);
+
+	function clearSubmissionError() {
+		$('#eauth-dkim-manager-error').empty();
+	}
 
 	async function loadKeys() {
 		$('#eauth-dkim-manager').text('Loading keys...');
@@ -117,7 +122,7 @@ jQuery(($) => {
 									return;
 								}
 
-								$('#eauth-dkim-manager-error').empty();
+								clearSubmissionError();
 
 								await EmailAuthPlugin.request(
 									`${eauthDkimApi.keys}/${selector}`,
@@ -135,7 +140,7 @@ jQuery(($) => {
 	loadKeys();
 
 	async function postKey(body) {
-		$('#eauth-dkim-manager-error').empty();
+		clearSubmissionError();
 
 		const res = await EmailAuthPlugin.request(eauthDkimApi.keys, 'POST', {
 			headers: {
@@ -146,7 +151,6 @@ jQuery(($) => {
 
 		if (!res.ok) {
 			const json = await res.json();
-
 			$('#eauth-dkim-manager-error').text(json.error);
 		}
 
