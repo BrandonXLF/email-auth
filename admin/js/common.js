@@ -161,6 +161,7 @@ class EAUTHChecker {
 		this.status.empty();
 		this.output.empty();
 		this.destroyAlignmentListener?.();
+		this.requestAborter?.abort('New check started.');
 
 		const preCheckRes = this.preCheck?.();
 
@@ -176,7 +177,10 @@ class EAUTHChecker {
 		this.status.text(`Loading ${this.checkType} record...`);
 		this.heading.attr('data-status', '');
 
-		const raw = await EmailAuthPlugin.request(this.getRequestUrl());
+		this.requestAborter = new AbortController();
+		const raw = await EmailAuthPlugin.request(this.getRequestUrl(), 'GET', {
+			signal: this.requestAborter.signal,
+		});
 		const res = await raw.json();
 		const domainName = this.domain.get(res);
 
