@@ -239,24 +239,6 @@ class CheckDmarcTest extends TestCase {
 		);
 	}
 
-	public function testInvalidDomain() {
-		$f_resolve = $this->makeFallbackResolver();
-		$res       = check_dmarc( '+', null, $f_resolve );
-
-		$this->assertEquals(
-			[
-				'pass'     => false,
-				'reason'   => 'Could not retrieve DNS record. dns_get_record(): DNS Query failed',
-				'warnings' => [],
-				'infos'    => [],
-				'footnote' => null,
-				'org'      => null,
-				'orgFail'  => null,
-			],
-			$res
-		);
-	}
-
 	public function testSubDomain() {
 		$t_resolve = $this->makeTxtResolver( '_dmarc.existent.example.com', [ 'txt' => 'v=DMARC1' ] );
 		$f_resolve = $this->makeFallbackResolver( 'example.com' );

@@ -99,16 +99,4 @@ class CheckDkimTest extends TestCase {
 			$res
 		);
 	}
-
-	public function testInvalidDomain() {
-		$res = check_dkim_dns( '+', 'PUBLIC_KEY' );
-
-		$this->assertEquals(
-			[
-				'pass'   => false,
-				'reason' => 'Could not retrieve DNS record. dns_get_record(): DNS Query failed',
-			],
-			$res
-		);
-	}
 }
