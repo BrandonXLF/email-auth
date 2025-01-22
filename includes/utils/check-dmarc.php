@@ -27,9 +27,10 @@ function is_dmarc_record( $record ) {
  *
  * @param DNSTagValue\Exception $e The exception.
  * @param string                $org The organizational domain.
+ * @param string                $org_fail Reason why org domain is unknown, if applicable.
  * @return array{ pass: bool, reason: string }
  */
-function dmarc_failure( &$e, $org = null ) {
+function dmarc_failure( &$e, $org = null, $org_fail = null ) {
 	return [
 		'pass'     => false,
 		'reason'   => $e->getMessage(),
@@ -37,6 +38,7 @@ function dmarc_failure( &$e, $org = null ) {
 		'infos'    => [],
 		'footnote' => null,
 		'org'      => $org,
+		'orgFail'  => $org_fail,
 	];
 }
 
@@ -45,13 +47,14 @@ function dmarc_failure( &$e, $org = null ) {
  *
  * @access private
  *
- * @param string   $domain The domain.
- * @param bool     $is_org True if the domain is a derived organizational domain.
- * @param callable $txt_resolver Function to get TXT records with.
- * @param callable $fallback_resolver Function to resolve the fallback organizational domain.
+ * @param string        $domain The domain.
+ * @param bool          $is_org True if the domain is a derived organizational domain.
+ * @param string|null   $org_domain_failure Warnings from previous org domain retrieval.
+ * @param callable|null $txt_resolver Function to get TXT records with.
+ * @param callable|null $fallback_resolver Function to resolve the fallback organizational domain.
  * @return array
  */
-function _check_dmarc( $domain, $is_org, $txt_resolver = null, $fallback_resolver = null ) {
+function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fallback_resolver ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
 
 	/**
@@ -63,7 +66,7 @@ function _check_dmarc( $domain, $is_org, $txt_resolver = null, $fallback_resolve
 		$org_domain = $domain;
 	} else {
 		require_once __DIR__ . '/fallback-domain.php';
-		$org_domain = call_user_func( $fallback_resolver ?? __NAMESPACE__ . '\fallback_domain', $domain );
+		[ $org_domain, $org_domain_failure ] = call_user_func( $fallback_resolver ?? __NAMESPACE__ . '\fallback_domain', $domain );
 	}
 
 	$dmarc = null;
@@ -72,12 +75,12 @@ function _check_dmarc( $domain, $is_org, $txt_resolver = null, $fallback_resolve
 		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record', $txt_resolver );
 	} catch ( DNSTagValue\MissingException $e ) {
 		if ( ! $org_domain || $org_domain === $domain ) {
-			return dmarc_failure( $e, $org_domain );
+			return dmarc_failure( $e, $org_domain, $org_domain_failure );
 		}
 
-		return _check_dmarc( $org_domain, true, $txt_resolver, $fallback_resolver );
+		return _check_dmarc( $org_domain, true, $org_domain_failure, $txt_resolver, $fallback_resolver );
 	} catch ( DNSTagValue\Exception $e ) {
-		return dmarc_failure( $e, $org_domain );
+		return dmarc_failure( $e, $org_domain, $org_domain_failure );
 	}
 
 	$warnings = [];
@@ -119,6 +122,7 @@ function _check_dmarc( $domain, $is_org, $txt_resolver = null, $fallback_resolve
 		'infos'    => $infos,
 		'footnote' => $footnote,
 		'org'      => $org_domain,
+		'orgFail'  => $org_domain_failure,
 	];
 }
 
@@ -131,5 +135,5 @@ function _check_dmarc( $domain, $is_org, $txt_resolver = null, $fallback_resolve
  * @return array
  */
 function check_dmarc( $domain, $txt_resolver = null, $fallback_resolver = null ) {
-	return _check_dmarc( $domain, false, $txt_resolver, $fallback_resolver );
+	return _check_dmarc( $domain, false, null, $txt_resolver, $fallback_resolver );
 }

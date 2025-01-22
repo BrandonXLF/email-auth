@@ -1,6 +1,6 @@
 /* global eauthDmarcApi */
 
-jQuery(() => {
+jQuery(($) => {
 	const checker = EmailAuthPlugin.instance.makeChecker(
 		'dmarc',
 		'DMARC',
@@ -12,6 +12,10 @@ jQuery(() => {
 			}
 
 			return [
+				res.orgFail &&
+					$('<div>')
+						.addClass('notice inline multiline')
+						.text(res.orgFail),
 				EmailAuthPlugin.createCommentList(
 					res.warnings.map((desc) => ({
 						level: 'warning',

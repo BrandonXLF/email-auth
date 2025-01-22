@@ -46,6 +46,15 @@
 	margin-right: 0.5em;
 }
 
+#eauth-wrap .error:empty {
+	display: none;
+}
+
+#eauth-wrap .notice.multiline,
+#eauth-wrap .error.multiline {
+	white-space: pre-wrap;
+}
+
 #eauth-toc ul {
 	margin: 0;
 	gap: 1em;
@@ -126,12 +135,4 @@
 .eauth-value,
 .eauth-variable .value {
 	font-family: monospace;
-}
-
-#eauth-dkim-manager-error {
-	white-space: pre-wrap;
-}
-
-#eauth-dkim-manager-error:empty {
-	display: none;
 }

@@ -38,11 +38,12 @@ class CheckDmarcTest extends TestCase {
 	 * Make a resolver that returns the fallback organizational domain for the domain being used in the test.
 	 *
 	 * @param string $fallback_domain The fallback domain.
+	 * @param string $warning Warning to simulate.
 	 * @return callable
 	 */
-	public function makeFallbackResolver( $fallback_domain = null ) {
-		return function () use ( $fallback_domain ) {
-			return $fallback_domain;
+	public function makeFallbackResolver( $fallback_domain = null, $warning = null ) {
+		return function () use ( $fallback_domain, $warning ) {
+			return [ $fallback_domain, $warning ];
 		};
 	}
 
@@ -63,6 +64,7 @@ class CheckDmarcTest extends TestCase {
 				],
 				'footnote' => null,
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -85,6 +87,7 @@ class CheckDmarcTest extends TestCase {
 				],
 				'footnote' => null,
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -106,6 +109,7 @@ class CheckDmarcTest extends TestCase {
 				],
 				'footnote' => 'DMARC only passes if at least one of <a href="#dkim">DKIM</a> and <a href="#spf">SPF</a> passes domain alignment.',
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -126,6 +130,7 @@ class CheckDmarcTest extends TestCase {
 				],
 				'footnote' => 'DMARC only passes if at least one of <a href="#dkim">DKIM</a> and <a href="#spf">SPF</a> passes domain alignment.',
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -147,6 +152,7 @@ class CheckDmarcTest extends TestCase {
 				],
 				'footnote' => null,
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -166,6 +172,7 @@ class CheckDmarcTest extends TestCase {
 				'infos'    => [],
 				'footnote' => null,
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -188,6 +195,7 @@ class CheckDmarcTest extends TestCase {
 				],
 				'footnote' => 'DMARC only passes if at least one of <a href="#dkim">DKIM</a> and <a href="#spf">SPF</a> passes domain alignment.',
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -206,6 +214,7 @@ class CheckDmarcTest extends TestCase {
 				'infos'    => [],
 				'footnote' => null,
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -224,6 +233,7 @@ class CheckDmarcTest extends TestCase {
 				'infos'    => [],
 				'footnote' => null,
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -241,6 +251,7 @@ class CheckDmarcTest extends TestCase {
 				'infos'    => [],
 				'footnote' => null,
 				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -263,6 +274,7 @@ class CheckDmarcTest extends TestCase {
 				],
 				'footnote' => null,
 				'org'      => 'example.com',
+				'orgFail'  => null,
 			],
 			$res
 		);
@@ -285,6 +297,30 @@ class CheckDmarcTest extends TestCase {
 				],
 				'footnote' => null,
 				'org'      => 'example.com',
+				'orgFail'  => null,
+			],
+			$res
+		);
+	}
+
+	public function testPSLWarning() {
+		$t_resolve = $this->makeTxtResolver( '_dmarc.test.example.com', [ 'txt' => 'v=DMARC1' ] );
+		$f_resolve = $this->makeFallbackResolver( 'example.com', 'Warning!' );
+		$res       = check_dmarc( 'test.example.com', $t_resolve, $f_resolve );
+
+		$this->assertEquals(
+			[
+				'pass'     => 'partial',
+				'warnings' => [
+					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
+				],
+				'infos'    => [
+					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
+					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+				],
+				'footnote' => null,
+				'org'      => 'example.com',
+				'orgFail'  => 'Warning!',
 			],
 			$res
 		);

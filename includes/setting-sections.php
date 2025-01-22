@@ -214,7 +214,7 @@ add_section(
 		</div>
 		<div id="eauth-dkim-dns" class="eauth-output"></div>
 		<h3>Manage Keys</h3>
-		<div id="eauth-dkim-manager-error" class="error inline"></div>
+		<div id="eauth-dkim-manager-error" class="error inline multiline"></div>
 		<ul id="eauth-dkim-manager"></ul>
 		<div>
 			<input name="eauth_dkim_new_selector" id="dkim-new-name" type="text" placeholder="Selector">
