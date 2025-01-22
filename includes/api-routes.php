@@ -147,7 +147,7 @@ register_rest_route(
 			$host   = "$name._domainkey.$domain";
 
 			$keys = get_keys();
-			$key  = $keys[ $name ];
+			$key  = $keys[ $name ] ?? '';
 			$pk   = openssl_pkey_get_private( $key );
 
 			if ( ! $pk ) {
