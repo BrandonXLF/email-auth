@@ -62,8 +62,8 @@ class TestDnsResolver extends \SPFLib\DNS\StandardResolver {
  */
 class CheckSpfTest extends TestCase {
 	public function testMinimal() {
-		$resolver = new TestDnsResolver( 'example.com', 'v=spf1' );
-		$res      = check_spf( 'example.com', '192.0.2.0', 'server.domain', $resolver );
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1' );
+		$res      = check_spf( 'domain.test', '192.0.2.0', 'server.domain', $resolver );
 
 		$this->assertEquals(
 			[
@@ -95,8 +95,8 @@ class CheckSpfTest extends TestCase {
 	}
 
 	public function testSoftFail() {
-		$resolver = new TestDnsResolver( 'example.com', 'v=spf1 ~all' );
-		$res      = check_spf( 'example.com', '192.0.2.0', 'server.domain', $resolver );
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 ~all' );
+		$res      = check_spf( 'domain.test', '192.0.2.0', 'server.domain', $resolver );
 
 		$this->assertEquals(
 			[
@@ -123,8 +123,8 @@ class CheckSpfTest extends TestCase {
 	}
 
 	public function testFail() {
-		$resolver = new TestDnsResolver( 'example.com', 'v=spf1 -all' );
-		$res      = check_spf( 'example.com', '192.0.2.0', 'server.domain', $resolver );
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 -all' );
+		$res      = check_spf( 'domain.test', '192.0.2.0', 'server.domain', $resolver );
 
 		$this->assertEquals(
 			[
@@ -151,8 +151,8 @@ class CheckSpfTest extends TestCase {
 	}
 
 	public function testPassIp() {
-		$resolver = new TestDnsResolver( 'example.com', 'v=spf1 ip4:192.0.2.0 -all' );
-		$res      = check_spf( 'example.com', '192.0.2.0', 'server.domain', $resolver );
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 ip4:192.0.2.0 -all' );
+		$res      = check_spf( 'domain.test', '192.0.2.0', 'server.domain', $resolver );
 
 		$this->assertEquals(
 			[
@@ -170,9 +170,9 @@ class CheckSpfTest extends TestCase {
 	}
 
 	public function testPassDomain() {
-		$resolver = new TestDnsResolver( 'example.com', 'v=spf1 a:google.com -all' );
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 a:google.com -all' );
 		$ip       = gethostbyname( 'google.com' );
-		$res      = check_spf( 'example.com', $ip, 'google.com', $resolver );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
 
 		$this->assertEquals(
 			[
@@ -190,9 +190,9 @@ class CheckSpfTest extends TestCase {
 	}
 
 	public function testInvalid() {
-		$resolver = new TestDnsResolver( 'example.com', 'v=spf1 waaaaaa -all' );
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 waaaaaa -all' );
 		$ip       = gethostbyname( 'google.com' );
-		$res      = check_spf( 'example.com', $ip, 'google.com', $resolver );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
 
 		$this->assertEquals(
 			[
@@ -215,9 +215,9 @@ class CheckSpfTest extends TestCase {
 	}
 
 	public function testInvalidPass() {
-		$resolver = new TestDnsResolver( 'example.com', 'v=spf1 a:google.com -all ip4:127.0.0.1' );
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 a:google.com -all ip4:127.0.0.1' );
 		$ip       = gethostbyname( 'google.com' );
-		$res      = check_spf( 'example.com', $ip, 'google.com', $resolver );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
 
 		$this->assertEquals(
 			[
@@ -240,9 +240,9 @@ class CheckSpfTest extends TestCase {
 	}
 
 	public function testRecPass() {
-		$resolver = new TestDnsResolver( 'example.com', 'v=spf1 a:google.com' );
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 a:google.com' );
 		$ip       = gethostbyname( 'google.com' );
-		$res      = check_spf( 'example.com', $ip, 'google.com', $resolver );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
 
 		$this->assertEquals(
 			[
