@@ -16,6 +16,15 @@ jobs:
     steps:
       - name: Check out repository code
         uses: actions/checkout@v4
+
+      - name: Install SVN
+        run: sudo apt-get install subversion
+
+      - name: Start MySQL
+        run: sudo /etc/init.d/mysql start
+
+      - name: Install WP Tests
+        run: ./bin/install-wp-tests.sh wptests root root
   
       - name: Cache Composer packages
         id: composer-cache
