@@ -57,17 +57,21 @@ function get_domain() {
  * @return array[string]string $keys The private keys.
  */
 function get_keys() {
+	if ( defined( 'EAUTH_PRIVATE_KEYS' ) ) {
+		return EAUTH_PRIVATE_KEYS;
+	}
+
 	$keys_path = get_config_dir( 'dkim-keys.php', false );
 
 	if ( file_exists( $keys_path ) ) {
 		include $keys_path;
 	}
 
-	return defined( constant_name: 'EAUTH_PRIVATE_KEYS' ) ? EAUTH_PRIVATE_KEYS : [];
+	return defined( 'EAUTH_PRIVATE_KEYS' ) ? EAUTH_PRIVATE_KEYS : [];
 }
 
 /**
- * Save the given of private keys.
+ * Save the given of private keys for subsequent page loads.
  *
  * @param array[string]string $keys The private keys.
  */
