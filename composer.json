@@ -9,13 +9,16 @@
 		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
 		"phpcompatibility/phpcompatibility-wp": "*",
 		"wp-coding-standards/wpcs": "^3.0",
-		"phpunit/phpunit": "^10.5"
+		"phpunit/phpunit": "^9.0",
+		"yoast/phpunit-polyfills" : "^3.0"
 	},
 	"scripts": {
 		"phpcs": "vendor/bin/phpcs --report=summary",
 		"phpcs:full": "vendor/bin/phpcs",
 		"phpcs:fix": "vendor/bin/phpcbf",
-		"test": "vendor/bin/phpunit tests"
+		"test": "vendor/bin/phpunit",
+		"test:unit": "vendor/bin/phpunit --testsuite unit",
+		"test:integration": "vendor/bin/phpunit --testsuite integration"
 	},
 	"config": {
 		"allow-plugins": {

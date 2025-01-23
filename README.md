@@ -52,6 +52,8 @@ Composer and npm are required to install dependencies. Once they are installed, 
 
 ### Running tests
 
+To run integration tests, an installation of WordPress is required to be installed with `bin/install-wp-tests.sh`. This script requires Subversion to be installed. Once installed, run `composer run test` to run tests. You can also run unit tests, which do not depend on a WordPress installation, using `composer run test:unit`.
+
 Once Composer dependencies are installed, run `composer run test` to run tests.
 
 ### Code sniffing

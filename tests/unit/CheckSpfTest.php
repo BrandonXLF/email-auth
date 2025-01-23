@@ -7,9 +7,7 @@
 
 namespace EmailAuthPlugin;
 
-require_once dirname( __DIR__ ) . '/vendor/autoload.php';
-require_once dirname( __DIR__ ) . '/includes/utils/common.php';
-require_once dirname( __DIR__ ) . '/includes/utils/check-spf.php';
+require_once dirname( dirname( __DIR__ ) ) . '/includes/utils/check-spf.php';
 
 use PHPUnit\Framework\TestCase;
 
