@@ -42,7 +42,7 @@ function extract_domain( $addr ) {
  * Get the bounce address that should be used.
  *
  * @param PHPMailer &$mailer The instance of PHPMailer.
- * @return string | null The bounce address if any.
+ * @return string The bounce address if any.
  */
 function get_bounce_address( &$mailer ) {
 	$mode = get_option( 'eauth_bounce_address_mode' );
@@ -56,7 +56,7 @@ function get_bounce_address( &$mailer ) {
 		return as_address( get_option( 'eauth_bounce_address' ) );
 	}
 
-	return ini_get( 'sendmail_from' ) ?: null;
+	return ini_get( 'sendmail_from' ) ?? '';
 }
 
 /**
@@ -103,8 +103,9 @@ add_action(
 			return as_address( $addr );
 		}
 
-		return $from_emai;
-	}
+		return $from_email;
+	},
+	PHP_INT_MAX
 );
 
 add_action(
@@ -117,7 +118,8 @@ add_action(
 		}
 
 		return get_option( 'eauth_from_address_name' ) ?: $from_name;
-	}
+	},
+	PHP_INT_MAX
 );
 
 add_action(
@@ -149,5 +151,6 @@ add_action(
 				// phpcs:enable
 			}
 		}
-	}
+	},
+	PHP_INT_MAX
 );
