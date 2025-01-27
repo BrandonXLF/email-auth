@@ -23,28 +23,27 @@
      id="defs2" />
   <sodipodi:namedview
      id="base"
-     pagecolor="#73ca39"
      bordercolor="#666666"
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
      inkscape:zoom="1.4"
-     inkscape:cx="137.85714"
-     inkscape:cy="156.07143"
+     inkscape:cx="431.07143"
+     inkscape:cy="53.928572"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      units="px"
-     inkscape:window-width="1147"
-     inkscape:window-height="1211"
-     inkscape:window-x="1013"
-     inkscape:window-y="119"
-     inkscape:window-maximized="0"
+     inkscape:window-width="2560"
+     inkscape:window-height="1417"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
      showguides="false"
      inkscape:showpageshadow="2"
      inkscape:pagecheckerboard="0"
      inkscape:deskcolor="#d1d1d1"
-     inkscape:export-bgcolor="#73ca39ff" />
+     pagecolor="#ffffff" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -61,6 +60,13 @@
      inkscape:groupmode="layer"
      id="layer1"
      transform="translate(0,-230.85415)">
+    <rect
+       style="fill:#73ca39;fill-opacity:1;stroke:none;stroke-width:0;stroke-dasharray:none"
+       id="rect1"
+       width="204.25833"
+       height="66.145836"
+       x="0"
+       y="230.85416" />
     <g
        aria-label="Email Auth"
        style="font-style:normal;font-weight:normal;font-size:10.58333302px;line-height:1.25;font-family:sans-serif;text-align:start;letter-spacing:0px;word-spacing:0px;text-anchor:start;fill:#ffffff;fill-opacity:1;stroke:none;stroke-width:0.26458332"
@@ -95,6 +101,35 @@
          style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:19.40277863px;font-family:Barlow;-inkscape-font-specification:'Barlow Semi-Bold';fill:#ffffff;stroke-width:0.26458332"
          id="path3821"
          inkscape:connector-curvature="0" />
+      <g
+         transform="matrix(0.61499877,0,0,0.61499877,15.845298,236.60529)"
+         style="fill:none;stroke:#ffffff;stroke-width:2.79641485;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+         id="g4631">
+        <path
+           id="path3756"
+           d="M 3,7 A 2,2 0 0 1 5,5 h 14 a 2,2 0 0 1 2,2 v 10 a 2,2 0 0 1 -2,2 H 5 A 2,2 0 0 1 3,17 Z"
+           inkscape:connector-curvature="0"
+           style="stroke:#ffffff;stroke-width:2.79641485;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        <path
+           style="stroke:#ffffff;stroke-width:2.79641485;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
+           id="path3758"
+           d="m 3,7 9,6 9,-6"
+           inkscape:connector-curvature="0" />
+      </g>
+      <g
+         id="g4878"
+         transform="translate(0.52916667)">
+        <path
+           id="path3775"
+           d="m 72.432395,239.53338 a 5.8391503,5.8391503 0 0 0 4.136064,1.45979 5.8391503,5.8391503 0 0 1 -4.136064,7.29894 5.8391503,5.8391503 0 0 1 -4.136065,-7.29894 5.8391503,5.8391503 0 0 0 4.136065,-1.45979"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#fffffc;stroke-width:1.71979165;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+        <path
+           id="path3791"
+           d="m 70.945619,243.99185 1.100192,1.10019 2.200384,-2.20038"
+           inkscape:connector-curvature="0"
+           style="fill:none;stroke:#ffffff;stroke-width:1.32291663;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
+      </g>
     </g>
     <g
        aria-label="Prevent Email Spoofing, Avoid the Spam Folder"
@@ -582,40 +617,6 @@
          d="m 128.44783,290.81038 q -0.33337,0 -0.58737,-0.0953 -0.24871,-0.10055 -0.3863,-0.26988 -0.13758,-0.17462 -0.13758,-0.38629 v -0.0476 q 0,-0.0265 0.0159,-0.0423 0.0212,-0.0212 0.0476,-0.0212 h 0.46567 q 0.0265,0 0.0423,0.0212 0.0212,0.0159 0.0212,0.0423 v 0.0106 q 0,0.13229 0.14287,0.23283 0.14817,0.0953 0.37042,0.0953 0.21167,0 0.34396,-0.0847 0.13229,-0.0899 0.13229,-0.22225 0,-0.1217 -0.11113,-0.17991 -0.10583,-0.0635 -0.34925,-0.13229 l -0.20108,-0.0635 q -0.26987,-0.0794 -0.45508,-0.16934 -0.18521,-0.09 -0.31221,-0.24341 -0.127,-0.15875 -0.127,-0.40217 0,-0.37042 0.29104,-0.58738 0.29104,-0.22225 0.76729,-0.22225 0.32279,0 0.56621,0.10584 0.24342,0.10054 0.37571,0.28575 0.13229,0.17991 0.13229,0.41275 0,0.0265 -0.0212,0.0476 -0.0159,0.0159 -0.0423,0.0159 h -0.44979 q -0.0265,0 -0.0476,-0.0159 -0.0159,-0.0212 -0.0159,-0.0476 0,-0.13759 -0.13758,-0.22754 -0.1323,-0.0952 -0.36513,-0.0952 -0.20637,0 -0.33867,0.0794 -0.127,0.0741 -0.127,0.21167 0,0.127 0.12171,0.19579 0.127,0.0635 0.41804,0.14287 l 0.11642,0.0317 q 0.28046,0.0847 0.47096,0.17463 0.1905,0.0847 0.32279,0.24342 0.13229,0.15345 0.13229,0.40216 0,0.37571 -0.29633,0.59267 -0.29633,0.21167 -0.78846,0.21167 z"
          style="font-style:normal;font-variant:normal;font-weight:600;font-stretch:normal;font-size:5.29166651px;font-family:Barlow;-inkscape-font-specification:'Barlow Semi-Bold';fill:#ffffff;stroke-width:0.26458332"
          id="path4873" />
-    </g>
-    <path
-       style="fill:none;stroke:none;stroke-width:1.71979165;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none"
-       inkscape:connector-curvature="0"
-       d="m 15.420075,235.04614 h 14.75997 v 14.75997 h -14.75997 z"
-       id="path3754" />
-    <g
-       transform="matrix(0.61499876,0,0,0.61499876,15.845298,236.60529)"
-       style="fill:none;stroke:#ffffff;stroke-width:2.79641485;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-       id="g4631">
-      <path
-         id="path3756"
-         d="M 3,7 A 2,2 0 0 1 5,5 h 14 a 2,2 0 0 1 2,2 v 10 a 2,2 0 0 1 -2,2 H 5 A 2,2 0 0 1 3,17 Z"
-         inkscape:connector-curvature="0"
-         style="stroke:#ffffff;stroke-width:2.79641485;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         style="stroke:#ffffff;stroke-width:2.79641485;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1"
-         id="path3758"
-         d="m 3,7 9,6 9,-6"
-         inkscape:connector-curvature="0" />
-    </g>
-    <g
-       id="g4878"
-       transform="translate(0.52916667)">
-      <path
-         id="path3775"
-         d="m 72.432395,239.53338 a 5.8391503,5.8391503 0 0 0 4.136064,1.45979 5.8391503,5.8391503 0 0 1 -4.136064,7.29894 5.8391503,5.8391503 0 0 1 -4.136065,-7.29894 5.8391503,5.8391503 0 0 0 4.136065,-1.45979"
-         inkscape:connector-curvature="0"
-         style="fill:none;stroke:#fffffc;stroke-width:1.71979165;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
-      <path
-         id="path3791"
-         d="m 70.945619,243.99185 1.100192,1.10019 2.200384,-2.20038"
-         inkscape:connector-curvature="0"
-         style="fill:none;stroke:#ffffff;stroke-width:1.32291663;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1" />
     </g>
   </g>
 </svg>
