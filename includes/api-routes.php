@@ -75,7 +75,7 @@ register_rest_route(
 			$name = $obj['name'];
 
 			if ( ! $name ) {
-				return dkim_create_error( 'No name given.' );
+				return dkim_create_error( 'No selector name given.' );
 			}
 
 			$keys = get_keys();
