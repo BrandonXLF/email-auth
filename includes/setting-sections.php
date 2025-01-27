@@ -61,7 +61,7 @@ function show_sections() {
 }
 
 /**
- * Print a placeholder attribute.
+ * Print a possibly-defined placeholder attribute.
  *
  * @param string | null $placeholder The placeholder text.
  */
@@ -69,6 +69,15 @@ function placeholder( $placeholder ) {
 	if ( $placeholder ) {
 		echo ' placeholder="' . esc_attr( $placeholder ) . '" ';
 	}
+}
+
+/**
+ * Print a placeholder label attribute.
+ * 
+ * @param string The label text.
+ */
+function placeholder_label( $label ) {
+	echo ' placeholder="' . esc_attr( $label ) . '" aria-label="' . esc_attr( $label ) . '" ';
 }
 
 /**
@@ -217,7 +226,7 @@ add_section(
 		<div id="eauth-dkim-manager-error" class="error inline multiline"></div>
 		<ul id="eauth-dkim-manager"></ul>
 		<div>
-			<input name="eauth_dkim_new_selector" id="dkim-new-name" type="text" placeholder="Selector">
+			<input name="eauth_dkim_new_selector" id="dkim-new-name" type="text" <?php placeholder_label('Selector name'); ?>>
 			<button type="button" id="eauth-dkim-upload" class="button">Upload Key</button>
 			<button type="button" id="eauth-dkim-create" class="button">Create Key</button>
 		</div>
@@ -306,7 +315,7 @@ add_section(
 	function () {
 		?>
 		<div>
-			<input id="eauth-test-to" name="eauth_test_to" type="email">
+			<input id="eauth-test-to" name="eauth_test_to" type="email" <?php placeholder_label('Test email address'); ?>>
 			<input type="submit" name="eauth_send_test" value="Save & Send Test" class="button">
 		</div>
 		<div>
