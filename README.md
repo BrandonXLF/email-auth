@@ -6,7 +6,7 @@
 
 ## Description
 
-Email Auth allows you to configure the DKIM selector, SPF, DMARC, bounce address, from address, and reply-to address of emails sent by WordPress through the default PHPMailer.
+Email Auth allows you to enable email authentication/validation for your WordPress site. Configure the DKIM selector, SPF, DMARC, bounce address, from address, and reply-to address of emails sent by WordPress through the default PHPMailer.
 
 Configuring these email settings allows you to prevent attackers from spoofing emails from your domain and helps keep your emails out of the spam folder.
 

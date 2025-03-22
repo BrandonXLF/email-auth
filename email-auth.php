@@ -10,7 +10,7 @@
  * @wordpress-plugin
  * Plugin Name:       Email Auth
  * Plugin URI:        https://www.brandonfowler.me/email-auth/
- * Description:       Configure the DKIM selector, SPF, DMARC, bounce address, from address, and reply-to address of emails sent by WordPress.
+ * Description:       Enable email authentication/validation for the default WordPress PHPMailer.
  * Version:           1.2.3
  * Requires at least: 6.0
  * Requires PHP:      7.4
