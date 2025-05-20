@@ -78,6 +78,10 @@ register_rest_route(
 				return dkim_create_error( 'No selector name given.' );
 			}
 
+			if ( ! preg_match("[a-zA-Z0-9-]+", $name ) ) {
+				return dkim_create_error( 'Selectors may only contain letters, numbers and hyphens (-).' );
+			}
+
 			$keys = get_keys();
 
 			if ( array_key_exists( $name, $keys ) ) {
