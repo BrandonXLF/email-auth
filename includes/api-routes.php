@@ -12,6 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'EAUTH_API_PREFIX', 'eauth/v1' );
+define( 'EAUTH_DKIM_SELECTOR_REGEX', '[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*' );
 
 /**
  * Check if the current user can use the admin API.
@@ -78,8 +79,8 @@ register_rest_route(
 				return dkim_create_error( 'No selector name given.' );
 			}
 
-			if ( ! preg_match( '[a-zA-Z0-9-]+', $name ) ) {
-				return dkim_create_error( 'Selectors may only contain letters, numbers and hyphens (-).' );
+			if ( ! preg_match( sprintf( '/^%s$/', EAUTH_DKIM_SELECTOR_REGEX ), $name ) ) {
+				return dkim_create_error( 'Selector does not match a valid format.' );
 			}
 
 			$keys = get_keys();
@@ -142,7 +143,7 @@ function dkim_check_ssl_error( $host, $ctx ) {
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	'/dkim/keys/(?P<name>[a-zA-Z0-9-]+)/dns/(?P<domain>[a-zA-Z0-9-.]+)',
+	sprintf( '/dkim/keys/(?P<name>%s)/dns/(?P<domain>[a-zA-Z0-9-.]+)', EAUTH_DKIM_SELECTOR_REGEX ),
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
@@ -187,7 +188,7 @@ register_rest_route(
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	'/dkim/keys/(?P<name>[a-zA-Z0-9-]+)/download',
+	sprintf( '/dkim/keys/(?P<name>%s)/download', EAUTH_DKIM_SELECTOR_REGEX ),
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
@@ -209,7 +210,7 @@ register_rest_route(
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	'/dkim/keys/(?P<name>[a-zA-Z0-9-]+)',
+	sprintf( '/dkim/keys/(?P<name>%s)', EAUTH_DKIM_SELECTOR_REGEX ),
 	[
 		'methods'             => 'DELETE',
 		'callback'            => function ( \WP_REST_Request $request ) {
