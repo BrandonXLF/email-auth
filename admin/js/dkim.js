@@ -3,6 +3,10 @@
 jQuery(($) => {
 	const selectorSelect = $('[name="eauth_dkim_selector"]');
 
+	// Per RFC 6367 3.1 and RFC 5321 4.1.2
+	const compliantSelectorPattern =
+		/^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
+
 	let dkimDomain;
 
 	const checker = EmailAuthPlugin.instance.makeChecker(
@@ -139,8 +143,18 @@ jQuery(($) => {
 
 	loadKeys();
 
-	async function postKey(body) {
+	async function postKey(selector, body) {
 		clearSubmissionError();
+
+		if (!compliantSelectorPattern.test(selector)) {
+			const ignoreNonCompliant = confirm(
+				`Selector "${selector}" is non-compliant. A valid selector must contain ASCII letters and numbers with optional hyphens in-between. Dots can be used to separate subdomains. Would you like to continue anyway?`
+			);
+
+			if (!ignoreNonCompliant) {
+				return;
+			}
+		}
 
 		const res = await EmailAuthPlugin.request(eauthDkimApi.keys, 'POST', {
 			headers: {
@@ -164,8 +178,7 @@ jQuery(($) => {
 		fileInput.click();
 
 		fileInput.on('change', async () =>
-			postKey({
-				name: selector,
+			postKey(selector, {
 				key: await fileInput.prop('files')[0].text(),
 			})
 		);
@@ -173,6 +186,6 @@ jQuery(($) => {
 
 	$('#eauth-dkim-create').on('click', async () => {
 		const selector = $('#dkim-new-name').val();
-		postKey({ name: selector });
+		postKey(selector);
 	});
 });
