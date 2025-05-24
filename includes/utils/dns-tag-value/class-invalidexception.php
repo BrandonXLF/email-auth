@@ -8,7 +8,7 @@
 
 namespace EmailAuthPlugin\DNSTagValue;
 
-require __DIR__ . '/class-exception.php';
+require_once __DIR__ . '/class-exception.php';
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
