@@ -34,21 +34,34 @@ class CheckDkimTest extends TestCase {
 
 	public function testNormal() {
 		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'p=PUBLIC_KEY' ] );
-		$res     = check_dkim_dns( 'test._domainkey.domain.test', 'PUBLIC_KEY', $resolve );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals( [ 'pass' => true ], $res );
 	}
 
 	public function testEntries() {
 		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'entries' => [ 'v=DKIM1; p=PUBLIC', '_KEY' ] ] );
-		$res     = check_dkim_dns( 'test._domainkey.domain.test', 'PUBLIC_KEY', $resolve );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals( [ 'pass' => true ], $res );
 	}
 
+	public function testNonStandard() {
+		$resolve = $this->makeTxtResolver( 'te_st._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY' ] );
+		$res     = check_dkim_dns( 'te_st', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => 'partial',
+				'reason' => 'Selector name is non-standard.',
+			],
+			$res
+		);
+	}
+
 	public function testMissingKey() {
 		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; a=b;' ] );
-		$res     = check_dkim_dns( 'test._domainkey.domain.test', 'PUBLIC_KEY', $resolve );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
 			[
@@ -61,7 +74,7 @@ class CheckDkimTest extends TestCase {
 
 	public function testIncorrectKey() {
 		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PRIVATE_KEY' ] );
-		$res     = check_dkim_dns( 'test._domainkey.domain.test', 'PUBLIC_KEY', $resolve );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
 			[
@@ -74,7 +87,7 @@ class CheckDkimTest extends TestCase {
 
 	public function testMultipleRecords() {
 		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY' ], [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY' ] );
-		$res     = check_dkim_dns( 'test._domainkey.domain.test', 'PUBLIC_KEY', $resolve );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
 			[
@@ -87,7 +100,7 @@ class CheckDkimTest extends TestCase {
 
 	public function testNoRecord() {
 		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test' );
-		$res     = check_dkim_dns( 'test._domainkey.domain.test', 'PUBLIC_KEY', $resolve );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
 			[

@@ -70,6 +70,10 @@
 	display: none;
 }
 
+.eauth-dkim-issue {
+	margin-top: 1em !important;
+}
+
 .eauth-dns-record > dt {
 	margin-top: 1em;
 	font-weight: 600;

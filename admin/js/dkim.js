@@ -3,7 +3,7 @@
 jQuery(($) => {
 	const selectorSelect = $('[name="eauth_dkim_selector"]');
 
-	// Per RFC 6367 3.1 and RFC 5321 4.1.2
+	// Per RFC 6367 3.1 and RFC 5321 4.1.2.
 	const compliantSelectorPattern =
 		/^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
 
@@ -28,14 +28,18 @@ jQuery(($) => {
 				};
 			}
 		},
-		(res) =>
-			res.dns && [
-				$('<h3>').text('DNS Record'),
+		(res) => [
+			res.pass === 'partial' &&
+				$('<div>')
+					.addClass('eauth-dkim-issue')
+					.text(`${EmailAuthPlugin.EMOJIS.warning} ${res.reason}`),
+			res.dns && $('<h3>').text('DNS Record'),
+			res.dns &&
 				$('<details>').append(
 					$('<summary>').append('Show DNS Record'),
 					EmailAuthPlugin.createTxtRecord(res.host, res.dns)
 				),
-			],
+		],
 		{
 			get: (res) => ({ alignment: dkimDomain, record: res.host }),
 			type: 'DKIM Domain',
@@ -148,7 +152,7 @@ jQuery(($) => {
 
 		if (!compliantSelectorPattern.test(selector)) {
 			const ignoreNonCompliant = confirm(
-				`Selector "${selector}" is non-compliant. A valid selector must contain ASCII letters and numbers with optional hyphens in-between. Dots can be used to separate subdomains. Would you like to continue anyway?`
+				`Selector "${selector}" is non-standard. A valid selector must contain ASCII letters and numbers with optional hyphens in-between. Dots can be used to separate subdomains. Would you like to continue anyway?`
 			);
 
 			if (!ignoreNonCompliant) {

@@ -175,7 +175,7 @@ register_rest_route(
 					'host' => $host,
 					'dns'  => $dns,
 				],
-				check_dkim_dns( $host, $pub )
+				check_dkim_dns( $name, $domain, $pub )
 			);
 		},
 		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
