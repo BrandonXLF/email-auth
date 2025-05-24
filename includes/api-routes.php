@@ -79,10 +79,6 @@ register_rest_route(
 				return dkim_create_error( 'No selector name given.' );
 			}
 
-			if ( ! preg_match( sprintf( '/^%s$/', EAUTH_DKIM_SELECTOR_REGEX ), $name ) ) {
-				return dkim_create_error( 'Selector does not match a valid format.' );
-			}
-
 			$keys = get_keys();
 
 			if ( array_key_exists( $name, $keys ) ) {
