@@ -156,12 +156,16 @@ jQuery(($) => {
 			}
 		}
 
-		const res = await EmailAuthPlugin.request(eauthDkimApi.keys, 'POST', {
-			headers: {
-				'Content-Type': 'application/json',
-			},
-			body: JSON.stringify(body),
-		});
+		const res = await EmailAuthPlugin.request(
+			`${eauthDkimApi.keys}/${selector}`,
+			'POST',
+			{
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(body) ?? '{}',
+			}
+		);
 
 		if (!res.ok) {
 			const json = await res.json();
