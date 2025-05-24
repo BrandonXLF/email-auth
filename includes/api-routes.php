@@ -12,7 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'EAUTH_API_PREFIX', 'eauth/v1' );
-define( 'EAUTH_DKIM_SELECTOR_REGEX', '[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*' );
+define( 'EAUTH_DOMAIN_IN_URL_REGEX', '[a-zA-Z0-9-._]+' ); // _ is widely supported
 
 /**
  * Check if the current user can use the admin API.
@@ -68,12 +68,12 @@ function dkim_create_error( $msg, $ssl_failure = false ) {
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	'/dkim/keys',
+	sprintf( '/dkim/keys/(?P<name>%s)', EAUTH_DOMAIN_IN_URL_REGEX ),
 	[
 		'methods'             => 'POST',
 		'callback'            => function ( \WP_REST_Request $request ) {
+			$name = $request['name'];
 			$obj  = $request->get_json_params();
-			$name = $obj['name'];
 
 			if ( ! $name ) {
 				return dkim_create_error( 'No selector name given.' );
@@ -139,7 +139,7 @@ function dkim_check_ssl_error( $host, $ctx ) {
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	sprintf( '/dkim/keys/(?P<name>%s)/dns/(?P<domain>[a-zA-Z0-9-.]+)', EAUTH_DKIM_SELECTOR_REGEX ),
+	sprintf( '/dkim/keys/(?P<name>%s)/dns/(?P<domain>%s)', EAUTH_DOMAIN_IN_URL_REGEX, EAUTH_DOMAIN_IN_URL_REGEX ),
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
@@ -184,7 +184,7 @@ register_rest_route(
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	sprintf( '/dkim/keys/(?P<name>%s)/download', EAUTH_DKIM_SELECTOR_REGEX ),
+	sprintf( '/dkim/keys/(?P<name>%s)/download', EAUTH_DOMAIN_IN_URL_REGEX ),
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
@@ -206,7 +206,7 @@ register_rest_route(
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	sprintf( '/dkim/keys/(?P<name>%s)', EAUTH_DKIM_SELECTOR_REGEX ),
+	sprintf( '/dkim/keys/(?P<name>%s)', EAUTH_DOMAIN_IN_URL_REGEX ),
 	[
 		'methods'             => 'DELETE',
 		'callback'            => function ( \WP_REST_Request $request ) {
@@ -222,7 +222,7 @@ register_rest_route(
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	'/spf/check/(?P<domain>[a-zA-Z0-9-.]+)',
+	sprintf( '/spf/check/(?P<domain>%s)', EAUTH_DOMAIN_IN_URL_REGEX ),
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
@@ -238,7 +238,7 @@ register_rest_route(
 
 register_rest_route(
 	EAUTH_API_PREFIX,
-	'/dmarc/check/(?P<domain>[a-zA-Z0-9-.]+)',
+	sprintf( '/dmarc/check/(?P<domain>%s)', EAUTH_DOMAIN_IN_URL_REGEX ),
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
