@@ -227,7 +227,7 @@ class CheckSpfTest extends TestCase {
 				'cur_validity' => [
 					[
 						'level' => 'warning',
-						'desc'  => '\'all\' should be the last mechanism (any other mechanism will be ignored)',
+						'desc'  => '&#039;all&#039; should be the last mechanism (any other mechanism will be ignored)',
 					],
 				],
 				'rec_dns'      => null,

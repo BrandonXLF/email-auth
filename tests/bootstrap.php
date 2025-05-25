@@ -39,3 +39,10 @@ if ( ! file_exists( "{$_tests_dir}/includes/functions.php" ) ) {
 	// Start up the WP testing environment.
 	require "{$_tests_dir}/includes/bootstrap.php";
 }
+
+if ( ! function_exists( 'esc_html') ) {
+	// Dummy esc_html function for unit tests.
+	function esc_html( $text ) {
+		return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
+	}
+}
