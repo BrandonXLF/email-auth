@@ -283,7 +283,7 @@ class CheckDmarcTest extends TestCase {
 		);
 	}
 
-	public function testPSLWarning() {
+	public function testFallbackWarning() {
 		$t_resolve = $this->makeTxtResolver( '_dmarc.test.domain.test', [ 'txt' => 'v=DMARC1' ] );
 		$f_resolve = $this->makeFallbackResolver( 'domain.test', 'Warning!' );
 		$res       = check_dmarc( 'test.domain.test', $t_resolve, $f_resolve );
@@ -301,6 +301,110 @@ class CheckDmarcTest extends TestCase {
 				'footnote' => null,
 				'org'      => 'domain.test',
 				'orgFail'  => 'Warning!',
+			],
+			$res
+		);
+	}
+
+	public function testBadVersion() {
+		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC2' ] );
+		$f_resolve = $this->makeFallbackResolver();
+		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
+
+		$this->assertEquals(
+			[
+				'pass'     => false,
+				'reason'   => 'No TXT record found.',
+				'warnings' => [ 'Potential record ignored: Version identifier must be v=DMARC1.' ],
+				'infos'    => [],
+				'footnote' => null,
+				'org'      => null,
+				'orgFail'  => null,
+			],
+			$res
+		);
+	}
+
+	public function testMissingVersion() {
+		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'p=reject' ] );
+		$f_resolve = $this->makeFallbackResolver();
+		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
+
+		$this->assertEquals(
+			[
+				'pass'     => false,
+				'reason'   => 'No TXT record found.',
+				'warnings' => [ 'Potential record ignored: Version identifier (v=DMARC1) is missing.' ],
+				'infos'    => [],
+				'footnote' => null,
+				'org'      => null,
+				'orgFail'  => null,
+			],
+			$res
+		);
+	}
+
+	public function testVersionFirst() {
+		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'p=reject; v=DMARC1' ] );
+		$f_resolve = $this->makeFallbackResolver();
+		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
+
+		$this->assertEquals(
+			[
+				'pass'     => false,
+				'reason'   => 'No TXT record found.',
+				'warnings' => [ 'Potential record ignored: First tag must be the version identifier (v).' ],
+				'infos'    => [],
+				'footnote' => null,
+				'org'      => null,
+				'orgFail'  => null,
+			],
+			$res
+		);
+	}
+
+	public function testIgnoredRecords() {
+		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC2; p=none' ], [ 'txt' => 'v=DMARC2; p=quarantine' ], [ 'txt' => 'v=DMARC1; p=reject' ] );
+		$f_resolve = $this->makeFallbackResolver();
+		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
+
+		$this->assertEquals(
+			[
+				'pass'     => 'partial',
+				'warnings' => [
+					'Potential record ignored: Version identifier must be v=DMARC1.',
+					'Potential record ignored: Version identifier must be v=DMARC1.'
+				],
+				'infos'    => [
+					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
+					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+				],
+				'footnote' => 'DMARC only passes if at least one of <a href="#dkim">DKIM</a> and <a href="#spf">SPF</a> passes domain alignment.',
+				'org'      => null,
+				'orgFail'  => null,
+			],
+			$res
+		);
+	}
+
+	public function testTrailingSemicolon() {
+		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1; p=none;' ] );
+		$f_resolve = $this->makeFallbackResolver();
+		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
+
+		$this->assertEquals(
+			[
+				'pass'     => 'partial',
+				'warnings' => [
+					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
+				],
+				'infos'    => [
+					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
+					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+				],
+				'footnote' => null,
+				'org'      => null,
+				'orgFail'  => null,
 			],
 			$res
 		);

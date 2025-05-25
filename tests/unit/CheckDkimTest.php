@@ -220,4 +220,18 @@ class CheckDkimTest extends TestCase {
 			$res
 		);
 	}
+
+	public function testMalformedRecord() {
+		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; malformed' ] );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => false,
+				'reason' => 'Malformed tag-value pair.',
+				'warnings' => [],
+			],
+			$res
+		);
+	}
 }

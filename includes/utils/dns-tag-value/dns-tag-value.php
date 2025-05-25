@@ -72,14 +72,16 @@ function get_txt_record( $domain ) {
  * Get the DNS tag-value map for a given domain for DKIM and DMARC.
  *
  * @param string   $domain The domain to get the DNS records from.
- * @param callable $filter Function to use to filter DNS TXT records.
+ * @param callable $filter Function that filters out records with invalid tag-value pairs.
+ * 	                       If specified, malformed records are also ignored.
+ * @param array    $filter_reasons Array to store reasons for filtering out records.
  * @param callable $txt_resolver Function to get TXT records with.
  * @return array[string]string The map of tag-value pairs.
  *
  * @throws InvalidException Too many records.
  * @throws MissingException Record could not be fetch or no record present.
  */
-function get_map( $domain, $filter = null, $txt_resolver = null ) {
+function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver = null ) {
 	$records = call_user_func( $txt_resolver ?? __NAMESPACE__ . '\get_txt_record', $domain );
 
 	foreach ( $records as &$record ) {
@@ -90,38 +92,67 @@ function get_map( $domain, $filter = null, $txt_resolver = null ) {
 
 	unset( $record );
 
-	if ( $filter ) {
-		$records = array_filter( $records, $filter );
-	}
+	$valid_return = null;
 
-	if ( count( $records ) > 1 ) {
-		// Per RFC 6376 3.6.2.2 and RFC 7489 6.6.3.
-		require_once __DIR__ . '/class-invalidexception.php';
-		throw new InvalidException( 'Multiple TXT records found, only one should be present.' );
-	}
-
-	if ( empty( $records ) ) {
-		require_once __DIR__ . '/class-missingexception.php';
-		throw new MissingException( 'No TXT record found.' );
-	}
-
-	$record = $records[0];
-	$parts  = array_filter( explode( ';', trim( $record['txt'] ) ) );
-	$tags   = [];
-
-	foreach ( $parts as $part ) {
-		$part = trim( $part );
-		$pos  = strpos( $part, '=' );
-
-		if ( false === $pos ) {
-			continue;
+	foreach ( $records as &$record ) {
+		$parts  = explode( ';', trim( $record['txt'] ) );
+		
+		$last = array_pop( $parts );
+		if ( $last !== '') {
+			array_push( $parts, $last );
 		}
 
-		$key = substr( $part, 0, $pos );
-		$val = substr( $part, $pos + 1 );
+		$tags   = [];
 
-		$tags[ $key ] = $val;
+		foreach ( $parts as $part ) {
+			$part = trim( $part );
+			$pos  = strpos( $part, '=' );
+
+			if ( false === $pos ) {
+				if ( $filter ) {
+					$filter_reasons[] = 'Potential record ignored: Malformed tag-value pair.';
+					continue 2;
+				}
+
+				require_once __DIR__ . '/class-invalidexception.php';
+				throw new InvalidException( 'Malformed tag-value pair.' );
+			}
+
+			$key = trim( substr( $part, 0, $pos ) );
+			$val = trim( substr( $part, $pos + 1 ) );
+
+			if ( array_key_exists( $key, $tags ) ) {
+				require_once __DIR__ . '/class-invalidexception.php';
+				throw new InvalidException( 'Multiple tag-values pairs with the same key (' . $key . ').' );
+			}
+
+			$tags[ $key ] = $val;
+		}
+
+		if ( $filter ) {
+			$filter_reason = call_user_func( $filter, $tags );
+
+			if ( $filter_reason !== null ) {
+				$filter_reasons[] = 'Potential record ignored: ' . $filter_reason;
+				continue;
+			}
+		}
+
+		if ( $valid_return ) {
+			// Per RFC 6376 3.6.2.2 and RFC 7489 6.6.3.
+			require_once __DIR__ . '/class-invalidexception.php';
+			throw new InvalidException( 'Multiple TXT records found, only one should be present.' );
+		}
+
+		$valid_return = $tags;
 	}
 
-	return $tags;
+	unset( $record );
+
+	if ( ! $valid_return ) {
+		require_once __DIR__ . '/class-missingexception.php';
+		throw new MissingException('No TXT record found.' );
+	}
+
+	return $valid_return;
 }

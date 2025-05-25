@@ -62,7 +62,7 @@ function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 	$warnings = [];
 
 	try {
-		$dkim = DNSTagValue\get_map( $host, null, $txt_resolver );
+		$dkim = DNSTagValue\get_map( $host, null, $warnings, $txt_resolver );
 	} catch ( DNSTagValue\Exception $e ) {
 		return dkim_failure( $e->getMessage(), $warnings );
 	}

@@ -15,11 +15,23 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Check if the given DNS TXT record matches a DMARC record.
  * Follows RFC 7489 6.6.3.
  *
- * @param array $record The DNS TXT record.
- * @return boolean True if the record is a valid DMARC DNS record.
+ * @param array $tags  The list of tag-value pairs.
+ * @return string|null Reason the record is not a DMARC record or null if it is.
  */
-function is_dmarc_record( $record ) {
-	return str_starts_with( trim( $record['txt'] ), 'v=DMARC1' );
+function is_dmarc_record( $tags ) {
+	if ( ! array_key_exists( 'v', $tags ) ) {
+		return 'Version identifier (v=DMARC1) is missing.';
+	}
+
+	if ( array_key_first( $tags ) !== 'v' ) {
+		return 'First tag must be the version identifier (v).';
+	}
+
+	if ( $tags['v'] !== 'DMARC1' ) {
+		return 'Version identifier must be v=DMARC1.';
+	}
+	
+	return null;
 }
 
 /**
@@ -28,13 +40,14 @@ function is_dmarc_record( $record ) {
  * @param DNSTagValue\Exception $e The exception.
  * @param string                $org The organizational domain.
  * @param string                $org_fail Reason why org domain is unknown, if applicable.
+ * @param array                 $warnings Warnings from previous checks.
  * @return array{ pass: bool, reason: string }
  */
-function dmarc_failure( &$e, $org = null, $org_fail = null ) {
+function dmarc_failure( &$e, $org = null, $org_fail = null, &$warnings = [] ) {
 	return [
 		'pass'     => false,
 		'reason'   => $e->getMessage(),
-		'warnings' => [],
+		'warnings' => $warnings,
 		'infos'    => [],
 		'footnote' => null,
 		'org'      => $org,
@@ -52,9 +65,10 @@ function dmarc_failure( &$e, $org = null, $org_fail = null ) {
  * @param string|null   $org_domain_failure Warnings from previous org domain retrieval.
  * @param callable|null $txt_resolver Function to get TXT records with.
  * @param callable|null $fallback_resolver Function to resolve the fallback organizational domain.
+ * @param array		    $warnings Existing warnings to append to.
  * @return array
  */
-function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fallback_resolver ) {
+function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fallback_resolver, &$warnings = [] ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
 
 	/**
@@ -72,18 +86,17 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 	$dmarc = null;
 
 	try {
-		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record', $txt_resolver );
+		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record', $warnings, $txt_resolver );
 	} catch ( DNSTagValue\MissingException $e ) {
 		if ( ! $org_domain || $org_domain === $domain ) {
-			return dmarc_failure( $e, $org_domain, $org_domain_failure );
+			return dmarc_failure( $e, $org_domain, $org_domain_failure, $warnings );
 		}
 
-		return _check_dmarc( $org_domain, true, $org_domain_failure, $txt_resolver, $fallback_resolver );
+		return _check_dmarc( $org_domain, true, $org_domain_failure, $txt_resolver, $fallback_resolver, $warnings );
 	} catch ( DNSTagValue\Exception $e ) {
-		return dmarc_failure( $e, $org_domain, $org_domain_failure );
+		return dmarc_failure( $e, $org_domain, $org_domain_failure, $warnings );
 	}
 
-	$warnings = [];
 	$infos    = [];
 	$footnote = null;
 
