@@ -40,8 +40,13 @@ if ( ! file_exists( "{$_tests_dir}/includes/functions.php" ) ) {
 	require "{$_tests_dir}/includes/bootstrap.php";
 }
 
-if ( ! function_exists( 'esc_html') ) {
-	// Dummy esc_html function for unit tests.
+if ( ! function_exists( 'esc_html' ) ) {
+	/**
+	 * Dummy esc_html function for unit tests.
+	 *
+	 * @param string $text The text to escape.
+	 * @return string The escaped text.
+	 */
 	function esc_html( $text ) {
 		return htmlspecialchars( $text, ENT_QUOTES, 'UTF-8' );
 	}
