@@ -103,7 +103,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 			$rec_reasons[] = [
 				'level' => 'error',
-				'desc'  => 'Website host is not included in a pass case of the SPF record.',
+				'desc'  => 'Website host (' . $domain . ' or ' . $ip . ') is not included in a pass case of the SPF record.',
 			];
 		} else {
 			$rec_record = clone $record;

@@ -80,7 +80,7 @@ class CheckSpfTest extends TestCase {
 				'rec_reasons'  => [
 					[
 						'level' => 'error',
-						'desc'  => 'Website host is not included in a pass case of the SPF record.',
+						'desc'  => 'Website host (domain.test or 192.0.2.0) is not included in a pass case of the SPF record.',
 					],
 					[
 						'level' => 'warning',
@@ -112,7 +112,7 @@ class CheckSpfTest extends TestCase {
 				'rec_reasons'  => [
 					[
 						'level' => 'error',
-						'desc'  => 'Website host is not included in a pass case of the SPF record.',
+						'desc'  => 'Website host (domain.test or 192.0.2.0) is not included in a pass case of the SPF record.',
 					],
 				],
 			],
@@ -140,7 +140,7 @@ class CheckSpfTest extends TestCase {
 				'rec_reasons'  => [
 					[
 						'level' => 'error',
-						'desc'  => 'Website host is not included in a pass case of the SPF record.',
+						'desc'  => 'Website host (domain.test or 192.0.2.0) is not included in a pass case of the SPF record.',
 					],
 				],
 			],
