@@ -373,7 +373,7 @@ class CheckDmarcTest extends TestCase {
 				'pass'     => 'partial',
 				'warnings' => [
 					'Potential record ignored: Version identifier must be v=DMARC1.',
-					'Potential record ignored: Version identifier must be v=DMARC1.'
+					'Potential record ignored: Version identifier must be v=DMARC1.',
 				],
 				'infos'    => [
 					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',

@@ -72,8 +72,8 @@ function get_txt_record( $domain ) {
  * Get the DNS tag-value map for a given domain for DKIM and DMARC.
  *
  * @param string   $domain The domain to get the DNS records from.
- * @param callable $filter Function that filters out records with invalid tag-value pairs.
- * 	                       If specified, malformed records are also ignored.
+ * @param callable $filter Function that filters out records with invalid tag-value pairs. If specified, malformed records are also ignored.
+ *                         Returns HTML reason for filtering out the record, or null if the record is valid.
  * @param array    $filter_reasons Array to store reasons for filtering out records.
  * @param callable $txt_resolver Function to get TXT records with.
  * @return array[string]string The map of tag-value pairs.
@@ -95,14 +95,14 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 	$valid_return = null;
 
 	foreach ( $records as &$record ) {
-		$parts  = explode( ';', trim( $record['txt'] ) );
-		
+		$parts = explode( ';', trim( $record['txt'] ) );
+
 		$last = array_pop( $parts );
-		if ( $last !== '') {
+		if ( '' !== $last ) {
 			array_push( $parts, $last );
 		}
 
-		$tags   = [];
+		$tags = [];
 
 		foreach ( $parts as $part ) {
 			$part = trim( $part );
@@ -123,7 +123,7 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 
 			if ( array_key_exists( $key, $tags ) ) {
 				require_once __DIR__ . '/class-invalidexception.php';
-				throw new InvalidException( 'Multiple tag-values pairs with the same key (' . $key . ').' );
+				throw new InvalidException( 'Multiple tag-values pairs with the same key (' . esc_html( $key ) . ').' );
 			}
 
 			$tags[ $key ] = $val;
@@ -132,7 +132,7 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 		if ( $filter ) {
 			$filter_reason = call_user_func( $filter, $tags );
 
-			if ( $filter_reason !== null ) {
+			if ( null !== $filter_reason ) {
 				$filter_reasons[] = 'Potential record ignored: ' . $filter_reason;
 				continue;
 			}
@@ -151,7 +151,7 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 
 	if ( ! $valid_return ) {
 		require_once __DIR__ . '/class-missingexception.php';
-		throw new MissingException('No TXT record found.' );
+		throw new MissingException( 'No TXT record found.' );
 	}
 
 	return $valid_return;

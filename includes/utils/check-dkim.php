@@ -24,7 +24,7 @@ define(
  * @param array  $warnings Warnings to include in the result.
  * @return array{ pass: bool, reason: string }
  */
-function dkim_failure( $reason , &$warnings = [] ) {
+function dkim_failure( $reason, &$warnings = [] ) {
 	return [
 		'pass'     => false,
 		'reason'   => $reason,
@@ -34,7 +34,7 @@ function dkim_failure( $reason , &$warnings = [] ) {
 
 /**
  * Parse a colon-separated list of strings.
- * 
+ *
  * @param string $str The string to parse.
  * @return array The parsed list of strings.
  */
@@ -80,7 +80,7 @@ function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 			return dkim_failure( 'Version identifier must be the first tag if present.', $warnings );
 		}
 
-		if ( $dkim['v'] !== 'DKIM1' ) {
+		if ( 'DKIM1' !== $dkim['v'] ) {
 			return dkim_failure( 'Version identifier must be v=DKIM1 if present.', $warnings );
 		}
 	}
@@ -89,7 +89,7 @@ function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 		return dkim_failure( 'Record service type must include email (or *).', $warnings );
 	}
 
-	if ( isset( $dkim['t'] ) && in_array( 'y', parse_colon_list( $dkim['t'] ) ) )  {
+	if ( isset( $dkim['t'] ) && in_array( 'y', parse_colon_list( $dkim['t'] ), true ) ) {
 		$warnings[] = 'Test mode is enabled, DKIM policy might be ignored.';
 	}
 
@@ -98,7 +98,7 @@ function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 	}
 
 	return [
-		'pass' => $warnings ? 'partial' : true,
+		'pass'     => $warnings ? 'partial' : true,
 		'warnings' => $warnings,
 	];
 }

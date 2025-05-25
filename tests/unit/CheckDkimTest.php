@@ -50,7 +50,7 @@ class CheckDkimTest extends TestCase {
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
-		[
+			[
 				'pass'     => true,
 				'warnings' => [],
 			],
@@ -64,7 +64,7 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => 'partial',
+				'pass'     => 'partial',
 				'warnings' => [ 'Selector name is non-standard.' ],
 			],
 			$res
@@ -77,8 +77,8 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => false,
-				'reason' => 'Public key is missing.',
+				'pass'     => false,
+				'reason'   => 'Public key is missing.',
 				'warnings' => [],
 			],
 			$res
@@ -91,8 +91,8 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => false,
-				'reason' => 'Public key is incorrect.',
+				'pass'     => false,
+				'reason'   => 'Public key is incorrect.',
 				'warnings' => [],
 			],
 			$res
@@ -105,8 +105,8 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => false,
-				'reason' => 'Multiple TXT records found, only one should be present.',
+				'pass'     => false,
+				'reason'   => 'Multiple TXT records found, only one should be present.',
 				'warnings' => [],
 			],
 			$res
@@ -119,8 +119,8 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => false,
-				'reason' => 'No TXT record found.',
+				'pass'     => false,
+				'reason'   => 'No TXT record found.',
 				'warnings' => [],
 			],
 			$res
@@ -133,7 +133,7 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => true,
+				'pass'     => true,
 				'warnings' => [],
 			],
 			$res
@@ -146,8 +146,8 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => false,
-				'reason' => 'Record service type must include email (or *).',
+				'pass'     => false,
+				'reason'   => 'Record service type must include email (or *).',
 				'warnings' => [],
 			],
 			$res
@@ -160,8 +160,8 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => false,
-				'reason' => 'Version identifier must be v=DKIM1 if present.',
+				'pass'     => false,
+				'reason'   => 'Version identifier must be v=DKIM1 if present.',
 				'warnings' => [],
 			],
 			$res
@@ -174,8 +174,8 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => false,
-				'reason' => 'Version identifier must be the first tag if present.',
+				'pass'     => false,
+				'reason'   => 'Version identifier must be the first tag if present.',
 				'warnings' => [],
 			],
 			$res
@@ -188,7 +188,7 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => true,
+				'pass'     => true,
 				'warnings' => [ 'Test mode is enabled, DKIM policy might be ignored.' ],
 			],
 			$res
@@ -201,7 +201,7 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => true,
+				'pass'     => true,
 				'warnings' => [ 'Test mode is enabled, DKIM policy might be ignored.', 'Selector name is non-standard.' ],
 			],
 			$res
@@ -214,7 +214,7 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => true,
+				'pass'     => true,
 				'warnings' => [],
 			],
 			$res
@@ -227,8 +227,8 @@ class CheckDkimTest extends TestCase {
 
 		$this->assertEquals(
 			[
-				'pass'   => false,
-				'reason' => 'Malformed tag-value pair.',
+				'pass'     => false,
+				'reason'   => 'Malformed tag-value pair.',
 				'warnings' => [],
 			],
 			$res

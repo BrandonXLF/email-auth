@@ -27,10 +27,10 @@ function is_dmarc_record( $tags ) {
 		return 'First tag must be the version identifier (v).';
 	}
 
-	if ( $tags['v'] !== 'DMARC1' ) {
+	if ( 'DMARC1' !== $tags['v'] ) {
 		return 'Version identifier must be v=DMARC1.';
 	}
-	
+
 	return null;
 }
 
@@ -65,7 +65,7 @@ function dmarc_failure( &$e, $org = null, $org_fail = null, &$warnings = [] ) {
  * @param string|null   $org_domain_failure Warnings from previous org domain retrieval.
  * @param callable|null $txt_resolver Function to get TXT records with.
  * @param callable|null $fallback_resolver Function to resolve the fallback organizational domain.
- * @param array		    $warnings Existing warnings to append to.
+ * @param array         $warnings Existing warnings to append to.
  * @return array
  */
 function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fallback_resolver, &$warnings = [] ) {

@@ -27,7 +27,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 		function ( $msg ) {
 			return [
 				'level' => 'error',
-				'desc'  => $msg,
+				'desc'  => esc_html( $msg ),
 			];
 		},
 		$check_result->getMessages()
@@ -35,7 +35,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 	if ( $full_non_pass && $check_result->getMatchedMechanism() ) {
 		$code_reasons[] = [
-			'desc' => 'Non-pass caused by: <code>' . $check_result->getMatchedMechanism() . '</code>',
+			'desc' => 'Non-pass caused by: <code>' . esc_html( $check_result->getMatchedMechanism() ) . '</code>',
 		];
 	}
 
@@ -59,7 +59,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 						return [
 							'level' => 'error',
-							'desc'  => $issue->getDescription(),
+							'desc'  => esc_html( $issue->getDescription() ),
 						];
 					}
 
@@ -68,12 +68,12 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 						return [
 							'level' => 'warning',
-							'desc'  => $issue->getDescription(),
+							'desc'  => esc_html( $issue->getDescription() ),
 						];
 					}
 
 					return [
-						'desc' => $issue->getDescription(),
+						'desc' => esc_html( $issue->getDescription() ),
 					];
 				},
 				$validator->validateRecord( $record )
@@ -103,7 +103,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 			$rec_reasons[] = [
 				'level' => 'error',
-				'desc'  => 'Website host (' . $domain . ' or ' . $ip . ') is not included in a pass case of the SPF record.',
+				'desc'  => 'Website host (' . $domain . ' or ' . esc_html( $ip ) . ') is not included in a pass case of the SPF record.',
 			];
 		} else {
 			$rec_record = clone $record;
