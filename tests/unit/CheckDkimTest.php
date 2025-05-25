@@ -32,18 +32,30 @@ class CheckDkimTest extends TestCase {
 		};
 	}
 
-	public function testNormal() {
+	public function testBasic() {
 		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'p=PUBLIC_KEY' ] );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
-		$this->assertEquals( [ 'pass' => true ], $res );
+		$this->assertEquals(
+			[
+				'pass'     => true,
+				'warnings' => [],
+			],
+			$res
+		);
 	}
 
 	public function testEntries() {
 		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'entries' => [ 'v=DKIM1; p=PUBLIC', '_KEY' ] ] );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
-		$this->assertEquals( [ 'pass' => true ], $res );
+		$this->assertEquals(
+		[
+				'pass'     => true,
+				'warnings' => [],
+			],
+			$res
+		);
 	}
 
 	public function testNonStandard() {
@@ -53,20 +65,21 @@ class CheckDkimTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'   => 'partial',
-				'reason' => 'Selector name is non-standard.',
+				'warnings' => [ 'Selector name is non-standard.' ],
 			],
 			$res
 		);
 	}
 
 	public function testMissingKey() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; a=b;' ] );
+		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; a=b' ] );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'   => false,
 				'reason' => 'Public key is missing.',
+				'warnings' => [],
 			],
 			$res
 		);
@@ -80,6 +93,7 @@ class CheckDkimTest extends TestCase {
 			[
 				'pass'   => false,
 				'reason' => 'Public key is incorrect.',
+				'warnings' => [],
 			],
 			$res
 		);
@@ -93,6 +107,7 @@ class CheckDkimTest extends TestCase {
 			[
 				'pass'   => false,
 				'reason' => 'Multiple TXT records found, only one should be present.',
+				'warnings' => [],
 			],
 			$res
 		);
@@ -106,6 +121,101 @@ class CheckDkimTest extends TestCase {
 			[
 				'pass'   => false,
 				'reason' => 'No TXT record found.',
+				'warnings' => [],
+			],
+			$res
+		);
+	}
+
+	public function testServiceType() {
+		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; s=phone:email' ] );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => true,
+				'warnings' => [],
+			],
+			$res
+		);
+	}
+
+	public function testServiceTypeUnsupported() {
+		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; s=phone' ] );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => false,
+				'reason' => 'Record service type must include email (or *).',
+				'warnings' => [],
+			],
+			$res
+		);
+	}
+
+	public function testBadVersion() {
+		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM2; p=PUBLIC_KEY' ] );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => false,
+				'reason' => 'Version identifier must be v=DKIM1 if present.',
+				'warnings' => [],
+			],
+			$res
+		);
+	}
+
+	public function testVersionFirst() {
+		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'p=PUBLIC_KEY; v=DKIM1' ] );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => false,
+				'reason' => 'Version identifier must be the first tag if present.',
+				'warnings' => [],
+			],
+			$res
+		);
+	}
+
+	public function testTestMode() {
+		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; t=y' ] );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => true,
+				'warnings' => [ 'Test mode is enabled, DKIM policy might be ignored.' ],
+			],
+			$res
+		);
+	}
+
+	public function testMultipleWarnings() {
+		$resolve = $this->makeTxtResolver( 'te_st._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; t=y' ] );
+		$res     = check_dkim_dns( 'te_st', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => true,
+				'warnings' => [ 'Test mode is enabled, DKIM policy might be ignored.', 'Selector name is non-standard.' ],
+			],
+			$res
+		);
+	}
+
+	public function testTrailingSemicolon() {
+		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY;' ] );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+
+		$this->assertEquals(
+			[
+				'pass'   => true,
+				'warnings' => [],
 			],
 			$res
 		);

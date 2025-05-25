@@ -29,10 +29,13 @@ jQuery(($) => {
 			}
 		},
 		(res) => [
-			res.pass === 'partial' &&
-				$('<div>')
-					.addClass('eauth-dkim-issue')
-					.text(`${EmailAuthPlugin.EMOJIS.warning} ${res.reason}`),
+			EmailAuthPlugin.createCommentList(
+				res.warnings.map((desc) => ({
+					level: 'warning',
+					desc,
+				})),
+				'Warnings'
+			),
 			res.dns && $('<h3>').text('DNS Record'),
 			res.dns &&
 				$('<details>').append(
