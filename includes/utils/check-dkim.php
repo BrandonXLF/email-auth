@@ -61,6 +61,10 @@ function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 	$dkim     = null;
 	$warnings = [];
 
+	if ( ! preg_match( EAUTH_DKIM_SELECTOR_REGEX, $name ) ) {
+		$warnings[] = 'Selector name is non-standard.';
+	}
+
 	try {
 		$dkim = DNSTagValue\get_map( $host, null, $warnings, $txt_resolver );
 	} catch ( DNSTagValue\Exception $e ) {
@@ -91,10 +95,6 @@ function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 
 	if ( isset( $dkim['t'] ) && in_array( 'y', parse_colon_list( $dkim['t'] ), true ) ) {
 		$warnings[] = 'Test mode is enabled, DKIM policy might be ignored.';
-	}
-
-	if ( ! preg_match( EAUTH_DKIM_SELECTOR_REGEX, $name ) ) {
-		$warnings[] = 'Selector name is non-standard.';
 	}
 
 	return [
