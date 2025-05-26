@@ -202,7 +202,7 @@ class CheckDkimTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => true,
-				'warnings' => [ 'Test mode is enabled, DKIM policy might be ignored.', 'Selector name is non-standard.' ],
+				'warnings' => [ 'Selector name is non-standard.', 'Test mode is enabled, DKIM policy might be ignored.' ],
 			],
 			$res
 		);
