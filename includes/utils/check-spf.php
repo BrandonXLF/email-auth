@@ -37,11 +37,14 @@ function replace_spf_all_term( \SPFLib\Record &$record, string $qualifier ) {
  * @return array
  */
 function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
-	$environment   = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
-	$checker       = new \SPFLib\Checker( $dns_resolver );
-	$check_result  = $checker->check( $environment );
-	$code          = $check_result->getCode();
-	$full_non_pass = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
+	require_once __DIR__ . '/spf/class-dnsresolver.php';
+
+	$dns_resolver ??= new SPF\DNSResolver( make_net_dns2_resolver() );
+	$environment    = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
+	$checker        = new \SPFLib\Checker( $dns_resolver );
+	$check_result   = $checker->check( $environment );
+	$code           = $check_result->getCode();
+	$full_non_pass  = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
 
 	$code_reasons = array_map(
 		function ( $msg ) {

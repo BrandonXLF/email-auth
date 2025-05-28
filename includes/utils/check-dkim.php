@@ -48,18 +48,20 @@ function parse_colon_list( $str ) {
 /**
  * Check if the public key is set for a domain.
  *
- * @param string   $name The DKIM selector.
- * @param string   $domain The base domain.
- * @param string   $pub The public key.
- * @param callable $txt_resolver Function to get TXT records with.
+ * @param string                  $name The DKIM selector.
+ * @param string                  $domain The base domain.
+ * @param string                  $pub The public key.
+ * @param DNSTagValue\TxtResolver $txt_resolver DNS resolver for TXT records.
  * @return array{ pass: bool, reason: string | null }
  */
 function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
+	require_once __DIR__ . '/dns-tag-value/class-txtresolver.php';
 
-	$host     = "$name._domainkey.$domain";
-	$dkim     = null;
-	$warnings = [];
+	$txt_resolver ??= new DNSTagValue\TxtResolver( make_net_dns2_resolver() );
+	$host           = "$name._domainkey.$domain";
+	$dkim           = null;
+	$warnings       = [];
 
 	if ( ! preg_match( EAUTH_DKIM_SELECTOR_REGEX, $name ) ) {
 		$warnings[] = 'Selector name is non-standard.';

@@ -110,3 +110,23 @@ define('EAUTH_PRIVATE_KEYS', $str_keys);
 		0640
 	);
 }
+
+/**
+ * Make a \Net_DNS2_Resolver instance with plugin-specific settings.
+ *
+ * @return \Net_DNS2_Resolver
+ */
+function make_net_dns2_resolver() {
+	return new \Net_DNS2_Resolver(
+		[
+			'nameservers' => [
+				'1.1.1.1',
+				'1.0.0.1', // Cloudflare DNS.
+				'8.8.8.8',
+				'8.8.4.4', // Google Public DNS.
+				'208.67.222.222',
+				'208.67.220.220', // OpenDNS.
+			],
+		]
+	);
+}

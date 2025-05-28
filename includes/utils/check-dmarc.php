@@ -60,16 +60,19 @@ function dmarc_failure( &$e, $org = null, $org_fail = null, &$warnings = [] ) {
  *
  * @access private
  *
- * @param string        $domain The domain.
- * @param bool          $is_org True if the domain is a derived organizational domain.
- * @param string|null   $org_domain_failure Warnings from previous org domain retrieval.
- * @param callable|null $txt_resolver Function to get TXT records with.
- * @param callable|null $fallback_resolver Function to resolve the fallback organizational domain.
- * @param array         $warnings Existing warnings to append to.
+ * @param string                       $domain The domain.
+ * @param bool                         $is_org True if the domain is a derived organizational domain.
+ * @param string|null                  $org_domain_failure Warnings from previous org domain retrieval.
+ * @param DNSTagValue\TxtResolver|null $txt_resolver Function to get TXT records with.
+ * @param callable|null                $fallback_resolver Function to resolve the fallback organizational domain.
+ * @param array                        $warnings Existing warnings to append to.
  * @return array
  */
 function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fallback_resolver, &$warnings = [] ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
+	require_once __DIR__ . '/dns-tag-value/class-txtresolver.php';
+
+	$txt_resolver ??= new DNSTagValue\TxtResolver( make_net_dns2_resolver() );
 
 	/**
 	 * Organizational domain if different from the base domain.
@@ -142,9 +145,9 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 /**
  * Check DMARC for a given domain.
  *
- * @param string   $domain The domain.
- * @param callable $txt_resolver Function to get TXT records with.
- * @param callable $fallback_resolver Function to resolve the fallback organizational domain.
+ * @param string                  $domain The domain.
+ * @param DNSTagValue\TxtResolver $txt_resolver DNS resolver for TXT records.
+ * @param callable                $fallback_resolver Function to resolve the fallback organizational domain.
  * @return array
  */
 function check_dmarc( $domain, $txt_resolver = null, $fallback_resolver = null ) {

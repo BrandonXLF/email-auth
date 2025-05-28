@@ -8,6 +8,7 @@
 namespace EmailAuthPlugin;
 
 require_once dirname( dirname( __DIR__ ) ) . '/includes/utils/check-dkim.php';
+require_once dirname( __DIR__ ) . '/class-testtxtresolver.php';
 
 use PHPUnit\Framework\TestCase;
 
@@ -15,38 +16,8 @@ use PHPUnit\Framework\TestCase;
  * Tests for check_dkim_dns.
  */
 class CheckDkimTest extends TestCase {
-	/**
-	 * Make a TXT record resolver that supports one domain.
-	 *
-	 * @param string $domain The domain.
-	 * @param array  ...$res The result to return for the domain.
-	 * @return callable
-	 */
-	public function makeTxtResolver( $domain = 'test._domainkey.domain.test', ...$res ) {
-		return function ( $actual_domain ) use ( $domain, $res ) {
-			if ( $domain !== $actual_domain ) {
-				throw new \Exception( 'TXT resolver invoked on ' . $actual_domain . ', expected ' . $domain );
-			}
-
-			return $res;
-		};
-	}
-
 	public function testBasic() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'p=PUBLIC_KEY' ] );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
-
-		$this->assertEquals(
-			[
-				'pass'     => true,
-				'warnings' => [],
-			],
-			$res
-		);
-	}
-
-	public function testEntries() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'entries' => [ 'v=DKIM1; p=PUBLIC', '_KEY' ] ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -59,7 +30,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testNonStandard() {
-		$resolve = $this->makeTxtResolver( 'te_st._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY' ] );
+		$resolve = new TestTxtResolver( 'te_st._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY' );
 		$res     = check_dkim_dns( 'te_st', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -72,7 +43,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testMissingKey() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; a=b' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; a=b' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -86,7 +57,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testIncorrectKey() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PRIVATE_KEY' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PRIVATE_KEY' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -100,7 +71,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testMultipleRecords() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY' ], [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY', 'v=DKIM1; p=PUBLIC_KEY' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -114,7 +85,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testNoRecord() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test' );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -128,7 +99,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testServiceType() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; s=phone:email' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; s=phone:email' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -141,7 +112,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testServiceTypeUnsupported() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; s=phone' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; s=phone' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -155,7 +126,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testBadVersion() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM2; p=PUBLIC_KEY' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM2; p=PUBLIC_KEY' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -169,7 +140,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testVersionFirst() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'p=PUBLIC_KEY; v=DKIM1' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'p=PUBLIC_KEY; v=DKIM1' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -183,7 +154,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testTestMode() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; t=y' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; t=y' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -196,7 +167,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testMultipleWarnings() {
-		$resolve = $this->makeTxtResolver( 'te_st._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; t=y' ] );
+		$resolve = new TestTxtResolver( 'te_st._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; t=y' );
 		$res     = check_dkim_dns( 'te_st', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -209,7 +180,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testTrailingSemicolon() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY;' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY;' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(
@@ -222,7 +193,7 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testMalformedRecord() {
-		$resolve = $this->makeTxtResolver( 'test._domainkey.domain.test', [ 'txt' => 'v=DKIM1; p=PUBLIC_KEY; malformed' ] );
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; malformed' );
 		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
 
 		$this->assertEquals(

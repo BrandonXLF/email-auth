@@ -8,6 +8,7 @@
 namespace EmailAuthPlugin;
 
 require_once dirname( dirname( __DIR__ ) ) . '/includes/utils/check-dmarc.php';
+require_once dirname( __DIR__ ) . '/class-testtxtresolver.php';
 
 use PHPUnit\Framework\TestCase;
 
@@ -15,23 +16,6 @@ use PHPUnit\Framework\TestCase;
  * Tests for check_dmarc.
  */
 class CheckDmarcTest extends TestCase {
-	/**
-	 * Make a TXT record resolver that has a override for a domain.
-	 *
-	 * @param string $domain The domain to override.
-	 * @param array  ...$res The result to return for the domain.
-	 * @return callable
-	 */
-	public function makeTxtResolver( $domain = 'domain.test', ...$res ) {
-		return function ( $actual_domain ) use ( $domain, $res ) {
-			if ( $domain !== $actual_domain ) {
-				return DNSTagValue\get_txt_record( $domain );
-			}
-
-			return $res;
-		};
-	}
-
 	/**
 	 * Make a resolver that returns the fallback organizational domain for the domain being used in the test.
 	 *
@@ -46,30 +30,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testMinimal() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1' ] );
-		$f_resolve = $this->makeFallbackResolver();
-		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
-
-		$this->assertEquals(
-			[
-				'pass'     => 'partial',
-				'warnings' => [
-					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
-				],
-				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
-				],
-				'footnote' => null,
-				'org'      => null,
-				'orgFail'  => null,
-			],
-			$res
-		);
-	}
-
-	public function testEntries() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'entries' => [ 'v=DMA', 'RC1' ] ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -92,7 +53,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testQuarantine() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1; p=quarantine' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1; p=quarantine' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -114,7 +75,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testReject() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1; p=reject' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1; p=reject' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -135,7 +96,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testStrictDKIM() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1; adkim=s' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1; adkim=s' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -157,7 +118,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testStrictAll() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1; adkim=s; aspf=s' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1; adkim=s; aspf=s' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -177,7 +138,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testPct() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1; p=reject; pct=40' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1; p=reject; pct=40' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -200,7 +161,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testMultipleRecords() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1; p=reject' ], [ 'txt' => 'v=DMARC1; p=none' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1; p=reject', 'v=DMARC1; p=none' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -219,7 +180,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testNoRecord() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test' );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -238,7 +199,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testSubDomain() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.existent.domain.test', [ 'txt' => 'v=DMARC1' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.existent.domain.test', 'v=DMARC1' );
 		$f_resolve = $this->makeFallbackResolver( 'domain.test' );
 		$res       = check_dmarc( 'existent.domain.test', $t_resolve, $f_resolve );
 
@@ -261,7 +222,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testOrgFallback() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1' );
 		$f_resolve = $this->makeFallbackResolver( 'domain.test' );
 		$res       = check_dmarc( 'non-existent.domain.test', $t_resolve, $f_resolve );
 
@@ -284,7 +245,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testFallbackWarning() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.test.domain.test', [ 'txt' => 'v=DMARC1' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.test.domain.test', 'v=DMARC1' );
 		$f_resolve = $this->makeFallbackResolver( 'domain.test', 'Warning!' );
 		$res       = check_dmarc( 'test.domain.test', $t_resolve, $f_resolve );
 
@@ -307,7 +268,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testBadVersion() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC2' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC2' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -326,7 +287,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testMissingVersion() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'p=reject' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'p=reject' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -345,7 +306,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testVersionFirst() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'p=reject; v=DMARC1' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'p=reject; v=DMARC1' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -364,7 +325,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testIgnoredRecords() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC2; p=none' ], [ 'txt' => 'v=DMARC2; p=quarantine' ], [ 'txt' => 'v=DMARC1; p=reject' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC2; p=none', 'v=DMARC2; p=quarantine', 'v=DMARC1; p=reject' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
@@ -388,7 +349,7 @@ class CheckDmarcTest extends TestCase {
 	}
 
 	public function testTrailingSemicolon() {
-		$t_resolve = $this->makeTxtResolver( '_dmarc.domain.test', [ 'txt' => 'v=DMARC1; p=none;' ] );
+		$t_resolve = new TestTxtResolver( '_dmarc.domain.test', 'v=DMARC1; p=none;' );
 		$f_resolve = $this->makeFallbackResolver();
 		$res       = check_dmarc( 'domain.test', $t_resolve, $f_resolve );
 
