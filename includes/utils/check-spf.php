@@ -59,8 +59,10 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 		];
 	}
 
+	$decoder = new \SPFLib\Decoder( $dns_resolver );
+
 	try {
-		$record = ( new \SPFLib\Decoder( $dns_resolver ) )->getRecordFromDomain( $domain );
+		$record = $decoder->getRecordFromDomain( $domain );
 	} catch ( \Exception $e ) {
 		$record = null;
 	}
@@ -70,7 +72,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	$rec_reasons = [];
 
 	if ( $record ) {
-		$validator = new \SPFLib\OnlineSemanticValidator();
+		$validator = new \SPFLib\OnlineSemanticValidator( $decoder );
 		$validity  = array_merge(
 			array_map(
 				function ( $issue ) use ( &$invalid ) {

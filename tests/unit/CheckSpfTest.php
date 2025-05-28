@@ -16,18 +16,11 @@ use PHPUnit\Framework\TestCase;
  */
 class TestDnsResolver extends \SPFLib\DNS\StandardResolver {
 	/**
-	 * The domain to override.
-	 *
-	 * @var string
-	 */
-	private string $domain;
-
-	/**
-	 * The text of the records to return.
+	 * Array of domains and results to override.
 	 *
 	 * @var array
 	 */
-	private array $res;
+	private array $overrides = [];
 
 	/**
 	 * Constructor that accepts an override for a domain.
@@ -36,8 +29,20 @@ class TestDnsResolver extends \SPFLib\DNS\StandardResolver {
 	 * @param array  ...$res The text of the records to return.
 	 */
 	public function __construct( $domain, ...$res ) {
-		$this->domain = $domain;
-		$this->res    = $res;
+		$this->overrides = [
+			$domain => $res,
+		];
+	}
+
+	/**
+	 * Add an override for a domain.
+	 *
+	 * @param mixed $domain The domain to override.
+	 * @param array ...$res The text of the records to return.
+	 * @return void
+	 */
+	public function addOverride( $domain, ...$res ) {
+		$this->overrides[ $domain ] = $res;
 	}
 
 	/**
@@ -47,8 +52,8 @@ class TestDnsResolver extends \SPFLib\DNS\StandardResolver {
 	 * @return string[]
 	 */
 	public function getTXTRecords( $domain ): array {
-		if ( $this->domain === $domain ) {
-			return $this->res;
+		if ( isset( $this->overrides[ $domain ] ) ) {
+			return $this->overrides[ $domain ];
 		}
 
 		return parent::getTXTRecords( $domain );
@@ -312,6 +317,74 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
 					],
 				],
+			],
+			$res
+		);
+	}
+
+	public function testInclude() {
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 include:bar.test -all' );
+		$resolver->addOverride( 'bar.test', 'v=spf1 a:google.com -all' );
+
+		$ip  = gethostbyname( 'google.com' );
+		$res = check_spf( 'domain.test', $ip, 'google.com', $resolver );
+
+		$this->assertEquals(
+			[
+				'pass'         => true,
+				'reason'       => null,
+				'code'         => 'pass',
+				'code_reasons' => [],
+				'cur_rec'      => 'v=spf1 include:bar.test -all',
+				'cur_validity' => [],
+				'rec_dns'      => null,
+				'rec_reasons'  => [],
+			],
+			$res
+		);
+	}
+
+	public function testMultipleIncludes() {
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 include:bar.test include:baz.test -all' );
+		$resolver->addOverride( 'bar.test', 'v=spf1 a:bing.com -all' );
+		$resolver->addOverride( 'baz.test', 'v=spf1 a:google.com -all' );
+
+		$ip  = gethostbyname( 'google.com' );
+		$res = check_spf( 'domain.test', $ip, 'google.com', $resolver );
+
+		$this->assertEquals(
+			[
+				'pass'         => true,
+				'reason'       => null,
+				'code'         => 'pass',
+				'code_reasons' => [],
+				'cur_rec'      => 'v=spf1 include:bar.test include:baz.test -all',
+				'cur_validity' => [],
+				'rec_dns'      => null,
+				'rec_reasons'  => [],
+			],
+			$res
+		);
+	}
+
+	public function testNestedIncludes() {
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 include:bar.test -all' );
+		$resolver->addOverride( 'bar.test', 'v=spf1 include:baz.test -all' );
+		$resolver->addOverride( 'baz.test', 'v=spf1 a:google.com -all' );
+
+		$ip  = gethostbyname( 'google.com' );
+		$res = check_spf( 'domain.test', $ip, 'google.com', $resolver );
+
+		$this->assertEquals(
+			[
+				'pass'         => true,
+				'reason'       => null,
+				'code'         => 'pass',
+				'code_reasons' => [],
+				'cur_rec'      => 'v=spf1 include:bar.test -all',
+				'cur_validity' => [],
+				'rec_dns'      => null,
+				'rec_reasons'  => [],
 			],
 			$res
 		);
