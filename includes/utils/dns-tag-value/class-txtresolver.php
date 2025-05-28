@@ -1,8 +1,9 @@
 <?php
 /**
- * Interface for a DNS resolver that resolves TXT records.
+ * DNS TXT record resolver for DNS Tag-Value.
  *
  * @package Email Auth
+ * @subpackage DNS Tag-Value
  */
 
 namespace EmailAuthPlugin\DNSTagValue;
@@ -11,6 +12,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+/**
+ * DNS TXT record resolver for DNS Tag-Value.
+ */
 class TxtResolver {
 	/**
 	 * The DNS resolver instance.
