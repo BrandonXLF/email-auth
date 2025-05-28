@@ -8,6 +8,26 @@
 namespace EmailAuthPlugin;
 
 /**
+ * Remove any "all" terms and replace them with new "all" term.
+ *
+ * @param \SPFLib\Record $record The SPF record to modify.
+ * @param string         $qualifier      The qualifier to use for the new "all" term.
+ * @return void
+ */
+function replace_spf_all_term( \SPFLib\Record &$record, string $qualifier ) {
+	$terms = $record->getTerms();
+	$record->clearTerms();
+
+	foreach ( $terms as $t ) {
+		if ( ! ( $t instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
+			$record->addTerm( $t );
+		}
+	}
+
+	$record->addTerm( new \SPFLib\Term\Mechanism\AllMechanism( $qualifier ) );
+}
+
+/**
  * Check the SPF record for a domain.
  *
  * @param string               $domain The domain to check.
@@ -109,17 +129,17 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 			$rec_record = clone $record;
 		}
 
-		$has_all = false;
+		$all_term = null;
 
 		foreach ( $terms as &$term ) {
 			if ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) {
-				$has_all = true;
+				$all_term = $term;
 				break;
 			}
 		}
 
-		if ( ! $has_all ) {
-			$rec_record->addTerm( new \SPFLib\Term\Mechanism\AllMechanism( \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL ) );
+		if ( ! $all_term || ( $all_term->getQualifier() !== \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL && $all_term->getQualifier() !== \SPFLib\Term\Mechanism::QUALIFIER_FAIL ) ) {
+			replace_spf_all_term( $rec_record, \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL );
 
 			$rec_reasons[] = [
 				'level' => 'warning',

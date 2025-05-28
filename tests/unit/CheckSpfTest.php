@@ -261,4 +261,59 @@ class CheckSpfTest extends TestCase {
 			$res
 		);
 	}
+
+	public function testUnsafeAll() {
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 a:google.com all' );
+		$ip       = gethostbyname( 'google.com' );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
+
+		$this->assertEquals(
+			[
+				'pass'         => 'partial',
+				'reason'       => null,
+				'code'         => 'pass',
+				'code_reasons' => [],
+				'cur_rec'      => 'v=spf1 a:google.com all',
+				'cur_validity' => [],
+				'rec_dns'      => 'v=spf1 a:google.com ~all',
+				'rec_reasons'  => [
+					[
+						'level' => 'warning',
+						'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
+					],
+				],
+			],
+			$res
+		);
+	}
+
+	public function testMisplacedUnsafeAll() {
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 all a:google.com' );
+		$ip       = gethostbyname( 'google.com' );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
+
+		$this->assertEquals(
+			[
+				'pass'         => 'partial',
+				'reason'       => null,
+				'code'         => 'pass',
+				'code_reasons' => [],
+				'cur_rec'      => 'v=spf1 all a:google.com',
+				'cur_validity' => [
+					[
+						'level' => 'warning',
+						'desc'  => '&#039;all&#039; should be the last mechanism (any other mechanism will be ignored)',
+					],
+				],
+				'rec_dns'      => 'v=spf1 a:google.com ~all',
+				'rec_reasons'  => [
+					[
+						'level' => 'warning',
+						'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
+					],
+				],
+			],
+			$res
+		);
+	}
 }
