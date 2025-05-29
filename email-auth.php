@@ -11,7 +11,7 @@
  * Plugin Name:       Email Auth
  * Plugin URI:        https://www.brandonfowler.me/email-auth/
  * Description:       Enable email authentication/validation for the default WordPress PHPMailer.
- * Version:           1.3.0
+ * Version:           1.4.0
  * Requires at least: 6.0
  * Requires PHP:      7.4
  * Author:            Brandon Fowler
@@ -27,7 +27,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 }
 
 define( 'EAUTH_PLUGIN_FILE', __FILE__ );
-define( 'EAUTH_PLUGIN_VERSION', '1.3.0' );
+define( 'EAUTH_PLUGIN_VERSION', '1.4.0' );
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/includes/utils/common.php';
