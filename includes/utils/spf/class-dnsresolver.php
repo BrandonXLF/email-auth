@@ -62,7 +62,7 @@ class DNSResolver implements \SPFLib\DNS\Resolver {
 	 * {@inheritdoc}
 	 *
 	 * @param string $domain The domain to get IP addresses for.
-	 * @return string[]
+	 * @return \IPLib\Address\AddressInterface[]
 	 *
 	 * @throws \SPFLib\Exception\DNSResolutionException If the DNS resolution fails.
 	 */
@@ -70,11 +70,11 @@ class DNSResolver implements \SPFLib\DNS\Resolver {
 		try {
 			return array_map(
 				function ( \Net_DNS2_RR_A|\Net_DNS2_RR_AAAA $record ) {
-					return $record->address;
+					return \IPLIB\Factory::parseAddressString( $record->address );
 				},
 				array_merge(
 					$this->resolver->query( $domain, 'A' )->answer,
-					$this->resolver->query( $domain, 'AAA' )->answer
+					$this->resolver->query( $domain, 'AAAA' )->answer
 				)
 			);
 		} catch ( \Net_DNS2_Exception $e ) {
