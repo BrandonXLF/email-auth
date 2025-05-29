@@ -287,7 +287,10 @@ add_section(
 		<div id="eauth-spf-status" class="eauth-status"></div>
 		<div id="eauth-spf-checker" class="eauth-output"></div>
 		<dialog id="eauth-spf-set-ip-dialog" class="eauth-dialog">
-			<h3>Set Email Server IP Address</h3>
+			<h3>Email Server IP Address for SPF Checks</h3>
+			<p>
+				To get accurate SPF checks, this must be the IP address of the server that sends outbound emails.
+			</p>
 			<?php
 			radio_inputs(
 				'eauth_spf_server_ip',
