@@ -31,6 +31,7 @@ define( 'EAUTH_PLUGIN_VERSION', '1.3.0' );
 
 require __DIR__ . '/vendor/autoload.php';
 require __DIR__ . '/includes/utils/common.php';
+require __DIR__ . '/includes/utils/get-settings.php';
 
 require __DIR__ . '/includes/mailer-hooks.php';
 require __DIR__ . '/includes/admin-interface.php';

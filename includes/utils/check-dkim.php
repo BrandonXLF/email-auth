@@ -52,7 +52,7 @@ function parse_colon_list( $str ) {
  * @param string                  $domain The base domain.
  * @param string                  $pub The public key.
  * @param DNSTagValue\TxtResolver $txt_resolver DNS resolver for TXT records.
- * @return array{ pass: bool, reason: string | null }
+ * @return array{ pass: bool, reason: string|null }
  */
 function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';

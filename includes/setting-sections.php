@@ -63,7 +63,7 @@ function show_sections() {
 /**
  * Print a possibly-defined placeholder attribute.
  *
- * @param string | null $placeholder The placeholder text.
+ * @param string|null $placeholder The placeholder text.
  */
 function placeholder( $placeholder ) {
 	if ( $placeholder ) {
@@ -83,10 +83,10 @@ function placeholder_label( $label ) {
 /**
  * Print an email input.
  *
- * @param string        $addr_name The setting name for the email address.
- * @param string | null $addr_placeholder The placeholder for the address.
- * @param string | null $display_name The setting name for the display name.
- * @param string | null $display_placeholder The placeholder for the display name.
+ * @param string      $addr_name The setting name for the email address.
+ * @param string|null $addr_placeholder The placeholder for the address.
+ * @param string|null $display_name The setting name for the display name.
+ * @param string|null $display_placeholder The placeholder for the display name.
  */
 function email_input( $addr_name, $addr_placeholder = null, $display_name = null, $display_placeholder = null ) {
 	$addr = get_option( $addr_name );
