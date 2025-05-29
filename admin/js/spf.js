@@ -15,7 +15,12 @@ jQuery(($) => {
 		},
 		(res) => {
 			const out = [
-				$('<div>').append('Result code: ', $('<code>').text(res.code)),
+				$('<div>').append(
+					'Result code: ',
+					$('<code>').text(res.code),
+					' for server ',
+					$('<code>').text(res.server_ip)
+				),
 				EmailAuthPlugin.createCommentList(
 					res.code_reasons,
 					'Details',

@@ -5,7 +5,8 @@
 		"jQuery": "readonly",
 		"eauthCommonConfig": "readonly",
 		"EmailAuthPlugin": "readonly",
-		"EAUTHRadioDependentListener": "readonly"
+		"EAUTHRadioDependentListener": "readonly",
+		"CSS":"readonly"
 	},
 	"rules": {
 		"no-alert": ["off"]

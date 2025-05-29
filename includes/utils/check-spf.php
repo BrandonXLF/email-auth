@@ -162,5 +162,6 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 		'cur_validity' => $validity,
 		'rec_dns'      => count( $rec_reasons ) ? (string) $rec_record : null,
 		'rec_reasons'  => $rec_reasons,
+		'server_ip'    => $ip,
 	];
 }

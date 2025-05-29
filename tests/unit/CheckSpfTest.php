@@ -92,6 +92,7 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
 					],
 				],
+				'server_ip'    => '192.0.2.0',
 			],
 			$res
 		);
@@ -120,6 +121,7 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'Website host (domain.test or 192.0.2.0) is not included in a pass case of the SPF record.',
 					],
 				],
+				'server_ip'    => '192.0.2.0',
 			],
 			$res
 		);
@@ -148,6 +150,7 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'Website host (domain.test or 192.0.2.0) is not included in a pass case of the SPF record.',
 					],
 				],
+				'server_ip'    => '192.0.2.0',
 			],
 			$res
 		);
@@ -167,6 +170,7 @@ class CheckSpfTest extends TestCase {
 				'cur_validity' => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
+				'server_ip'    => '192.0.2.0',
 			],
 			$res
 		);
@@ -187,6 +191,7 @@ class CheckSpfTest extends TestCase {
 				'cur_validity' => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
@@ -212,6 +217,7 @@ class CheckSpfTest extends TestCase {
 				'cur_validity' => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
@@ -237,6 +243,7 @@ class CheckSpfTest extends TestCase {
 				],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
@@ -262,6 +269,7 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
 					],
 				],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
@@ -287,6 +295,7 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
 					],
 				],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
@@ -317,6 +326,7 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
 					],
 				],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
@@ -339,6 +349,7 @@ class CheckSpfTest extends TestCase {
 				'cur_validity' => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
@@ -362,6 +373,7 @@ class CheckSpfTest extends TestCase {
 				'cur_validity' => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
@@ -385,6 +397,7 @@ class CheckSpfTest extends TestCase {
 				'cur_validity' => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
+				'server_ip'    => $ip,
 			],
 			$res
 		);
