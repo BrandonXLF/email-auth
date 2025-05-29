@@ -83,7 +83,8 @@
 	word-break: break-all;
 }
 
-#eauth-options > :not(h1):not(h2):not(h3) {
+#eauth-options > :not(h1):not(h2):not(h3):not(dialog),
+.eauth-dialog > :not(h1):not(h2):not(h3){
 	margin: 1em 0;
 }
 
@@ -135,4 +136,22 @@
 .eauth-value,
 .eauth-variable .value {
 	font-family: monospace;
+}
+
+#eauth-wrap .eauth-dialog {
+	padding: 1em 2em;
+	border: 1px solid black;
+	border-radius: 4px;
+	box-shadow: 2px 2px 7px 0px #00000090;
+}
+
+#eauth-wrap .eauth-dialog h3 {
+	margin: 1em 0;
+}
+
+#eauth-spf-set-ip-buttons {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.5em;
+	align-items: center;
 }

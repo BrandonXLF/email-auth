@@ -110,3 +110,23 @@ register_setting(
 		'sanitize_callback' => 'sanitize_text_field',
 	]
 );
+
+register_setting(
+	'eauth_settings',
+	'eauth_spf_server_ip',
+	[
+		'default'           => 'wp',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+	]
+);
+
+register_setting(
+	'eauth_settings',
+	'eauth_spf_server_ip_custom',
+	[
+		'default'           => '',
+		'type'              => 'string',
+		'sanitize_callback' => 'sanitize_text_field',
+	]
+);

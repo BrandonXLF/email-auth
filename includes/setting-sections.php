@@ -168,7 +168,7 @@ add_section(
 		$choice = get_option( 'eauth_bounce_address_mode' );
 		?>
 		<div>
-			The bounce address is the address the email as used by SMTP. Think of the bounce address as the address on the envelope and the from address as the address on the top of the letter. It is import for SPF.
+			The bounce address is the address of the email as used by SMTP. Think of the bounce address as the address on the envelope and the from address as the address on the top of the letter. It is import for SPF.
 		</div>
 		<?php
 		radio_inputs(
@@ -278,11 +278,53 @@ add_section(
 		wp_localize_script(
 			'eauth_spf_script',
 			'eauthSpfApi',
-			[ 'check' => esc_url_raw( rest_url( 'eauth/v1/spf/check' ) ) ]
+			[
+				'check' => esc_url_raw( rest_url( 'eauth/v1/spf/check' ) ),
+				'setIp' => esc_url_raw( rest_url( 'eauth/v1/spf/set-ip' ) ),
+			],
 		);
 		?>
 		<div id="eauth-spf-status" class="eauth-status"></div>
 		<div id="eauth-spf-checker" class="eauth-output"></div>
+		<dialog id="eauth-spf-set-ip-dialog" class="eauth-dialog">
+			<h3>Set Email Server IP Address</h3>
+			<?php
+			radio_inputs(
+				'eauth_spf_server_ip',
+				[
+					'wp'     => function () {
+						?>
+						<span>
+							Use WordPress's server's IP address - Email's are sent from the same server as WordPress
+						</span>
+						<?php
+					},
+					'bounce' => function () {
+						?>
+						<span>
+							Use the bounce address's mail exchange IP - Same server is used for inbound and outbound emails
+						</span>
+						<?php
+					},
+					'custom' => function () {
+						$custom = get_option( 'eauth_spf_server_ip_custom' );
+						?>
+						<input name="eauth_spf_server_ip_custom" value="<?php echo esc_attr( $custom ); ?>" type="text">
+						<a target="_blank" href="https://www.youtube.com/watch?v=_QNxGwEFTS4">Guide video</a>
+						<?php
+					},
+				]
+			);
+		?>
+			<div id="eauth-spf-set-ip-buttons">
+				<button type="button" id="eauth-spf-set-ip" class="button">
+					Save IP Configuration
+				</button>
+				<button type="button" id="eauth-spf-set-ip-close" class="button-link">
+					Close
+				</button>
+			</div>
+		</dialog>
 		<?php
 	}
 );

@@ -97,3 +97,28 @@ function get_dkim_domain( $from = null, $bounce = null ) {
 
 	return null;
 }
+
+/**
+ * Get the server IP address that should be used for SPF checks.
+ *
+ * @param string           $bounce_domain Bounce address domain to use if known.
+ * @param SPF\MxIpResolver $ip_resolver IP resolver to use if known.
+ * @return string
+ */
+function get_server_ip( $bounce_domain = null, $ip_resolver = null ) {
+	$mode = get_option( 'eauth_spf_server_ip' );
+
+	if ( 'bounce' === $mode ) {
+		include_once __DIR__ . '/spf/class-mxipresolver.php';
+		$ip_resolver ??= new SPF\MxIpResolver( make_net_dns2_resolver() );
+
+		$domain = $bounce_domain ?? extract_domain( get_bounce_address() );
+		return $ip_resolver->get_mx_ip( $domain ) ?? '';
+	}
+
+	if ( 'custom' === $mode ) {
+		return get_option( 'eauth_spf_server_ip_custom' );
+	}
+
+	return sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' ) );
+}

@@ -227,10 +227,30 @@ register_rest_route(
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
 			$domain = $request['domain'];
-			$ip     = sanitize_text_field( wp_unslash( $_SERVER['SERVER_ADDR'] ?? '' ) );
+			$ip     = get_server_ip( $domain );
 
 			require_once __DIR__ . '/utils/check-spf.php';
 			return check_spf( $domain, $ip, get_domain() );
+		},
+		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
+	]
+);
+
+register_rest_route(
+	EAUTH_API_PREFIX,
+	'/spf/set-ip',
+	[
+		'methods'             => 'POST',
+		'callback'            => function ( \WP_REST_Request $request ) {
+			$obj = $request->get_json_params();
+
+			update_option( 'eauth_spf_server_ip', $obj['mode'] );
+			update_option( 'eauth_spf_server_ip_custom', $obj['custom'] );
+
+			return [
+				'mode'   => get_option( 'eauth_spf_server_ip' ),
+				'custom' => get_option( 'eauth_spf_server_ip_custom' ),
+			];
 		},
 		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
 	]

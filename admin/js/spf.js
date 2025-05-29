@@ -19,7 +19,15 @@ jQuery(($) => {
 					'Result code: ',
 					$('<code>').text(res.code),
 					' for server ',
-					$('<code>').text(res.server_ip)
+					$('<code>').text(res.server_ip),
+					' ',
+					$('<button>')
+						.attr('type', 'button')
+						.text('Configure Server IP')
+						.addClass('button-link')
+						.on('click', () =>
+							$('#eauth-spf-set-ip-dialog')[0].showModal()
+						)
 				),
 				EmailAuthPlugin.createCommentList(
 					res.code_reasons,
@@ -93,4 +101,44 @@ jQuery(($) => {
 		'bouncedomainchange',
 		checker.boundCheck
 	);
+
+	$('#eauth-spf-set-ip').on('click', async (e) => {
+		e.preventDefault();
+
+		const mode = $('[name="eauth_spf_server_ip"]:checked').val().trim();
+		const custom = $('[name="eauth_spf_server_ip_custom"]').val().trim();
+
+		const res = await EmailAuthPlugin.request(
+			`${eauthSpfApi.setIp}`,
+			'POST',
+			{
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify({ mode, custom }),
+			}
+		);
+
+		if (!res.ok) {
+			return;
+		}
+
+		const json = await res.json();
+
+		const escapedMode = CSS.escape(json.mode);
+		$('[name="eauth_spf_server_ip"][value="' + escapedMode + '"]').prop(
+			'checked',
+			true
+		);
+
+		$('[name="eauth_spf_server_ip_custom"]').val(json.custom || '');
+
+		$('#eauth-spf-set-ip-dialog')[0].close();
+		checker.boundCheck();
+	});
+
+	$('#eauth-spf-set-ip-close').on('click', (e) => {
+		e.preventDefault();
+		$('#eauth-spf-set-ip-dialog')[0].close();
+	});
 });
