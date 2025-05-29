@@ -8,11 +8,11 @@
 
 namespace EmailAuthPlugin\DNSTagValue;
 
-require_once __DIR__ . '/class-exception.php';
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
+
+require_once __DIR__ . '/class-exception.php';
 
 /**
  * An exception for an invalid DNS state.

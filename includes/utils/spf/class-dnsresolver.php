@@ -11,29 +11,15 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/../dns/class-netdns2wrapper.php';
+
 // Exceptions are not escaped since they are used by SPFLib. Instead, all output from SPFLib should be escaped.
 // phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 
 /**
  * Custom DNS Resolver for SPFLib.
  */
-class DNSResolver implements \SPFLib\DNS\Resolver {
-	/**
-	 * The DNS resolver instance.
-	 *
-	 * @var \Net_DNS2_Resolver
-	 */
-	private $resolver;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param \Net_DNS2_Resolver $resolver The DNS resolver instance.
-	 */
-	public function __construct( ?\Net_DNS2_Resolver $resolver = null ) {
-		$this->resolver = $resolver ?? new \Net_DNS2_Resolver();
-	}
-
+class DNSResolver extends \EmailAuthPlugin\DNS\NetDns2Wrapper implements \SPFLib\DNS\Resolver {
 	/**
 	 * {@inheritdoc}
 	 *

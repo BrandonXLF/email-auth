@@ -12,26 +12,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
+require_once __DIR__ . '/../dns/class-netdns2wrapper.php';
+
 /**
  * DNS TXT record resolver for DNS Tag-Value.
  */
-class TxtResolver {
-	/**
-	 * The DNS resolver instance.
-	 *
-	 * @var \Net_DNS2_Resolver
-	 */
-	private $resolver;
-
-	/**
-	 * Constructor.
-	 *
-	 * @param \Net_DNS2_Resolver $resolver The DNS resolver instance.
-	 */
-	public function __construct( ?\Net_DNS2_Resolver $resolver = null ) {
-		$this->resolver = $resolver ?? new \Net_DNS2_Resolver();
-	}
-
+class TxtResolver extends \EmailAuthPlugin\DNS\NetDns2Wrapper {
 	/**
 	 * Get TXT records for a given domain.
 	 *
