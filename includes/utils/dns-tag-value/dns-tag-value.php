@@ -17,7 +17,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  *
  * @param string      $domain The domain to get the DNS records from.
  * @param callable    $filter Function that filters out records with invalid tag-value pairs. If specified, malformed records are also ignored.
- *                         Returns HTML reason for filtering out the record, or null if the record is valid.
+ *                            Returns HTML reason for filtering out the record, or null if the record is valid.
  * @param array       $filter_reasons Array to store reasons for filtering out records.
  * @param TxtResolver $txt_resolver Function to get TXT records with.
  * @return array[string]string The map of tag-value pairs.
