@@ -155,3 +155,20 @@
 	gap: 0.5em;
 	align-items: center;
 }
+
+.eauth-checker-header {
+   display: flex;
+   align-items: center;
+   justify-content: space-between;
+}
+
+#eauth-wrap .eauth-recheck {
+	font-size: 1em;
+	height: 1em;
+	width: 1em;
+	margin: 0;
+	padding: 0;
+	background: none;
+	border: none;
+	cursor: pointer;
+}

@@ -201,6 +201,27 @@ class EAUTHChecker {
 			);
 		}
 
+		if (!this.heading.hasClass('eauth-checker-header')) {
+			const currentContent = this.heading.contents();
+
+			this.heading
+				.addClass('eauth-checker-header')
+				.empty()
+				.append(
+					jQuery('<div>').append(currentContent),
+					jQuery('<button>')
+						.addClass(
+							'dashicons dashicons-image-rotate eauth-recheck'
+						)
+						.attr('type', 'button')
+						.attr(
+							'title',
+							'Recheck. Note that DNS changes may take a few minutes to show depending on their TTL.'
+						)
+						.on('click', this.boundCheck)
+				);
+		}
+
 		this.output
 			.empty()
 			.append(
