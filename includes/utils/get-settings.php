@@ -110,7 +110,7 @@ function get_server_ip( $bounce_domain = null, $ip_resolver = null ) {
 
 	if ( 'bounce' === $mode ) {
 		include_once __DIR__ . '/spf/class-mxipresolver.php';
-		$ip_resolver ??= new SPF\MxIpResolver( make_net_dns2_resolver() );
+		$ip_resolver ??= new SPF\MxIpResolver( get_net_dns2_resolver() );
 
 		$domain = $bounce_domain ?? extract_domain( get_bounce_address() );
 		return $ip_resolver->get_mx_ip( $domain ) ?? '';

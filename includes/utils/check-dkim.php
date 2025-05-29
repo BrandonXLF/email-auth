@@ -58,7 +58,7 @@ function check_dkim_dns( $name, $domain, $pub, $txt_resolver = null ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
 	require_once __DIR__ . '/dns-tag-value/class-txtresolver.php';
 
-	$txt_resolver ??= new DNSTagValue\TxtResolver( make_net_dns2_resolver() );
+	$txt_resolver ??= new DNSTagValue\TxtResolver( get_net_dns2_resolver() );
 	$host           = "$name._domainkey.$domain";
 	$dkim           = null;
 	$warnings       = [];

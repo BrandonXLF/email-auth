@@ -72,7 +72,7 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
 	require_once __DIR__ . '/dns-tag-value/class-txtresolver.php';
 
-	$txt_resolver ??= new DNSTagValue\TxtResolver( make_net_dns2_resolver() );
+	$txt_resolver ??= new DNSTagValue\TxtResolver( get_net_dns2_resolver() );
 
 	/**
 	 * Organizational domain if different from the base domain.

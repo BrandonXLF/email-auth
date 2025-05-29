@@ -39,7 +39,7 @@ function replace_spf_all_term( \SPFLib\Record &$record, string $qualifier ) {
 function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	require_once __DIR__ . '/spf/class-dnsresolver.php';
 
-	$dns_resolver ??= new SPF\DNSResolver( make_net_dns2_resolver() );
+	$dns_resolver ??= new SPF\DNSResolver( get_net_dns2_resolver() );
 	$environment    = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
 	$checker        = new \SPFLib\Checker( $dns_resolver );
 	$check_result   = $checker->check( $environment );
