@@ -298,7 +298,7 @@ add_section(
 					'wp'     => function () {
 						?>
 						<span>
-							Use WordPress's server's IP address - Email's are sent from the same server as WordPress
+							Use WordPress's server's IP address - Emails are sent from the same server as WordPress
 						</span>
 						<?php
 					},
