@@ -198,6 +198,7 @@ class EAUTHChecker {
 		const preCheckRes = this.preCheck?.();
 
 		if (preCheckRes) {
+			this.plugin.setResult(this.identifier, preCheckRes.pass);
 			const statusCode =
 				preCheckRes.pass === null ? 'unknown' : preCheckRes.pass;
 			this.#boundSetStatus(statusCode, preCheckRes.reason);
