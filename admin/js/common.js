@@ -303,6 +303,7 @@ class EmailAuthPlugin extends EventTarget {
 	fromDomain;
 	bounceDomain;
 	fromAddress;
+	extra = {};
 
 	#getFromAddressAndDomain() {
 		const input = jQuery('[name="eauth_from_address"]');
