@@ -120,7 +120,7 @@ class EAUTHChecker {
 					jQuery('<span>')
 						.addClass('eauth-value')
 						.text(this.plugin.fromDomain),
-					`) do not match, so the from address domain cannot be verified through ${this.checkType}.`
+					`) do not match, so the from address domain cannot be strictly verified through ${this.checkType}.`
 				);
 			this.heading.attr('data-status', 'partial');
 
