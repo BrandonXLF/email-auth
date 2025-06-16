@@ -30,9 +30,7 @@ jQuery(($) => {
 			];
 		},
 		{
-			get: () => ({
-				record: `_dmarc.${EmailAuthPlugin.instance.fromDomain}`,
-			}),
+			get: () => `_dmarc.${EmailAuthPlugin.instance.fromDomain}`,
 			getFallback: (res) => res.org && `_dmarc.${res.org}`,
 			type: 'From Address',
 			link: '#from-address',

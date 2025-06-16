@@ -43,14 +43,12 @@ jQuery(($) => {
 				),
 		],
 		{
-			get: (res) => ({
-				alignment: EmailAuthPlugin.instance.extra.dkimDomain,
-				record: res.host,
-			}),
+			get: (res) => res.host,
 			type: 'DKIM Domain',
 			link: '#dkim-domain',
 			typeHasDomain: true,
-		}
+		},
+		EmailAuthPlugin.instance.extra.dkimDomain
 	);
 
 	new EAUTHRadioDependentListener(

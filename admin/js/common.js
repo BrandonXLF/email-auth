@@ -64,17 +64,7 @@ class EAUTHChecker {
 		return el;
 	}
 
-	static getStatusDesc(pass) {
-		if (pass === null || pass === undefined) {
-			return 'unknown';
-		}
-
-		if (typeof pass === 'string') {
-			return pass;
-		}
-
-		return pass ? 'pass' : 'error';
-	}
+	#boundSetStatus;
 
 	constructor(
 		plugin,
@@ -83,7 +73,8 @@ class EAUTHChecker {
 		getRequestUrl,
 		preCheck,
 		process,
-		domain
+		domain,
+		showStatus
 	) {
 		this.plugin = plugin;
 		this.identifier = headingId;
@@ -95,47 +86,63 @@ class EAUTHChecker {
 		this.domain = domain;
 		this.status = this.heading.nextUntil('.eauth-status + *').last();
 		this.output = this.heading.nextUntil('.eauth-output + *').last();
-		this.boundCheck = this.#check.bind(this);
+		this.showStatus =
+			typeof showStatus === 'function'
+				? showStatus
+				: this.#defaultShowStatus.bind(this, showStatus);
 		this.boundAddFootnote = this.#addFootnote.bind(this);
+		this.boundCheck = this.#check.bind(this);
+		this.#boundSetStatus = this.setStatus.bind(this);
 	}
 
-	showAlignmentStatus(alignmentDomain, alignedStatus, alignedMessage) {
-		if (this.plugin.fromDomain !== alignmentDomain) {
-			this.status
-				.empty()
-				.append(
-					`${EmailAuthPlugin.EMOJIS.partial} `,
-					jQuery('<a>')
-						.attr('href', this.domain.link)
-						.text(this.domain.type),
-					this.domain.typeHasDomain ? '' : ' domain',
-					' (',
-					jQuery('<span>')
-						.addClass('eauth-value')
-						.text(alignmentDomain),
-					') and ',
-					jQuery('<a>')
-						.attr('href', '#from-address')
-						.text('From Address'),
-					' domain (',
-					jQuery('<span>')
-						.addClass('eauth-value')
-						.text(this.plugin.fromDomain),
-					`) do not match, so the from address domain cannot be strictly verified through ${this.checkType}.`
-				);
-			this.heading.attr('data-status', 'partial');
+	setStatus(statusCode, status) {
+		this.status
+			.empty()
+			.append(EmailAuthPlugin.EMOJIS[statusCode], ' ', status);
+		this.heading.attr('data-status', statusCode);
+	}
 
+	showAlignmentStatus(
+		alignmentDomain,
+		alignedStatus,
+		alignedMessage,
+		setStatusInfo
+	) {
+		if (this.plugin.fromDomain === alignmentDomain) {
+			setStatusInfo(alignedStatus, alignedMessage);
 			return;
 		}
 
-		this.status.text(alignedMessage);
-		this.heading.attr('data-status', alignedStatus);
+		setStatusInfo(
+			'partial',
+			jQuery('<span>').append(
+				jQuery('<a>')
+					.attr('href', this.domain.link)
+					.text(this.domain.type),
+				this.domain.typeHasDomain ? '' : ' domain',
+				' (',
+				jQuery('<span>').addClass('eauth-value').text(alignmentDomain),
+				') and ',
+				jQuery('<a>')
+					.attr('href', '#from-address')
+					.text('From Address'),
+				' domain (',
+				jQuery('<span>')
+					.addClass('eauth-value')
+					.text(this.plugin.fromDomain),
+				`) do not match, so the from address domain cannot be strictly verified through ${this.checkType}.`
+			)
+		);
 	}
 
-	alignmentStatus(alignmentDomain, alignedStatus, alignedMessage) {
+	alignmentStatus(
+		alignmentDomain,
+		alignedStatus,
+		alignedMessage,
+		setStatusInfo
+	) {
 		if (!alignmentDomain) {
-			this.status.text(alignedMessage);
-			this.heading.attr('data-status', alignedStatus);
+			setStatusInfo(alignedStatus, alignedMessage);
 			return;
 		}
 
@@ -143,7 +150,8 @@ class EAUTHChecker {
 			this.showAlignmentStatus(
 				alignmentDomain,
 				alignedStatus,
-				alignedMessage
+				alignedMessage,
+				setStatusInfo
 			);
 
 		listener();
@@ -158,20 +166,41 @@ class EAUTHChecker {
 		this.output.prepend(`* ${text}`);
 	}
 
+	#defaultShowStatus(checkedDomain, res, setStatusInfo) {
+		if (!res.pass) {
+			setStatusInfo('error', res.reason);
+			return;
+		}
+
+		if (res.pass === 'partial') {
+			return this.alignmentStatus(
+				checkedDomain,
+				'partial',
+				'Configured with warnings.',
+				setStatusInfo
+			);
+		}
+
+		return this.alignmentStatus(
+			checkedDomain,
+			'pass',
+			'Configured.',
+			setStatusInfo
+		);
+	}
+
 	async #check() {
 		this.status.empty();
 		this.output.empty();
-		this.destroyAlignmentListener?.();
+		this.disposable?.();
 		this.requestAborter?.abort('New check started.');
 
 		const preCheckRes = this.preCheck?.();
 
 		if (preCheckRes) {
-			const desc = EAUTHChecker.getStatusDesc(preCheckRes.pass);
-			this.status.text(
-				`${EmailAuthPlugin.EMOJIS[desc]} ${preCheckRes.reason}`
-			);
-			this.heading.attr('data-status', desc);
+			const statusCode =
+				preCheckRes.pass === null ? 'unknown' : preCheckRes.pass;
+			this.#boundSetStatus(statusCode, preCheckRes.reason);
 			return;
 		}
 
@@ -183,26 +212,9 @@ class EAUTHChecker {
 			signal: this.requestAborter.signal,
 		});
 		const res = await raw.json();
-		const domainName = this.domain.get(res);
 
 		this.plugin.setResult(this.identifier, res.pass);
-
-		if (!res.pass) {
-			this.status.text(`${EmailAuthPlugin.EMOJIS.error} ${res.reason}`);
-			this.heading.attr('data-status', 'error');
-		} else if (res.pass === 'partial') {
-			this.destroyAlignmentListener = this.alignmentStatus(
-				domainName.alignment,
-				'partial',
-				`${EmailAuthPlugin.EMOJIS.partial} Configured with warnings.`
-			);
-		} else {
-			this.destroyAlignmentListener = this.alignmentStatus(
-				domainName.alignment,
-				'pass',
-				`${EmailAuthPlugin.EMOJIS.pass} Configured.`
-			);
-		}
+		this.disposable = this.showStatus(res, this.#boundSetStatus);
 
 		if (!this.heading.hasClass('eauth-checker-header')) {
 			const currentContent = this.heading.contents();
@@ -229,7 +241,7 @@ class EAUTHChecker {
 			.empty()
 			.append(
 				EAUTHChecker.createCheckedDomain(
-					domainName.record,
+					this.domain.get(res),
 					this.domain.link,
 					this.domain.type,
 					this.domain.getFallback?.(res)
@@ -367,7 +379,8 @@ class EmailAuthPlugin extends EventTarget {
 		getRequestUrl,
 		preCheck,
 		process,
-		domain
+		domain,
+		showStatus
 	) {
 		return new EAUTHChecker(
 			this,
@@ -376,7 +389,8 @@ class EmailAuthPlugin extends EventTarget {
 			getRequestUrl,
 			preCheck,
 			process,
-			domain
+			domain,
+			showStatus
 		);
 	}
 }
