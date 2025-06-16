@@ -86,6 +86,7 @@ class EAUTHChecker {
 		domain
 	) {
 		this.plugin = plugin;
+		this.identifier = headingId;
 		this.heading = jQuery(`#${headingId}`);
 		this.checkType = checkType;
 		this.getRequestUrl = getRequestUrl;
@@ -183,6 +184,8 @@ class EAUTHChecker {
 		});
 		const res = await raw.json();
 		const domainName = this.domain.get(res);
+
+		this.plugin.setResult(this.identifier, res.pass);
 
 		if (!res.pass) {
 			this.status.text(`${EmailAuthPlugin.EMOJIS.error} ${res.reason}`);
@@ -304,6 +307,7 @@ class EmailAuthPlugin extends EventTarget {
 	bounceDomain;
 	fromAddress;
 	extra = {};
+	results = {};
 
 	#getFromAddressAndDomain() {
 		const input = jQuery('[name="eauth_from_address"]');
@@ -350,6 +354,11 @@ class EmailAuthPlugin extends EventTarget {
 				},
 			}
 		);
+	}
+
+	setResult(identifier, pass) {
+		this.results[identifier] = pass;
+		this.dispatchEvent(new CustomEvent(`${identifier}resultchange`));
 	}
 
 	makeChecker(
