@@ -87,12 +87,12 @@ jQuery(($) => {
 			return out;
 		},
 		{
-			get: () => ({
-				alignment: EmailAuthPlugin.instance.bounceDomain,
-				record: EmailAuthPlugin.instance.bounceDomain,
-			}),
+			get: () => EmailAuthPlugin.instance.bounceDomain,
 			type: 'Bounce Address',
 			link: '#bounce-address',
+		},
+		{
+			get: () => EmailAuthPlugin.instance.bounceDomain,
 		}
 	);
 

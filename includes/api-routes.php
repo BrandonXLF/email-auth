@@ -270,3 +270,23 @@ register_rest_route(
 		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
 	]
 );
+
+register_rest_route(
+	EAUTH_API_PREFIX,
+	sprintf( '/dmarc/org-domain/(?P<domain>%s)', EAUTH_DOMAIN_IN_URL_REGEX ),
+	[
+		'methods'             => 'GET',
+		'callback'            => function ( \WP_REST_Request $request ) {
+			$domain = $request['domain'];
+
+			require_once __DIR__ . '/utils/fallback-domain.php';
+			[ $org_domain, $org_domain_failure ] = call_user_func( $fallback_resolver ?? __NAMESPACE__ . '\fallback_domain', $domain );
+
+			return [
+				'org'  => $org_domain,
+				'fail' => $org_domain_failure,
+			];
+		},
+		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
+	]
+);

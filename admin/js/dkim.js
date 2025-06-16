@@ -7,12 +7,11 @@ jQuery(($) => {
 	const compliantSelectorPattern =
 		/^[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]*[a-zA-Z0-9])?)*$/;
 
-	let dkimDomain;
-
 	const checker = EmailAuthPlugin.instance.makeChecker(
 		'dkim',
 		'DKIM',
-		() => `${eauthDkimApi.keys}/${selectorSelect.val()}/dns/${dkimDomain}`,
+		() =>
+			`${eauthDkimApi.keys}/${selectorSelect.val()}/dns/${EmailAuthPlugin.instance.extra.dkimDomain}`,
 		() => {
 			if (!selectorSelect.val()) {
 				return {
@@ -21,7 +20,7 @@ jQuery(($) => {
 				};
 			}
 
-			if (dkimDomain === null) {
+			if (EmailAuthPlugin.instance.extra.dkimDomain === null) {
 				return {
 					pass: null,
 					reason: 'Unknown DKIM domain. DKIM will only be applied if the domain can be figured out by WordPress.',
@@ -44,18 +43,23 @@ jQuery(($) => {
 				),
 		],
 		{
-			get: (res) => ({ alignment: dkimDomain, record: res.host }),
+			get: (res) => res.host,
 			type: 'DKIM Domain',
 			link: '#dkim-domain',
 			typeHasDomain: true,
+		},
+		{
+			get: () => EmailAuthPlugin.instance.extra.dkimDomain,
 		}
 	);
 
 	new EAUTHRadioDependentListener(
 		'eauth_dkim_domain',
 		(val) => {
-			dkimDomain = val;
-			checker.boundCheck();
+			EmailAuthPlugin.instance.extra.dkimDomain = val;
+			EmailAuthPlugin.instance.dispatchEvent(
+				new CustomEvent('dkimdomainchange')
+			);
 		},
 		{
 			wp: {
@@ -79,6 +83,11 @@ jQuery(($) => {
 		}
 	);
 
+	checker.boundCheck();
+	EmailAuthPlugin.instance.addEventListener(
+		'dkimdomainchange',
+		checker.boundCheck
+	);
 	selectorSelect.on('change', checker.boundCheck);
 
 	function clearSubmissionError() {
