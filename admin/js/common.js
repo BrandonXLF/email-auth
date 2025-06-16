@@ -195,8 +195,9 @@ class EAUTHChecker {
 		this.disposable?.();
 		this.requestAborter?.abort('New check started.');
 
-		const preCheckRes = this.preCheck?.();
+		this.plugin.setResult(this.identifier, null);
 
+		const preCheckRes = this.preCheck?.();
 		if (preCheckRes) {
 			this.plugin.setResult(this.identifier, preCheckRes.pass);
 			const statusCode =
