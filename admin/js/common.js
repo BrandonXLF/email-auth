@@ -89,7 +89,7 @@ class EAUTHChecker {
 		this.showStatus =
 			typeof showStatus === 'function'
 				? showStatus
-				: this.#defaultShowStatus.bind(this, showStatus);
+				: this.#defaultShowStatus.bind(this, showStatus?.get);
 		this.boundAddFootnote = this.#addFootnote.bind(this);
 		this.boundCheck = this.#check.bind(this);
 		this.#boundSetStatus = this.setStatus.bind(this);
@@ -166,7 +166,7 @@ class EAUTHChecker {
 		this.output.prepend(`* ${text}`);
 	}
 
-	#defaultShowStatus(checkedDomain, res, setStatusInfo) {
+	#defaultShowStatus(getCheckedDomain, res, setStatusInfo) {
 		if (!res.pass) {
 			setStatusInfo('error', res.reason);
 			return;
@@ -174,7 +174,7 @@ class EAUTHChecker {
 
 		if (res.pass === 'partial') {
 			return this.alignmentStatus(
-				checkedDomain,
+				getCheckedDomain(),
 				'partial',
 				'Configured with warnings.',
 				setStatusInfo
@@ -182,7 +182,7 @@ class EAUTHChecker {
 		}
 
 		return this.alignmentStatus(
-			checkedDomain,
+			getCheckedDomain(),
 			'pass',
 			'Configured.',
 			setStatusInfo

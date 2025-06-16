@@ -48,7 +48,9 @@ jQuery(($) => {
 			link: '#dkim-domain',
 			typeHasDomain: true,
 		},
-		EmailAuthPlugin.instance.extra.dkimDomain
+		{
+			get: () => EmailAuthPlugin.instance.extra.dkimDomain,
+		}
 	);
 
 	new EAUTHRadioDependentListener(

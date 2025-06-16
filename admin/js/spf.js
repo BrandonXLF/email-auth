@@ -91,7 +91,9 @@ jQuery(($) => {
 			type: 'Bounce Address',
 			link: '#bounce-address',
 		},
-		EmailAuthPlugin.instance.bounceDomain
+		{
+			get: () => EmailAuthPlugin.instance.bounceDomain,
+		}
 	);
 
 	checker.boundCheck();
