@@ -346,7 +346,10 @@ add_section(
 		wp_localize_script(
 			'eauth_spf_script',
 			'eauthDmarcApi',
-			[ 'check' => esc_url_raw( rest_url( 'eauth/v1/dmarc/check' ) ) ]
+			[
+				'check' => esc_url_raw( rest_url( 'eauth/v1/dmarc/check' ) ),
+				'org'   => esc_url_raw( rest_url( 'eauth/v1/dmarc/org-domain' ) ),
+			]
 		);
 		?>
 		<div id="eauth-dmarc-status" class="eauth-status"></div>

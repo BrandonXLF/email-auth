@@ -90,7 +90,6 @@ class EAUTHChecker {
 			typeof showStatus === 'function'
 				? showStatus
 				: this.#defaultShowStatus.bind(this, showStatus?.get);
-		this.boundAddFootnote = this.#addFootnote.bind(this);
 		this.boundCheck = this.#check.bind(this);
 		this.#boundSetStatus = this.setStatus.bind(this);
 	}
@@ -159,11 +158,6 @@ class EAUTHChecker {
 
 		return () =>
 			this.plugin.removeEventListener('fromdomainchange', listener);
-	}
-
-	#addFootnote(text) {
-		this.status.append('*');
-		this.output.prepend(`* ${text}`);
 	}
 
 	#defaultShowStatus(getCheckedDomain, res, setStatusInfo) {
@@ -249,7 +243,7 @@ class EAUTHChecker {
 					this.domain.getFallback?.(res)
 				)
 			)
-			.append(this.process(res, this.boundAddFootnote));
+			.append(this.process(res));
 	}
 }
 
@@ -259,6 +253,7 @@ class EmailAuthPlugin extends EventTarget {
 		pass: '✅',
 		error: '❌',
 		partial: '✅⚠️',
+		incomplete: '✅❔',
 		unknown: '❔',
 		// Only for individual items
 		warning: '⚠️',

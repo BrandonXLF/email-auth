@@ -25,6 +25,7 @@
 	background: linear-gradient(0.25turn, #ffff0020, #00000000);
 }
 
+#eauth-wrap h2[data-status="incomplete"],
 #eauth-wrap h2[data-status="unknown"] {
 	background: linear-gradient(0.25turn, #88888820, #00000000);
 }
