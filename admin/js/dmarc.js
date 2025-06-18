@@ -53,7 +53,7 @@ jQuery(($) => {
 		}
 
 		if (validateDomain === null) {
-			return { level: 'unknown', desc: `${name} result unknown.` };
+			return { level: 'unknown', desc: `${name} alignment unknown.` };
 		}
 
 		try {
