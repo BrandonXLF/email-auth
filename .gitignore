@@ -2,6 +2,7 @@ node_modules
 vendor
 vendor-backup
 *.cache
+email-auth.zip
 email-auth.*.zip
 svn-repo
 build
