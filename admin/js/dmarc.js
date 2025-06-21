@@ -93,6 +93,7 @@ jQuery(($) => {
 	) {
 		const resultEvent = `${checkId}resultchange`;
 		const plugin = EmailAuthPlugin.instance;
+
 		const runCheck = async () =>
 			onRun(
 				await runAlignmentCheck(
@@ -118,8 +119,8 @@ jQuery(($) => {
 
 	function addAlignmentChecks(relaxed, setAlignmentStatus) {
 		const results = {
-			spf: { level: 'unknown', desc: `Check in progress...` },
 			dkim: { level: 'unknown', desc: `Check in progress...` },
+			spf: { level: 'unknown', desc: `Check in progress...` },
 		};
 
 		const onRun = (checkId, result) => {
@@ -155,16 +156,7 @@ jQuery(($) => {
 			setAlignmentStatus('error', 'alignment checks failed', 'but');
 		};
 
-		const d1 = addAlignmentCheck(
-			onRun.bind(null, 'spf'),
-			'spf',
-			'SPF',
-			() => EmailAuthPlugin.instance.bounceDomain,
-			'bouncedomainchange',
-			relaxed.spf
-		);
-
-		const d2 = addAlignmentCheck(
+		const disposeDKIMCheck = addAlignmentCheck(
 			onRun.bind(null, 'dkim'),
 			'dkim',
 			'DKIM',
@@ -173,9 +165,18 @@ jQuery(($) => {
 			relaxed.dkim
 		);
 
+		const disposeSPFCheck = addAlignmentCheck(
+			onRun.bind(null, 'spf'),
+			'spf',
+			'SPF',
+			() => EmailAuthPlugin.instance.bounceDomain,
+			'bouncedomainchange',
+			relaxed.spf
+		);
+
 		return () => {
-			d1();
-			d2();
+			disposeDKIMCheck();
+			disposeSPFCheck();
 		};
 	}
 
