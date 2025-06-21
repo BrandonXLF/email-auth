@@ -5,7 +5,7 @@ TOP_DIR=$( dirname -- SCRIPT_DIR )
 VERSION=$( grep -oP " \* Version: *\K.+" $TOP_DIR/email-auth.php )
 
 mv vendor vendor-backup
-composer install --no-dev
+composer install --no-dev --optimize-autoloader
 
 cd $TOP_DIR
 cd ..
