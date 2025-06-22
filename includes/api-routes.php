@@ -23,24 +23,6 @@ function rest_api_permission_callback() {
 	return current_user_can( 'manage_options' );
 }
 
-
-/**
- * Get all OpenSSL errors in a presentable.
- *
- * @param string $prefix The prefix to show before each error string.
- * @return string
- */
-function get_openssl_errors( $prefix = '\n' ) {
-	$out = '';
-
-	// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
-	while ( $msg = openssl_error_string() ) {
-		$out .= "{$prefix}OpenSSL error: $msg";
-	}
-
-	return $out;
-}
-
 register_rest_route(
 	EAUTH_API_PREFIX,
 	'/dkim/keys',
@@ -118,25 +100,6 @@ register_rest_route(
 	]
 );
 
-/**
- * Return an OpenSSL error response for the DKIM check endpoint.
- *
- * @param string $host The DKIM DNS record host.
- * @param string $ctx The context for the OpenSSL error.
- * @return \WP_REST_Response
- */
-function dkim_check_ssl_error( $host, $ctx ) {
-	return new \WP_REST_Response(
-		[
-			'host'   => $host,
-			'dns'    => null,
-			'pass'   => false,
-			'reason' => $ctx . get_openssl_errors( ' - ' ),
-		],
-		500
-	);
-}
-
 register_rest_route(
 	EAUTH_API_PREFIX,
 	sprintf( '/dkim/keys/(?P<name>%s)/dns/(?P<domain>%s)', EAUTH_DOMAIN_IN_URL_REGEX, EAUTH_DOMAIN_IN_URL_REGEX ),
@@ -145,38 +108,9 @@ register_rest_route(
 		'callback'            => function ( \WP_REST_Request $request ) {
 			$name   = $request['name'];
 			$domain = $request['domain'];
-			$host   = "$name._domainkey.$domain";
-
-			$keys = get_keys();
-			$key  = $keys[ $name ] ?? '';
-			$pk   = openssl_pkey_get_private( $key );
-
-			if ( ! $pk ) {
-				return dkim_check_ssl_error( $host, 'Failed to read private key from store.' );
-			}
-
-			$pub = openssl_pkey_get_details( $pk );
-
-			if ( ! $pub ) {
-				return dkim_check_ssl_error( $host, 'Failed to get public key' );
-			}
-
-			$pub = $pub['key'];
-			$pub = preg_replace( '/^-+.*?-+$/m', '', $pub );
-			$pub = str_replace( [ "\r", "\n" ], '', $pub );
-			$pub = trim( $pub );
-
-			$dns = "v=DKIM1; h=sha256; t=s; p=$pub";
 
 			require_once __DIR__ . '/utils/check-dkim.php';
-
-			return array_merge(
-				[
-					'host' => $host,
-					'dns'  => $dns,
-				],
-				check_dkim_dns( $name, $domain, $pub )
-			);
+			return check_dkim_dns( $name, $domain );
 		},
 		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
 	]

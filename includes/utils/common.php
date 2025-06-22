@@ -136,3 +136,57 @@ function get_net_dns2_resolver() {
 
 	return $eauth_net_dns2_resolver;
 }
+
+/**
+ * Get all OpenSSL errors in a presentable format.
+ *
+ * @param string $prefix The prefix to show before each error string.
+ * @return string
+ */
+function get_openssl_errors( $prefix = '\n' ) {
+	$out = '';
+
+	// phpcs:ignore Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+	while ( $msg = openssl_error_string() ) {
+		$out .= "{$prefix}OpenSSL error: $msg";
+	}
+
+	return $out;
+}
+
+/**
+ * Create a common API response.
+ *
+ * @param string|bool $pass The pass status. Can be true, false, or "partial".
+ * @param string|null $reason The reason for the failure.
+ * @param array       $data Additional data to include in the response.
+ * @return array{pass: string, reason: string}
+ */
+function api_response( $pass, $reason, &$data = [] ) {
+	return [
+		'pass'   => $pass,
+		'reason' => $reason,
+	] + $data;
+}
+
+/**
+ * Create a common API pass response.
+ *
+ * @param string $partial True if the pass is only a partial pass.
+ * @param array  $data Additional data to include in the response.
+ * @return array{pass: string, reason: null}
+ */
+function api_pass( $partial, &$data = [] ) {
+	return api_response( $partial ? 'partial' : true, null, $data );
+}
+
+/**
+ * Create a common API failure response.
+ *
+ * @param string $reason The reason for the failure.
+ * @param array  $data Additional data to include in the response.
+ * @return array{pass: string, reason: string}
+ */
+function api_failure( $reason, &$data = [] ) {
+	return api_response( false, $reason, $data );
+}
