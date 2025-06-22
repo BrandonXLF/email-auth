@@ -160,7 +160,7 @@ function get_openssl_errors( $prefix = '\n' ) {
  * @param string|bool $pass The pass status. Can be true, false, or "partial".
  * @param string|null $reason The reason for the failure.
  * @param array       $data Additional data to include in the response.
- * @return array{pass: string, reason: string}
+ * @return array{pass: string, reason: string|null}
  */
 function api_response( $pass, $reason, &$data = [] ) {
 	return [
