@@ -35,27 +35,6 @@ function is_dmarc_record( $tags ) {
 }
 
 /**
- * Transform the given exception to a failure return.
- *
- * @param DNSTagValue\Exception $e The exception.
- * @param string                $org The organizational domain.
- * @param string                $org_fail Reason why org domain is unknown, if applicable.
- * @param array                 $warnings Warnings from previous checks.
- * @return array{ pass: bool, reason: string }
- */
-function dmarc_failure( &$e, $org = null, $org_fail = null, &$warnings = [] ) {
-	return [
-		'pass'     => false,
-		'reason'   => $e->getMessage(),
-		'warnings' => $warnings,
-		'infos'    => [],
-		'footnote' => null,
-		'org'      => $org,
-		'orgFail'  => $org_fail,
-	];
-}
-
-/**
  * Internal, recursive function to check DMARC for a given domain.
  *
  * @access private
@@ -65,10 +44,10 @@ function dmarc_failure( &$e, $org = null, $org_fail = null, &$warnings = [] ) {
  * @param string|null                  $org_domain_failure Warnings from previous org domain retrieval.
  * @param DNSTagValue\TxtResolver|null $txt_resolver Function to get TXT records with.
  * @param callable|null                $fallback_resolver Function to resolve the fallback organizational domain.
- * @param array                        $warnings Existing warnings to append to.
+ * @param array                        $base_warnings Existing warnings to append to.
  * @return array
  */
-function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fallback_resolver, &$warnings = [] ) {
+function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fallback_resolver, &$base_warnings = [] ) {
 	require_once __DIR__ . '/dns-tag-value/dns-tag-value.php';
 	require_once __DIR__ . '/dns-tag-value/class-txtresolver.php';
 
@@ -86,56 +65,52 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 		[ $org_domain, $org_domain_failure ] = call_user_func( $fallback_resolver ?? __NAMESPACE__ . '\fallback_domain', $domain );
 	}
 
+	$response = [
+		'warnings' => $base_warnings,
+		'infos'    => [],
+		'org'      => $org_domain,
+		'orgFail'  => $org_domain_failure,
+		'relaxed'  => [],
+	];
+
 	$dmarc = null;
 
 	try {
-		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record', $warnings, $txt_resolver );
+		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record', $response['warnings'], $txt_resolver );
 	} catch ( DNSTagValue\MissingException $e ) {
 		if ( ! $org_domain || $org_domain === $domain ) {
-			return dmarc_failure( $e, $org_domain, $org_domain_failure, $warnings );
+			return api_failure( $e->getMessage(), $response );
 		}
 
-		return _check_dmarc( $org_domain, true, $org_domain_failure, $txt_resolver, $fallback_resolver, $warnings );
+		return _check_dmarc( $org_domain, true, $org_domain_failure, $txt_resolver, $fallback_resolver, $response['warnings'] );
 	} catch ( DNSTagValue\Exception $e ) {
-		return dmarc_failure( $e, $org_domain, $org_domain_failure, $warnings );
+		return api_failure( $e->getMessage(), $response );
 	}
-
-	$infos = [];
 
 	$policy = $is_org
 		? ( $dmarc['sp'] ?? $dmarc['p'] ?? 'none' )
 		: ( $dmarc['p'] ?? 'none' );
 
 	if ( 'none' === $policy ) {
-		$term_type  = isset( $dmarc['sp'] ) ? 'sp' : 'p';
-		$warnings[] = "DMARC will pass regardless of DKIM and SPF alignment. Add a <code>$term_type=quarantine</code> or <code>$term_type=reject</code> term.";
+		$term_type              = isset( $dmarc['sp'] ) ? 'sp' : 'p';
+		$response['warnings'][] = "DMARC will pass regardless of DKIM and SPF alignment. Add a <code>$term_type=quarantine</code> or <code>$term_type=reject</code> term.";
 	} elseif ( 'quarantine' === $policy ) {
-		$infos[] = 'Failures will be treated as suspicious, but will not be outright rejected.';
+		$response['infos'][] = 'Failures will be treated as suspicious, but will not be outright rejected.';
 	}
 
 	$pct = intval( $dmarc['pct'] ?? '100' );
 
 	if ( $pct < 100 ) {
-		$warnings[] = "DMARC will only fail for $pct% of failures.";
+		$response['warnings'][] = "DMARC will only fail for $pct% of failures.";
 	}
 
-	$relaxed_dkim = ( $dmarc['adkim'] ?? 'r' ) === 'r';
-	$infos[]      = 'adkim: DKIM domain and "From" domain ' . ( $relaxed_dkim ? 'need only share a common registered domain' : 'must be identical' ) . '.';
+	$response['relaxed']['dkim'] = ( $dmarc['adkim'] ?? 'r' ) === 'r';
+	$response['infos'][]         = 'adkim: DKIM domain and "From" domain ' . ( $response['relaxed']['dkim'] ? 'need only share a common registered domain' : 'must be identical' ) . '.';
 
-	$relaxed_spf = ( $dmarc['aspf'] ?? 'r' ) === 'r';
-	$infos[]     = 'aspf: Bounce domain and "From" domain ' . ( $relaxed_spf ? 'need only share a common registered domain' : 'must be identical' ) . '.';
+	$response['relaxed']['spf'] = ( $dmarc['aspf'] ?? 'r' ) === 'r';
+	$response['infos'][]        = 'aspf: Bounce domain and "From" domain ' . ( $response['relaxed']['spf'] ? 'need only share a common registered domain' : 'must be identical' ) . '.';
 
-	return [
-		'pass'     => $warnings ? 'partial' : true,
-		'warnings' => $warnings,
-		'infos'    => $infos,
-		'org'      => $org_domain,
-		'orgFail'  => $org_domain_failure,
-		'relaxed'  => [
-			'dkim' => $relaxed_dkim,
-			'spf'  => $relaxed_spf,
-		],
-	];
+	return api_pass( (bool) $response['warnings'], $response );
 }
 
 /**

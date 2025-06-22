@@ -38,32 +38,33 @@ jQuery(($) => {
 
 			out.push($('<h3>').text('Validity Check'));
 
-			if (res.cur_rec) {
+			if (res.record) {
 				out.push(
 					$('<div>').append(
 						'Current record: ',
-						$('<code>').text(res.cur_rec)
+						$('<code>').text(res.record)
 					)
 				);
+			}
 
-				if (!res.cur_validity.length) {
-					res.cur_validity.push({
-						level: 'pass',
-						desc: 'Current record is schematically valid.',
-					});
-				}
-
+			if (res.validity === false) {
 				out.push(
-					EmailAuthPlugin.createCommentList(
-						res.cur_validity,
-						'Issues',
-						'h4'
+					$('<div>').append(
+						`${EmailAuthPlugin.EMOJIS.error} No syntactically valid record found.`
+					)
+				);
+			} else if (!res.validity.length) {
+				out.push(
+					$('<div>').append(
+						`${EmailAuthPlugin.EMOJIS.pass} Current record is schematically valid.`
 					)
 				);
 			} else {
 				out.push(
-					$('<div>').append(
-						`${EmailAuthPlugin.EMOJIS.error} No syntactically valid record found.`
+					EmailAuthPlugin.createCommentList(
+						res.validity,
+						'Issues',
+						'h4'
 					)
 				);
 			}

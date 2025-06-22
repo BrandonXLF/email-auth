@@ -46,7 +46,14 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	$code           = $check_result->getCode();
 	$full_non_pass  = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
 
-	$code_reasons = array_map(
+	$response = [
+		'code'         => $code,
+		'code_reasons' => [],
+		'server_ip'    => $ip,
+		'validity'     => false,
+	];
+
+	$response['code_reasons'] = array_map(
 		function ( $msg ) {
 			return [
 				'level' => 'error',
@@ -57,111 +64,106 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	);
 
 	if ( $full_non_pass && $check_result->getMatchedMechanism() ) {
-		$code_reasons[] = [
+		$response['code_reasons'][] = [
 			'desc' => 'Non-pass caused by: <code>' . esc_html( $check_result->getMatchedMechanism() ) . '</code>',
 		];
 	}
 
 	$decoder = new \SPFLib\Decoder( $dns_resolver );
+	$record  = null;
 
 	try {
 		$record = $decoder->getRecordFromDomain( $domain );
 	} catch ( \Exception $e ) {
-		$record = null;
+		return api_failure( 'Could not decode SPF record.', $response );
 	}
 
-	$validity    = [];
-	$invalid     = false;
-	$rec_reasons = [];
+	$invalid   = false;
+	$validator = new \SPFLib\OnlineSemanticValidator( $decoder );
 
-	if ( $record ) {
-		$validator = new \SPFLib\OnlineSemanticValidator( $decoder );
-		$validity  = array_merge(
-			array_map(
-				function ( $issue ) use ( &$invalid ) {
-					if ( $issue->getLevel() === \SPFLib\Semantic\Issue::LEVEL_FATAL ) {
-						$invalid = true;
-
-						return [
-							'level' => 'error',
-							'desc'  => esc_html( $issue->getDescription() ),
-						];
-					}
-
-					if ( $issue->getLevel() === \SPFLib\Semantic\Issue::LEVEL_WARNING ) {
-						$invalid = true;
-
-						return [
-							'level' => 'warning',
-							'desc'  => esc_html( $issue->getDescription() ),
-						];
-					}
+	$response['record']   = (string) $record;
+	$response['validity'] = array_merge(
+		array_map(
+			function ( $issue ) use ( &$invalid ) {
+				if ( $issue->getLevel() === \SPFLib\Semantic\Issue::LEVEL_FATAL ) {
+					$invalid = true;
 
 					return [
-						'desc' => esc_html( $issue->getDescription() ),
+						'level' => 'error',
+						'desc'  => esc_html( $issue->getDescription() ),
 					];
-				},
-				$validator->validateRecord( $record )
-			)
-		);
-
-		$terms = $record->getTerms();
-
-		if ( $full_non_pass ) {
-			$rec_record = new \SPFLib\Record();
-			$new_term   = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, $server_domain );
-
-			foreach ( $terms as &$term ) {
-				if ( $new_term && ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
-					$rec_record->addTerm( $new_term );
-					$new_term = null;
 				}
 
-				$rec_record->addTerm( $term );
-			}
+				if ( $issue->getLevel() === \SPFLib\Semantic\Issue::LEVEL_WARNING ) {
+					$invalid = true;
 
-			unset( $term );
+					return [
+						'level' => 'warning',
+						'desc'  => esc_html( $issue->getDescription() ),
+					];
+				}
 
-			if ( $new_term ) {
-				$rec_record->addTerm( $new_term );
-			}
+				return [
+					'desc' => esc_html( $issue->getDescription() ),
+				];
+			},
+			$validator->validateRecord( $record )
+		)
+	);
 
-			$rec_reasons[] = [
-				'level' => 'error',
-				'desc'  => 'Website host (' . $domain . ' or ' . esc_html( $ip ) . ') is not included in a pass case of the SPF record.',
-			];
-		} else {
-			$rec_record = clone $record;
-		}
+	$terms                   = $record->getTerms();
+	$response['rec_reasons'] = [];
 
-		$all_term = null;
+	if ( $full_non_pass ) {
+		$rec_record = new \SPFLib\Record();
+		$new_term   = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, $server_domain );
 
 		foreach ( $terms as &$term ) {
-			if ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) {
-				$all_term = $term;
-				break;
+			if ( $new_term && ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
+				$rec_record->addTerm( $new_term );
+				$new_term = null;
 			}
+
+			$rec_record->addTerm( $term );
 		}
 
-		if ( ! $all_term || ( $all_term->getQualifier() !== \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL && $all_term->getQualifier() !== \SPFLib\Term\Mechanism::QUALIFIER_FAIL ) ) {
-			replace_spf_all_term( $rec_record, \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL );
+		unset( $term );
 
-			$rec_reasons[] = [
-				'level' => 'warning',
-				'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
-			];
+		if ( $new_term ) {
+			$rec_record->addTerm( $new_term );
+		}
+
+		$response['rec_reasons'][] = [
+			'level' => 'error',
+			'desc'  => 'Website host (' . $domain . ' or ' . esc_html( $ip ) . ') is not included in a pass case of the SPF record.',
+		];
+	} else {
+		$rec_record = clone $record;
+	}
+
+	$all_term = null;
+
+	foreach ( $terms as &$term ) {
+		if ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) {
+			$all_term = $term;
+			break;
 		}
 	}
 
-	return [
-		'pass'         => 'pass' === $code ? ( $invalid || $rec_reasons ? 'partial' : true ) : false,
-		'reason'       => 'pass' !== $code ? 'SPF check did not pass.' : null,
-		'code'         => $code,
-		'code_reasons' => $code_reasons,
-		'cur_rec'      => $record ? (string) $record : null,
-		'cur_validity' => $validity,
-		'rec_dns'      => count( $rec_reasons ) ? (string) $rec_record : null,
-		'rec_reasons'  => $rec_reasons,
-		'server_ip'    => $ip,
-	];
+	if ( ! $all_term || ( $all_term->getQualifier() !== \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL && $all_term->getQualifier() !== \SPFLib\Term\Mechanism::QUALIFIER_FAIL ) ) {
+		replace_spf_all_term( $rec_record, \SPFLib\Term\Mechanism::QUALIFIER_SOFTFAIL );
+
+		$response['rec_reasons'][] = [
+			'level' => 'warning',
+			'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
+		];
+	}
+
+	$response['rec_dns'] = count( $response['rec_reasons'] ) ? (string) $rec_record : null;
+
+	return api_response(
+		'pass' === $code ? ( $invalid || $response['rec_reasons'] ? 'partial' : true ) : false,
+		'pass' !== $code ? 'SPF check did not pass.' : null,
+		$response
+	);
 }
