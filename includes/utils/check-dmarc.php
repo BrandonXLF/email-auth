@@ -100,7 +100,7 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 		return dmarc_failure( $e, $org_domain, $org_domain_failure, $warnings );
 	}
 
-	$infos    = [];
+	$infos = [];
 
 	$policy = $is_org
 		? ( $dmarc['sp'] ?? $dmarc['p'] ?? 'none' )
@@ -119,11 +119,11 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 		$warnings[] = "DMARC will only fail for $pct% of failures.";
 	}
 
-	$relaxedDKIM = ( $dmarc['adkim'] ?? 'r' ) === 'r';
-	$infos[] = 'adkim: DKIM domain and "From" domain ' . ( $relaxedDKIM ? 'need only share a common registered domain' : 'must be identical' ) . '.';
+	$relaxed_dkim = ( $dmarc['adkim'] ?? 'r' ) === 'r';
+	$infos[]      = 'adkim: DKIM domain and "From" domain ' . ( $relaxed_dkim ? 'need only share a common registered domain' : 'must be identical' ) . '.';
 
-	$relaxedSPF = ( $dmarc['aspf'] ?? 'r' ) === 'r';
-	$infos[] = 'aspf: Bounce domain and "From" domain ' . ( $relaxedSPF ? 'need only share a common registered domain' : 'must be identical' ) . '.';
+	$relaxed_spf = ( $dmarc['aspf'] ?? 'r' ) === 'r';
+	$infos[]     = 'aspf: Bounce domain and "From" domain ' . ( $relaxed_spf ? 'need only share a common registered domain' : 'must be identical' ) . '.';
 
 	return [
 		'pass'     => $warnings ? 'partial' : true,
@@ -132,9 +132,9 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 		'org'      => $org_domain,
 		'orgFail'  => $org_domain_failure,
 		'relaxed'  => [
-			'dkim' => $relaxedDKIM,
-			'spf'  => $relaxedSPF,
-		]
+			'dkim' => $relaxed_dkim,
+			'spf'  => $relaxed_spf,
+		],
 	];
 }
 
