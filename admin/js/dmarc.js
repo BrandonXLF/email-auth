@@ -25,14 +25,10 @@ jQuery(($) => {
 		return (alignmentStatus, alignmentText, conjunction) => {
 			conjunction = conjunction ?? (hasWarnings ? 'and' : 'with');
 
-			let statusCode;
-			if (alignmentStatus === 'error') {
-				statusCode = 'error';
-			} else if (hasWarnings) {
-				statusCode = 'partial';
-			} else {
-				statusCode = alignmentStatus;
-			}
+			const statusCode =
+				alignmentStatus === 'pass' && hasWarnings
+					? 'partial'
+					: alignmentStatus;
 
 			setStatusInfo(
 				statusCode,
@@ -149,7 +145,7 @@ jQuery(($) => {
 				({ level }) => level === 'unknown'
 			);
 			if (unknown) {
-				setAlignmentStatus('unknown', 'unknown alignment');
+				setAlignmentStatus('incomplete', 'unknown alignment');
 				return;
 			}
 
@@ -224,7 +220,7 @@ jQuery(($) => {
 				res.pass === 'partial',
 				setStatusInfo
 			);
-			setAlignmentStatus('unknown alignments', 'unknown');
+			setAlignmentStatus('incomplete', 'unknown alignments');
 
 			return addAlignmentChecks(res.relaxed, setAlignmentStatus);
 		}
