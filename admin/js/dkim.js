@@ -35,10 +35,10 @@ jQuery(($) => {
 				})),
 				'Warnings'
 			),
-			res.dns && $('<h3>').text('DNS Record'),
+			res.dns && $('<h3>').text('Generated DNS Record'),
 			res.dns &&
 				$('<details>').append(
-					$('<summary>').append('Show DNS Record'),
+					$('<summary>').append('Show Generated DNS Record'),
 					EmailAuthPlugin.createTxtRecord(res.host, res.dns)
 				),
 		],

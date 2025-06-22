@@ -6,7 +6,8 @@
 		"eauthCommonConfig": "readonly",
 		"EmailAuthPlugin": "readonly",
 		"EAUTHRadioDependentListener": "readonly",
-		"CSS":"readonly"
+		"CSS":"readonly",
+		"ResizeObserver": "readonly"
 	},
 	"rules": {
 		"no-alert": ["off"]

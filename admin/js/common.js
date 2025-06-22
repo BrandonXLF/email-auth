@@ -84,14 +84,27 @@ class EAUTHChecker {
 		this.preCheck = preCheck;
 		this.process = process;
 		this.domain = domain;
+
 		this.status = this.heading.nextUntil('.eauth-status + *').last();
 		this.output = this.heading.nextUntil('.eauth-output + *').last();
+
 		this.showStatus =
 			typeof showStatus === 'function'
 				? showStatus
 				: this.#defaultShowStatus.bind(this, showStatus?.get);
+
 		this.boundCheck = this.#check.bind(this);
 		this.#boundSetStatus = this.setStatus.bind(this);
+
+		this.currentRecordObserver = new ResizeObserver(() => {
+			const overflow =
+				this.currentRecord[0].scrollWidth >
+				this.currentRecord[0].clientWidth;
+
+			this.currentRecord
+				.parent()
+				.toggleClass('eauth-current-record-expandable', overflow);
+		});
 	}
 
 	setStatus(statusCode, status) {
@@ -183,10 +196,34 @@ class EAUTHChecker {
 		);
 	}
 
+	#showCurrentRecord(record) {
+		const expandedClass = 'eauth-current-record-expanded';
+		const cnt = jQuery('<div>').addClass('eauth-current-record-container');
+
+		const button = jQuery('<button>')
+			.attr('type', 'button')
+			.text('Expand')
+			.addClass('button-link eauth-current-record-expand')
+			.on('click', () => {
+				cnt.toggleClass(expandedClass);
+				const isExpanded = cnt.hasClass(expandedClass);
+				button.text(isExpanded ? 'Collapse' : 'Expand');
+			});
+
+		this.currentRecord = jQuery('<div>')
+			.addClass('eauth-current-record')
+			.append('Current record: ', jQuery('<code>').text(record));
+
+		this.currentRecordObserver.observe(this.currentRecord[0]);
+
+		return cnt.append(this.currentRecord, button);
+	}
+
 	async #check() {
 		this.status.empty();
 		this.output.empty();
 		this.disposable?.();
+		this.currentRecordObserver.disconnect();
 		this.requestAborter?.abort('New check started.');
 
 		this.plugin.setResult(this.identifier, null);
@@ -241,9 +278,10 @@ class EAUTHChecker {
 					this.domain.link,
 					this.domain.type,
 					this.domain.getFallback?.(res)
-				)
-			)
-			.append(this.process(res));
+				),
+				res.record ? this.#showCurrentRecord(res.record) : '',
+				this.process(res)
+			);
 	}
 }
 

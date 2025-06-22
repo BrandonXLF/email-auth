@@ -20,10 +20,11 @@ if ( ! defined( 'ABSPATH' ) ) {
  *                            Returns HTML reason for filtering out the record, or null if the record is valid.
  * @param array       $filter_reasons Array to store reasons for filtering out records.
  * @param TxtResolver $txt_resolver Function to get TXT records with.
- * @return array[string]string The map of tag-value pairs.
+ * @return [string, string]
  *
- * @throws InvalidException Too many records.
  * @throws MissingException Record could not be fetch or no record present.
+ * @throws InvalidException DNS retrieval returned results, but the result are invalid. Eg: Multiple DNS records.
+ * @throws MalformedException Record is malformed.
  */
 function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver = null ) {
 	require_once __DIR__ . '/class-txtresolver.php';
@@ -52,16 +53,19 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 					continue 2;
 				}
 
-				require_once __DIR__ . '/class-invalidexception.php';
-				throw new InvalidException( 'Malformed tag-value pair.' );
+				require_once __DIR__ . '/class-malformedexception.php';
+				throw new MalformedException( 'Malformed tag-value pair.', esc_html( $record ) );
 			}
 
 			$key = trim( substr( $part, 0, $pos ) );
 			$val = trim( substr( $part, $pos + 1 ) );
 
 			if ( array_key_exists( $key, $tags ) ) {
-				require_once __DIR__ . '/class-invalidexception.php';
-				throw new InvalidException( 'Multiple tag-values pairs with the same key (' . esc_html( $key ) . ').' );
+				require_once __DIR__ . '/class-malformedexception.php';
+				throw new MalformedException(
+					'Multiple tag-values pairs with the same key (' . esc_html( $key ) . ').',
+					esc_html( $record )
+				);
 			}
 
 			$tags[ $key ] = $val;
@@ -82,7 +86,7 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 			throw new InvalidException( 'Multiple TXT records found, only one should be present.' );
 		}
 
-		$valid_return = $tags;
+		$valid_return = [ $tags, $record ];
 	}
 
 	unset( $record );

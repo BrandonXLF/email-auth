@@ -173,3 +173,34 @@
 	border: none;
 	cursor: pointer;
 }
+
+.eauth-current-record-container {
+	display: flex;
+	column-gap: 1em;
+	row-gap: 0.5em;
+	align-items: start;
+}
+
+.eauth-current-record-expanded {
+	flex-direction: column;
+}
+
+.eauth-current-record {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis
+}
+
+.eauth-current-record-expanded .eauth-current-record {
+	white-space: normal;
+	line-break: anywhere;
+}
+
+.eauth-current-record-expand {
+	visibility: hidden;
+}
+
+.eauth-current-record-expandable .eauth-current-record-expand,
+.eauth-current-record-expanded .eauth-current-record-expand {
+	visibility: initial;
+}

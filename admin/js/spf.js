@@ -15,6 +15,7 @@ jQuery(($) => {
 		},
 		(res) => {
 			const out = [
+				$('<h3>').text('SPF Check Result'),
 				$('<div>').append(
 					'Result code: ',
 					$('<code>').text(res.code),
@@ -36,25 +37,16 @@ jQuery(($) => {
 				),
 			];
 
-			out.push($('<h3>').text('Validity Check'));
-
-			if (res.record) {
-				out.push(
-					$('<div>').append(
-						'Current record: ',
-						$('<code>').text(res.record)
-					)
-				);
-			}
-
 			if (res.validity === false) {
 				out.push(
+					$('<h3>').text('Validity Check'),
 					$('<div>').append(
 						`${EmailAuthPlugin.EMOJIS.error} No syntactically valid record found.`
 					)
 				);
 			} else if (!res.validity.length) {
 				out.push(
+					$('<h3>').text('Validity Check'),
 					$('<div>').append(
 						`${EmailAuthPlugin.EMOJIS.pass} Current record is schematically valid.`
 					)
@@ -63,8 +55,7 @@ jQuery(($) => {
 				out.push(
 					EmailAuthPlugin.createCommentList(
 						res.validity,
-						'Issues',
-						'h4'
+						'Validity Check'
 					)
 				);
 			}

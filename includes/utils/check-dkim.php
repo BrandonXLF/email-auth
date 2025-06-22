@@ -77,7 +77,10 @@ function check_dkim_dns( $name, $domain, $txt_resolver = null ) {
 
 	try {
 		// Programs like Gmail seem to not filter records, so we perform checks on the first record instead.
-		$dkim = DNSTagValue\get_map( $host, null, $response['warnings'], $txt_resolver );
+		[ $dkim, $response['record'] ] = DNSTagValue\get_map( $host, null, $response['warnings'], $txt_resolver );
+	} catch ( DNSTagValue\MalformedException $e ) {
+		$response['record'] = $e->getRecordText();
+		return api_failure( $e->getMessage(), $response );
 	} catch ( DNSTagValue\Exception $e ) {
 		return api_failure( $e->getMessage(), $response );
 	}

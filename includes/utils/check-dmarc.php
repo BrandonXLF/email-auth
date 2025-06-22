@@ -76,13 +76,16 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 	$dmarc = null;
 
 	try {
-		$dmarc = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record', $response['warnings'], $txt_resolver );
+		[ $dmarc, $response['record'] ] = DNSTagValue\get_map( "_dmarc.$domain", __NAMESPACE__ . '\is_dmarc_record', $response['warnings'], $txt_resolver );
 	} catch ( DNSTagValue\MissingException $e ) {
 		if ( ! $org_domain || $org_domain === $domain ) {
 			return api_failure( $e->getMessage(), $response );
 		}
 
 		return _check_dmarc( $org_domain, true, $org_domain_failure, $txt_resolver, $fallback_resolver, $response['warnings'] );
+	} catch ( DNSTagValue\MalformedException $e ) {
+		$response['record'] = $e->getRecordText();
+		return api_failure( $e->getMessage(), $response );
 	} catch ( DNSTagValue\Exception $e ) {
 		return api_failure( $e->getMessage(), $response );
 	}
