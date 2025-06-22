@@ -38,7 +38,9 @@ jQuery(($) => {
 			res.dns && $('<h3>').text('Generated DNS Record'),
 			res.dns &&
 				$('<details>').append(
-					$('<summary>').append('Show Generated DNS Record'),
+					$('<summary>')
+						.addClass('button-link')
+						.append('Show Generated DNS Record'),
 					EmailAuthPlugin.createTxtRecord(res.host, res.dns)
 				),
 		],
