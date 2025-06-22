@@ -11,7 +11,7 @@ namespace EmailAuthPlugin;
  * Remove any "all" terms and replace them with new "all" term.
  *
  * @param \SPFLib\Record $record The SPF record to modify.
- * @param string         $qualifier      The qualifier to use for the new "all" term.
+ * @param string         $qualifier The qualifier to use for the new "all" term.
  * @return void
  */
 function replace_spf_all_term( \SPFLib\Record &$record, string $qualifier ) {
@@ -116,7 +116,18 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	$terms                   = $record->getTerms();
 	$response['rec_reasons'] = [];
 
-	if ( $full_non_pass ) {
+	$only_matched_by_all = $check_result->getMatchedMechanism() instanceof \SPFLib\Term\Mechanism\AllMechanism;
+	if ( $only_matched_by_all ) {
+		// Check if all terms are "all" mechanisms. Won't return false positives, but doesn't catch more complex cases.
+		foreach ( $terms as $term ) {
+			if ( ! ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
+				$only_matched_by_all = false;
+				break;
+			}
+		}
+	}
+
+	if ( $full_non_pass || $only_matched_by_all ) {
 		$rec_record = new \SPFLib\Record();
 		$new_term   = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, $server_domain );
 
@@ -136,8 +147,10 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 		}
 
 		$response['rec_reasons'][] = [
-			'level' => 'error',
-			'desc'  => 'Website host (' . $domain . ' or ' . esc_html( $ip ) . ') is not included in a pass case of the SPF record.',
+			'level' => $full_non_pass ? 'error' : 'warning',
+			'desc'  => $full_non_pass
+				? 'Server (' . esc_html( $ip ) . ' or ' . $domain . ') is not included in a pass case of the SPF record.'
+				: 'Server (' . esc_html( $ip ) . ' or ' . $domain . ') is only matched by an <code>all</code> term in the SPF record.',
 		];
 	} else {
 		$rec_record = clone $record;

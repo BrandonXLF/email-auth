@@ -85,7 +85,7 @@ class CheckSpfTest extends TestCase {
 				'rec_reasons'  => [
 					[
 						'level' => 'error',
-						'desc'  => 'Website host (domain.test or 192.0.2.0) is not included in a pass case of the SPF record.',
+						'desc'  => 'Server (192.0.2.0 or domain.test) is not included in a pass case of the SPF record.',
 					],
 					[
 						'level' => 'warning',
@@ -118,7 +118,7 @@ class CheckSpfTest extends TestCase {
 				'rec_reasons'  => [
 					[
 						'level' => 'error',
-						'desc'  => 'Website host (domain.test or 192.0.2.0) is not included in a pass case of the SPF record.',
+						'desc'  => 'Server (192.0.2.0 or domain.test) is not included in a pass case of the SPF record.',
 					],
 				],
 				'server_ip'    => '192.0.2.0',
@@ -147,7 +147,7 @@ class CheckSpfTest extends TestCase {
 				'rec_reasons'  => [
 					[
 						'level' => 'error',
-						'desc'  => 'Website host (domain.test or 192.0.2.0) is not included in a pass case of the SPF record.',
+						'desc'  => 'Server (192.0.2.0 or domain.test) is not included in a pass case of the SPF record.',
 					],
 				],
 				'server_ip'    => '192.0.2.0',
@@ -394,6 +394,36 @@ class CheckSpfTest extends TestCase {
 				'validity'     => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
+				'server_ip'    => $ip,
+			],
+			$res
+		);
+	}
+
+	public function testOnlyMatchedByAll() {
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 +all' );
+		$ip       = gethostbyname( 'google.com' );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
+
+		$this->assertEquals(
+			[
+				'pass'         => 'partial',
+				'reason'       => null,
+				'code'         => 'pass',
+				'code_reasons' => [],
+				'record'       => 'v=spf1 all',
+				'validity'     => [],
+				'rec_dns'      => 'v=spf1 a:google.com ~all',
+				'rec_reasons'  => [
+					[
+						'level' => 'warning',
+						'desc'  => 'Server (142.251.41.78 or domain.test) is only matched by an <code>all</code> term in the SPF record.',
+					],
+					[
+						'level' => 'warning',
+						'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
+					],
+				],
 				'server_ip'    => $ip,
 			],
 			$res
