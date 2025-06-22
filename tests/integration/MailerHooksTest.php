@@ -208,7 +208,7 @@ class MailerHooksTest extends \WP_UnitTestCase {
 		wp_mail( 'test@domain.test', 'Test', 'Testing 1 2 3' );
 
 		$this->assertEquals( 'example.org', $phpmailer->DKIM_domain );
-		$this->assertEquals( file_get_contents( __DIR__ . '/test.pem' ), $phpmailer->DKIM_private_string );
+		$this->assertEquals( file_get_contents( dirname( __DIR__ ) . '/test.pem' ), $phpmailer->DKIM_private_string );
 		$this->assertEquals( 'test', $phpmailer->DKIM_selector );
 
 		delete_option( 'eauth_dkim_selector' );
