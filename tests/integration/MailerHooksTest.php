@@ -201,7 +201,7 @@ class MailerHooksTest extends \WP_UnitTestCase {
 	public function testDkim() {
 		global $phpmailer;
 
-		save_keys( [ 'test' => file_get_contents( __DIR__ . '/test.pem' ) ] );
+		save_keys( [ 'test' => file_get_contents( dirname( __DIR__ ) . '/test.pem' ) ] );
 
 		update_option( 'eauth_dkim_selector', 'test' );
 
@@ -234,7 +234,7 @@ class MailerHooksTest extends \WP_UnitTestCase {
 	public function testDkimDomainMode( $mode, $expected ) {
 		global $phpmailer;
 
-		save_keys( [ 'test' => file_get_contents( __DIR__ . '/test.pem' ) ] );
+		save_keys( [ 'test' => file_get_contents( dirname( __DIR__ ) . '/test.pem' ) ] );
 
 		update_option( 'eauth_dkim_selector', 'test' );
 		update_option( 'eauth_dkim_domain', $mode );

@@ -34,14 +34,13 @@ function parse_colon_list( $str ) {
  *
  * @param string                  $name The DKIM selector.
  * @param string                  $domain The base domain.
+ * @param string                  $pk_text The private key.
  * @param DNSTagValue\TxtResolver $txt_resolver DNS resolver for TXT records.
  * @return array{ pass: bool, reason: string|null }
  */
-function check_dkim_dns( $name, $domain, $txt_resolver = null ) {
+function check_dkim_dns( $name, $domain, $pk_text, $txt_resolver = null ) {
 	$host = "$name._domainkey.$domain";
-	$keys = get_keys();
-	$key  = $keys[ $name ] ?? '';
-	$pk   = openssl_pkey_get_private( $key );
+	$pk   = openssl_pkey_get_private( $pk_text );
 
 	$response = [
 		'host'     => $host,

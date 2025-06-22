@@ -79,8 +79,8 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'No mechanism matched and no redirect modifier found.',
 					],
 				],
-				'cur_rec'      => 'v=spf1',
-				'cur_validity' => [],
+				'record'       => 'v=spf1',
+				'validity'     => [],
 				'rec_dns'      => 'v=spf1 a:server.domain ~all',
 				'rec_reasons'  => [
 					[
@@ -112,8 +112,8 @@ class CheckSpfTest extends TestCase {
 						'desc' => 'Non-pass caused by: <code>~all</code>',
 					],
 				],
-				'cur_rec'      => 'v=spf1 ~all',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 ~all',
+				'validity'     => [],
 				'rec_dns'      => 'v=spf1 a:server.domain ~all',
 				'rec_reasons'  => [
 					[
@@ -141,8 +141,8 @@ class CheckSpfTest extends TestCase {
 						'desc' => 'Non-pass caused by: <code>-all</code>',
 					],
 				],
-				'cur_rec'      => 'v=spf1 -all',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 -all',
+				'validity'     => [],
 				'rec_dns'      => 'v=spf1 a:server.domain -all',
 				'rec_reasons'  => [
 					[
@@ -166,8 +166,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 ip4:192.0.2.0 -all',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 ip4:192.0.2.0 -all',
+				'validity'     => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
 				'server_ip'    => '192.0.2.0',
@@ -187,8 +187,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 a:google.com -all',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 a:google.com -all',
+				'validity'     => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
 				'server_ip'    => $ip,
@@ -205,7 +205,7 @@ class CheckSpfTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'         => false,
-				'reason'       => 'SPF check did not pass.',
+				'reason'       => 'Could not decode SPF record.',
 				'code'         => 'permerror',
 				'code_reasons' => [
 					[
@@ -213,10 +213,7 @@ class CheckSpfTest extends TestCase {
 						'desc'  => 'The SPF record contains an unrecognized term: waaaaaa',
 					],
 				],
-				'cur_rec'      => '',
-				'cur_validity' => [],
-				'rec_dns'      => null,
-				'rec_reasons'  => [],
+				'validity'     => false,
 				'server_ip'    => $ip,
 			],
 			$res
@@ -234,8 +231,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 a:google.com -all ip4:127.0.0.1',
-				'cur_validity' => [
+				'record'       => 'v=spf1 a:google.com -all ip4:127.0.0.1',
+				'validity'     => [
 					[
 						'level' => 'warning',
 						'desc'  => '&#039;all&#039; should be the last mechanism (any other mechanism will be ignored)',
@@ -260,8 +257,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 a:google.com',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 a:google.com',
+				'validity'     => [],
 				'rec_dns'      => 'v=spf1 a:google.com ~all',
 				'rec_reasons'  => [
 					[
@@ -286,8 +283,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 a:google.com all',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 a:google.com all',
+				'validity'     => [],
 				'rec_dns'      => 'v=spf1 a:google.com ~all',
 				'rec_reasons'  => [
 					[
@@ -312,8 +309,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 all a:google.com',
-				'cur_validity' => [
+				'record'       => 'v=spf1 all a:google.com',
+				'validity'     => [
 					[
 						'level' => 'warning',
 						'desc'  => '&#039;all&#039; should be the last mechanism (any other mechanism will be ignored)',
@@ -345,8 +342,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 include:bar.test -all',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 include:bar.test -all',
+				'validity'     => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
 				'server_ip'    => $ip,
@@ -369,8 +366,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 include:bar.test include:baz.test -all',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 include:bar.test include:baz.test -all',
+				'validity'     => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
 				'server_ip'    => $ip,
@@ -393,8 +390,8 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'cur_rec'      => 'v=spf1 include:bar.test -all',
-				'cur_validity' => [],
+				'record'       => 'v=spf1 include:bar.test -all',
+				'validity'     => [],
 				'rec_dns'      => null,
 				'rec_reasons'  => [],
 				'server_ip'    => $ip,

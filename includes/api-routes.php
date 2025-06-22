@@ -106,11 +106,13 @@ register_rest_route(
 	[
 		'methods'             => 'GET',
 		'callback'            => function ( \WP_REST_Request $request ) {
-			$name   = $request['name'];
-			$domain = $request['domain'];
+			$name    = $request['name'];
+			$domain  = $request['domain'];
+			$keys    = get_keys();
+			$pk_text = $keys[ $name ] ?? '';
 
 			require_once __DIR__ . '/utils/check-dkim.php';
-			return check_dkim_dns( $name, $domain );
+			return check_dkim_dns( $name, $domain, $pk_text );
 		},
 		'permission_callback' => __NAMESPACE__ . '\rest_api_permission_callback',
 	]

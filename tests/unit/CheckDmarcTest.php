@@ -37,16 +37,21 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1',
 				'warnings' => [
 					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
 				],
 				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => null,
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -60,15 +65,20 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => true,
+				'reason'   => null,
+				'record'   => 'v=DMARC1; p=quarantine',
 				'warnings' => [],
 				'infos'    => [
 					'Failures will be treated as suspicious, but will not be outright rejected.',
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => 'DMARC only passes if at least one of <a href="#dkim">DKIM</a> and <a href="#spf">SPF</a> passes domain alignment.',
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -82,14 +92,19 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => true,
+				'reason'   => null,
+				'record'   => 'v=DMARC1; p=reject',
 				'warnings' => [],
 				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => 'DMARC only passes if at least one of <a href="#dkim">DKIM</a> and <a href="#spf">SPF</a> passes domain alignment.',
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -103,15 +118,21 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1; adkim=s',
 				'warnings' => [
 					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
 				],
 				'infos'    => [
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain must be identical.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => null,
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => false,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -125,13 +146,21 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1; adkim=s; aspf=s',
 				'warnings' => [
 					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
 				],
-				'infos'    => [],
-				'footnote' => null,
+				'infos'    => [
+					'adkim: DKIM domain and "From" domain must be identical.',
+					'aspf: Bounce domain and "From" domain must be identical.',
+				],
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => false,
+					'spf'  => false,
+				],
 			],
 			$res
 		);
@@ -145,16 +174,21 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1; p=reject; pct=40',
 				'warnings' => [
 					'DMARC will only fail for 40% of failures.',
 				],
 				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => 'DMARC only passes if at least one of <a href="#dkim">DKIM</a> and <a href="#spf">SPF</a> passes domain alignment.',
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -171,9 +205,9 @@ class CheckDmarcTest extends TestCase {
 				'reason'   => 'Multiple TXT records found, only one should be present.',
 				'warnings' => [],
 				'infos'    => [],
-				'footnote' => null,
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [],
 			],
 			$res
 		);
@@ -190,9 +224,9 @@ class CheckDmarcTest extends TestCase {
 				'reason'   => 'No TXT record found.',
 				'warnings' => [],
 				'infos'    => [],
-				'footnote' => null,
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [],
 			],
 			$res
 		);
@@ -206,16 +240,21 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1',
 				'warnings' => [
 					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
 				],
 				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => null,
 				'org'      => 'domain.test',
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -229,16 +268,21 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1',
 				'warnings' => [
 					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
 				],
 				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => null,
 				'org'      => 'domain.test',
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -252,16 +296,21 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1',
 				'warnings' => [
 					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
 				],
 				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => null,
 				'org'      => 'domain.test',
 				'orgFail'  => 'Warning!',
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -278,9 +327,9 @@ class CheckDmarcTest extends TestCase {
 				'reason'   => 'No TXT record found.',
 				'warnings' => [ 'Potential record ignored: Version identifier must be v=DMARC1.' ],
 				'infos'    => [],
-				'footnote' => null,
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [],
 			],
 			$res
 		);
@@ -297,9 +346,9 @@ class CheckDmarcTest extends TestCase {
 				'reason'   => 'No TXT record found.',
 				'warnings' => [ 'Potential record ignored: Version identifier (v=DMARC1) is missing.' ],
 				'infos'    => [],
-				'footnote' => null,
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [],
 			],
 			$res
 		);
@@ -316,9 +365,9 @@ class CheckDmarcTest extends TestCase {
 				'reason'   => 'No TXT record found.',
 				'warnings' => [ 'Potential record ignored: First tag must be the version identifier (v).' ],
 				'infos'    => [],
-				'footnote' => null,
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [],
 			],
 			$res
 		);
@@ -332,17 +381,22 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1; p=reject',
 				'warnings' => [
 					'Potential record ignored: Version identifier must be v=DMARC1.',
 					'Potential record ignored: Version identifier must be v=DMARC1.',
 				],
 				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => 'DMARC only passes if at least one of <a href="#dkim">DKIM</a> and <a href="#spf">SPF</a> passes domain alignment.',
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);
@@ -356,16 +410,21 @@ class CheckDmarcTest extends TestCase {
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => 'v=DMARC1; p=none;',
 				'warnings' => [
 					'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>p=quarantine</code> or <code>p=reject</code> term.',
 				],
 				'infos'    => [
-					'DMARC will still pass if the DKIM domain and "From" domain share a common registered domain.',
-					'DMARC will still pass if the bounce domain and "From" domain share a common registered domain.',
+					'adkim: DKIM domain and "From" domain need only share a common registered domain.',
+					'aspf: Bounce domain and "From" domain need only share a common registered domain.',
 				],
-				'footnote' => null,
 				'org'      => null,
 				'orgFail'  => null,
+				'relaxed'  => [
+					'dkim' => true,
+					'spf'  => true,
+				],
 			],
 			$res
 		);

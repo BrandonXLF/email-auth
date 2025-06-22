@@ -12,17 +12,26 @@ require_once dirname( __DIR__ ) . '/class-testtxtresolver.php';
 
 use PHPUnit\Framework\TestCase;
 
+$eauth_dkim_test_private_key = file_get_contents( dirname( __DIR__ ) . '/test.pem' );
+$eauth_dkim_test_public_key  = 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAsayYTCBNGnsly/w7uqpu6tyPU0rK/aN265+JX6H52tx23JV1Kn0GNC0kNQASXme/cjccIChcKjbMSb6MQZSexj1R3+SzB16rK2Zd9ymVBdBs93wVBz+RxawPi/At6+IkCFz/xoeJdi3nyqsJFKsegsYzGvvpQI49ldqpsDkGxArElqgxiQA+nTDgpcJx+U0EcB1w8jldUtqWzkpX2RKqVzzRsKgPwgJD0oZtbK3dwnry7zswIaXb4TjDGsprTR0THQjTEndAg5K28viqtVSt40HqTDQ25RjANCUEnpi0PnycP9nfB86OJ0TC9KIInn0NPxosG7Ov4V0NAaM03q4VAQIDAQAB';
+
 /**
  * Tests for check_dkim_dns.
  */
 class CheckDkimTest extends TestCase {
 	public function testBasic() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => true,
+				'reason'   => null,
+				'record'   => "v=DKIM1; p=$eauth_dkim_test_public_key",
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -30,12 +39,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testNonStandard() {
-		$resolve = new TestTxtResolver( 'te_st._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY' );
-		$res     = check_dkim_dns( 'te_st', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'te_st._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key" );
+		$res     = check_dkim_dns( 'te_st', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => 'partial',
+				'reason'   => null,
+				'record'   => "v=DKIM1; p=$eauth_dkim_test_public_key",
+				'host'     => 'te_st._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [ 'Selector name is non-standard.' ],
 			],
 			$res
@@ -43,13 +58,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testMissingKey() {
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
 		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; a=b' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => false,
 				'reason'   => 'Public key is missing.',
+				'record'   => 'v=DKIM1; a=b',
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -57,13 +77,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testIncorrectKey() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PRIVATE_KEY' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=INCORRECT_KEY' );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => false,
 				'reason'   => 'Public key is incorrect.',
+				'record'   => 'v=DKIM1; p=INCORRECT_KEY',
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -71,13 +96,17 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testMultipleRecords() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY', 'v=DKIM1; p=PUBLIC_KEY' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key", "v=DKIM1; p=$eauth_dkim_test_public_key" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => false,
 				'reason'   => 'Multiple TXT records found, only one should be present.',
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -85,13 +114,17 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testNoRecord() {
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
 		$resolve = new TestTxtResolver( 'test._domainkey.domain.test' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => false,
 				'reason'   => 'No TXT record found.',
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -99,12 +132,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testServiceType() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; s=phone:email' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key; s=phone:email" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => true,
+				'reason'   => null,
+				'record'   => "v=DKIM1; p=$eauth_dkim_test_public_key; s=phone:email",
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -112,13 +151,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testServiceTypeUnsupported() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; s=phone' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key; s=phone" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => false,
 				'reason'   => 'Record service type must include email (or *).',
+				'record'   => "v=DKIM1; p=$eauth_dkim_test_public_key; s=phone",
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -126,13 +170,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testBadVersion() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM2; p=PUBLIC_KEY' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM2; p=$eauth_dkim_test_public_key" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => false,
 				'reason'   => 'Version identifier must be v=DKIM1 if present.',
+				'record'   => "v=DKIM2; p=$eauth_dkim_test_public_key",
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -140,13 +189,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testVersionFirst() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'p=PUBLIC_KEY; v=DKIM1' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "p=$eauth_dkim_test_public_key; v=DKIM1" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => false,
 				'reason'   => 'Version identifier must be the first tag if present.',
+				'record'   => "p=$eauth_dkim_test_public_key; v=DKIM1",
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -154,12 +208,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testTestMode() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; t=y' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key; t=y" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => true,
+				'reason'   => null,
+				'record'   => "v=DKIM1; p=$eauth_dkim_test_public_key; t=y",
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [ 'Test mode is enabled, DKIM policy might be ignored.' ],
 			],
 			$res
@@ -167,12 +227,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testMultipleWarnings() {
-		$resolve = new TestTxtResolver( 'te_st._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; t=y' );
-		$res     = check_dkim_dns( 'te_st', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'te_st._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key; t=y" );
+		$res     = check_dkim_dns( 'te_st', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => true,
+				'reason'   => null,
+				'record'   => "v=DKIM1; p=$eauth_dkim_test_public_key; t=y",
+				'host'     => 'te_st._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [ 'Selector name is non-standard.', 'Test mode is enabled, DKIM policy might be ignored.' ],
 			],
 			$res
@@ -180,12 +246,18 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testTrailingSemicolon() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY;' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key;" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => true,
+				'reason'   => null,
+				'record'   => "v=DKIM1; p=$eauth_dkim_test_public_key;",
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
 				'warnings' => [],
 			],
 			$res
@@ -193,13 +265,40 @@ class CheckDkimTest extends TestCase {
 	}
 
 	public function testMalformedRecord() {
-		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', 'v=DKIM1; p=PUBLIC_KEY; malformed' );
-		$res     = check_dkim_dns( 'test', 'domain.test', 'PUBLIC_KEY', $resolve );
+		global  $eauth_dkim_test_public_key, $eauth_dkim_test_private_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key; malformed" );
+		$res     = check_dkim_dns( 'test', 'domain.test', $eauth_dkim_test_private_key, $resolve );
 
 		$this->assertEquals(
 			[
 				'pass'     => false,
 				'reason'   => 'Malformed tag-value pair.',
+				'record'   => "v=DKIM1; p=$eauth_dkim_test_public_key; malformed",
+				'host'     => 'test._domainkey.domain.test',
+				'dns'      => "v=DKIM1; h=sha256; t=s; p=$eauth_dkim_test_public_key",
+				'warnings' => [],
+			],
+			$res
+		);
+	}
+
+	public function testBadPrivateKey() {
+		global  $eauth_dkim_test_public_key;
+
+		$resolve = new TestTxtResolver( 'test._domainkey.domain.test', "v=DKIM1; p=$eauth_dkim_test_public_key" );
+		$res     = check_dkim_dns( 'test', 'domain.test', 'INVALID_PRIVATE_KEY', $resolve );
+
+		$this->assertStringStartsWith(
+			'Failed to read private key from store. - OpenSSL error: ',
+			$res['reason']
+		);
+
+		$this->assertEquals(
+			[
+				'pass'     => false,
+				'reason'   => $res['reason'], // Checked above.
+				'host'     => 'test._domainkey.domain.test',
 				'warnings' => [],
 			],
 			$res
