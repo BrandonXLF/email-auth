@@ -75,12 +75,14 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	try {
 		$record = $decoder->getRecordFromDomain( $domain );
 	} catch ( \Exception $e ) {
+		// TODO: Cannot access record text. https://github.com/mlocati/spf-lib/pull/40.
 		return api_failure( 'Could not decode SPF record.', $response );
 	}
 
 	$invalid   = false;
 	$validator = new \SPFLib\OnlineSemanticValidator( $decoder );
 
+	// TODO: Cannot access actual record text. https://github.com/mlocati/spf-lib/pull/40.
 	$response['record']   = (string) $record;
 	$response['validity'] = array_merge(
 		array_map(
