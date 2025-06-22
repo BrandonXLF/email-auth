@@ -145,8 +145,8 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	if ( $full_non_pass || $only_matched_by_all ) {
 		$rec_record = new \SPFLib\Record();
 		$new_term   = filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 )
-			? new \SPFLib\Term\Mechanism\IP6Mechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, \IPLib\Address\IPv6::parseString( $ip ) )
-			: new \SPFLib\Term\Mechanism\IP4Mechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, \IPLib\Address\IPv4::parseString( $ip ) );
+			? new \SPFLib\Term\Mechanism\Ip6Mechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, \IPLib\Address\IPv6::parseString( $ip ) )
+			: new \SPFLib\Term\Mechanism\Ip4Mechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, \IPLib\Address\IPv4::parseString( $ip ) );
 
 		foreach ( $terms as &$term ) {
 			if ( $new_term && ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
