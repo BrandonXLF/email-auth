@@ -37,30 +37,45 @@ function replace_spf_all_term( \SPFLib\Record &$record, string $qualifier ) {
  * @return array
  */
 function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
-	require_once __DIR__ . '/spf/class-dnsresolver.php';
-
-	$dns_resolver ??= new SPF\DNSResolver( get_net_dns2_resolver() );
-	$environment    = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
-	$checker        = new \SPFLib\Checker( $dns_resolver );
-	$check_result   = $checker->check( $environment );
-	$code           = $check_result->getCode();
-	$full_non_pass  = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
-
 	$response = [
-		'code'         => $code,
 		'code_reasons' => [],
 		'server_ip'    => $ip,
 		'validity'     => false,
 	];
 
-	$response['code_reasons'] = array_map(
-		function ( $msg ) {
-			return [
-				'level' => 'error',
-				'desc'  => esc_html( $msg ),
-			];
-		},
-		$check_result->getMessages()
+	require_once __DIR__ . '/spf/class-dnsresolver.php';
+	$dns_resolver ??= new SPF\DNSResolver( get_net_dns2_resolver() );
+
+	try {
+		$environment = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
+	} catch ( \SPFLib\Exception\InvalidIPAddressException $e ) {
+		$ip = '0.0.0.0';
+
+		$response['code_reasons'][] = [
+			'level' => 'error',
+			'desc'  => 'Configured IP address (' . esc_html( $ip ) . ') is invalid. Using <code>0.0.0.0</code>.',
+		];
+
+		$environment = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
+	}
+
+	$checker       = new \SPFLib\Checker( $dns_resolver );
+	$check_result  = $checker->check( $environment );
+	$code          = $check_result->getCode();
+	$full_non_pass = 'fail' === $code || 'softfail' === $code || 'neutral' === $code;
+
+	$response['code']         = $code;
+	$response['code_reasons'] = array_merge(
+		$response['code_reasons'],
+		array_map(
+			function ( $msg ) {
+				return [
+					'level' => 'error',
+					'desc'  => esc_html( $msg ),
+				];
+			},
+			$check_result->getMessages()
+		)
 	);
 
 	if ( $full_non_pass && $check_result->getMatchedMechanism() ) {
@@ -129,7 +144,9 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 	if ( $full_non_pass || $only_matched_by_all ) {
 		$rec_record = new \SPFLib\Record();
-		$new_term   = new \SPFLib\Term\Mechanism\AMechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, $server_domain );
+		$new_term   = filter_var( $ip, FILTER_VALIDATE_IP, FILTER_FLAG_IPV6 )
+			? new \SPFLib\Term\Mechanism\IP6Mechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, \IPLib\Address\IPv6::parseString( $ip ) )
+			: new \SPFLib\Term\Mechanism\IP4Mechanism( \SPFLib\Term\Mechanism::QUALIFIER_PASS, \IPLib\Address\IPv4::parseString( $ip ) );
 
 		foreach ( $terms as &$term ) {
 			if ( $new_term && ( $term instanceof \SPFLib\Term\Mechanism\AllMechanism ) ) {
@@ -149,8 +166,8 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 		$response['rec_reasons'][] = [
 			'level' => $full_non_pass ? 'error' : 'warning',
 			'desc'  => $full_non_pass
-				? 'Server (' . esc_html( $ip ) . ' or ' . $domain . ') is not included in a pass case of the SPF record.'
-				: 'Server (' . esc_html( $ip ) . ' or ' . $domain . ') is only matched by an <code>all</code> term in the SPF record.',
+				? 'Server (' . esc_html( $ip ) . ' or ' . esc_html( $server_domain ) . ') is not included in a pass case of the SPF record.'
+				: 'Server (' . esc_html( $ip ) . ' or ' . esc_html( $server_domain ) . ') is only matched by an <code>all</code> term in the SPF record.',
 		];
 	} else {
 		$rec_record = clone $record;
