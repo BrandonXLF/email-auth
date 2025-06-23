@@ -49,13 +49,12 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	try {
 		$environment = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
 	} catch ( \SPFLib\Exception\InvalidIPAddressException $e ) {
-		$ip = '0.0.0.0';
-
 		$response['code_reasons'][] = [
 			'level' => 'error',
 			'desc'  => 'Configured IP address (' . esc_html( $ip ) . ') is invalid. Using <code>0.0.0.0</code>.',
 		];
 
+		$ip          = '0.0.0.0';
 		$environment = new \SPFLib\Check\Environment( $ip, '', "test@$domain" );
 	}
 

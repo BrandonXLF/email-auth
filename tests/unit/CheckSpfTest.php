@@ -144,7 +144,7 @@ class CheckSpfTest extends TestCase {
 				'code_reasons' => [
 					[
 						'level' => 'error',
-						'desc'  => 'Configured IP address (0.0.0.0) is invalid. Using <code>0.0.0.0</code>.',
+						'desc'  => 'Configured IP address (BAD_IP) is invalid. Using <code>0.0.0.0</code>.',
 					],
 					[
 						'level' => 'error',
