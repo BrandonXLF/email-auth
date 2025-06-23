@@ -228,7 +228,6 @@ class CheckSpfTest extends TestCase {
 		);
 	}
 
-
 	public function testOnlyMatchedByAll() {
 		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 +all ~all' );
 		$ip       = gethostbyname( 'google.com' );
@@ -240,7 +239,7 @@ class CheckSpfTest extends TestCase {
 				'reason'       => null,
 				'code'         => 'pass',
 				'code_reasons' => [],
-				'record'       => 'v=spf1 all ~all',
+				'record'       => 'v=spf1 +all ~all',
 				'validity'     => [
 					[
 						'level' => 'warning',
@@ -305,6 +304,53 @@ class CheckSpfTest extends TestCase {
 		);
 	}
 
+	public function testMultipleRecords() {
+		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 a:google.com -all', 'v=spf1 a:google.com -all' );
+		$ip       = gethostbyname( 'google.com' );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
+
+		$this->assertEquals(
+			[
+				'pass'         => false,
+				'reason'       => 'Could not fetch SPF record.',
+				'code'         => 'permerror',
+				'code_reasons' => [
+					[
+						'level' => 'error',
+						'desc'  => 'The domain domain.test has more that one SPF record.',
+					],
+				],
+				'validity'     => false,
+				'server_ip'    => $ip,
+			],
+			$res
+		);
+	}
+
+	public function testNoRecord() {
+		$resolver = new TestDnsResolver( 'domain.test' );
+		$ip       = gethostbyname( 'google.com' );
+		$res      = check_spf( 'domain.test', $ip, 'google.com', $resolver );
+
+		$this->assertEquals(
+			[
+				'pass'         => false,
+				'reason'       => 'No SPF record found.',
+				'record'       => '',
+				'code'         => 'none',
+				'code_reasons' => [
+					[
+						'level' => 'error',
+						'desc'  => 'No SPF DNS record found for domain &#039;domain.test&#039;',
+					],
+				],
+				'validity'     => false,
+				'server_ip'    => $ip,
+			],
+			$res
+		);
+	}
+
 	public function testInvalid() {
 		$resolver = new TestDnsResolver( 'domain.test', 'v=spf1 waaaaaa -all' );
 		$ip       = gethostbyname( 'google.com' );
@@ -314,6 +360,7 @@ class CheckSpfTest extends TestCase {
 			[
 				'pass'         => false,
 				'reason'       => 'Could not decode SPF record.',
+				'record'       => 'v=spf1 waaaaaa -all',
 				'code'         => 'permerror',
 				'code_reasons' => [
 					[

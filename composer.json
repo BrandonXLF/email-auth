@@ -1,6 +1,6 @@
 {
 	"require": {
-		"mlocati/spf-lib": "^3.1",
+		"mlocati/spf-lib": "^3.3",
 		"jeremykendall/php-domain-parser": "^6.0",
 		"mlocati/idna": "^1.1",
 		"pear/net_dns2": "^1.5"

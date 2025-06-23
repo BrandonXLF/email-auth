@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b01f0bfe8bdd0e093033b44e0877e178",
+    "content-hash": "dcd510225c7b0aef55450c47f81188d4",
     "packages": [
         {
             "name": "jeremykendall/php-domain-parser",
@@ -264,16 +264,16 @@
         },
         {
             "name": "mlocati/spf-lib",
-            "version": "3.2.0",
+            "version": "3.3.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/mlocati/spf-lib.git",
-                "reference": "73129185330adcf783c1cb8e43af6ebb1ef9c66b"
+                "reference": "21afb4297d4985a4c9aaedb7e60e843819ca7924"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/mlocati/spf-lib/zipball/73129185330adcf783c1cb8e43af6ebb1ef9c66b",
-                "reference": "73129185330adcf783c1cb8e43af6ebb1ef9c66b",
+                "url": "https://api.github.com/repos/mlocati/spf-lib/zipball/21afb4297d4985a4c9aaedb7e60e843819ca7924",
+                "reference": "21afb4297d4985a4c9aaedb7e60e843819ca7924",
                 "shasum": ""
             },
             "require": {
@@ -328,7 +328,7 @@
                     "type": "other"
                 }
             ],
-            "time": "2025-02-27T16:24:07+00:00"
+            "time": "2025-06-23T12:30:43+00:00"
         },
         {
             "name": "pear/net_dns2",

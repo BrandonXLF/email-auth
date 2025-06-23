@@ -38,9 +38,9 @@ function replace_spf_all_term( \SPFLib\Record &$record, string $qualifier ) {
  */
 function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	$response = [
-		'code_reasons' => [], // Note: Array of HTML strings.
+		'code_reasons' => [], // Note: Array contains HTML string desc's.
 		'server_ip'    => $ip,
-		'validity'     => false, // Note: Array of HTML strings (or false).
+		'validity'     => false, // Note: Array contains HTML string desc's (or false).
 	];
 
 	require_once __DIR__ . '/spf/class-dnsresolver.php';
@@ -85,20 +85,27 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	}
 
 	$decoder = new \SPFLib\Decoder( $dns_resolver );
-	$record  = null;
 
 	try {
-		$record = $decoder->getRecordFromDomain( $domain );
+		$record_txt = $decoder->getTXTRecordFromDomain( $domain );
 	} catch ( \Exception $e ) {
-		// TODO: Cannot access record text. https://github.com/mlocati/spf-lib/pull/40.
+		return api_failure( 'Could not fetch SPF record.', $response );
+	}
+
+	$response['record'] = $record_txt;
+
+	try {
+		$record = $decoder->getRecordFromTXT( $record_txt );
+	} catch ( \Exception $e ) {
 		return api_failure( 'Could not decode SPF record.', $response );
 	}
 
-	$invalid   = false;
-	$validator = new \SPFLib\OnlineSemanticValidator( $decoder );
+	if ( ! $record ) {
+		return api_failure( 'No SPF record found.', $response );
+	}
 
-	// TODO: Cannot access actual record text. https://github.com/mlocati/spf-lib/pull/40.
-	$response['record']   = (string) $record;
+	$invalid              = false;
+	$validator            = new \SPFLib\OnlineSemanticValidator( $decoder );
 	$response['validity'] = array_merge(
 		array_map(
 			function ( $issue ) use ( &$invalid ) {
