@@ -318,6 +318,15 @@ class EmailAuthPlugin extends EventTarget {
 		return fetch(url, options);
 	}
 
+	static escapeHtml(html) {
+		return html
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;')
+			.replace(/"/g, '&quot;')
+			.replace(/'/g, '&#039;');
+	}
+
 	static createCommentList(comments, title, headingTag = 'h3') {
 		if (!comments.length) {
 			return;

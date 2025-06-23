@@ -16,7 +16,7 @@ if ( ! defined( 'ABSPATH' ) ) {
  * Follows RFC 7489 6.6.3.
  *
  * @param array $tags  The list of tag-value pairs.
- * @return string|null Reason the record is not a DMARC record or null if it is.
+ * @return string|null Reason the record is not a DMARC record as an HTML string or null if it is.
  */
 function is_dmarc_record( $tags ) {
 	if ( ! array_key_exists( 'v', $tags ) ) {
@@ -44,7 +44,7 @@ function is_dmarc_record( $tags ) {
  * @param string|null                  $org_domain_failure Warnings from previous org domain retrieval.
  * @param DNSTagValue\TxtResolver|null $txt_resolver Function to get TXT records with.
  * @param callable|null                $fallback_resolver Function to resolve the fallback organizational domain.
- * @param array                        $base_warnings Existing warnings to append to.
+ * @param array                        $base_warnings Existing (HTML string) warnings to append to.
  * @return array
  */
 function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fallback_resolver, &$base_warnings = [] ) {
@@ -66,8 +66,8 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 	}
 
 	$response = [
-		'warnings' => $base_warnings,
-		'infos'    => [],
+		'warnings' => $base_warnings, // Note: Array of HTML strings.
+		'infos'    => [], // Note: Array of HTML strings.
 		'org'      => $org_domain,
 		'orgFail'  => $org_domain_failure,
 		'relaxed'  => [],
@@ -96,7 +96,8 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 
 	if ( 'none' === $policy ) {
 		$term_type              = isset( $dmarc['sp'] ) ? 'sp' : 'p';
-		$response['warnings'][] = "DMARC will pass regardless of DKIM and SPF alignment. Add a <code>$term_type=quarantine</code> or <code>$term_type=reject</code> term.";
+		$escaped_term_type      = esc_html( $term_type );
+		$response['warnings'][] = "DMARC will pass regardless of DKIM and SPF alignment. Add a <code>$escaped_term_type=quarantine</code> or <code>$escaped_term_type=reject</code> term.";
 	} elseif ( 'quarantine' === $policy ) {
 		$response['infos'][] = 'Failures will be treated as suspicious, but will not be outright rejected.';
 	}
@@ -104,7 +105,8 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 	$pct = intval( $dmarc['pct'] ?? '100' );
 
 	if ( $pct < 100 ) {
-		$response['warnings'][] = "DMARC will only fail for $pct% of failures.";
+		$escaped_pct            = esc_html( $pct );
+		$response['warnings'][] = "DMARC will only fail for $escaped_pct% of failures.";
 	}
 
 	$response['relaxed']['dkim'] = ( $dmarc['adkim'] ?? 'r' ) === 'r';

@@ -38,9 +38,9 @@ function replace_spf_all_term( \SPFLib\Record &$record, string $qualifier ) {
  */
 function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	$response = [
-		'code_reasons' => [],
+		'code_reasons' => [], // Note: Array of HTML strings.
 		'server_ip'    => $ip,
-		'validity'     => false,
+		'validity'     => false, // Note: Array of HTML strings (or false).
 	];
 
 	require_once __DIR__ . '/spf/class-dnsresolver.php';
@@ -129,7 +129,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	);
 
 	$terms                   = $record->getTerms();
-	$response['rec_reasons'] = [];
+	$response['rec_reasons'] = []; // Note: Array of HTML strings.
 
 	$only_matched_by_all = $check_result->getMatchedMechanism() instanceof \SPFLib\Term\Mechanism\AllMechanism;
 	if ( $only_matched_by_all ) {

@@ -44,7 +44,7 @@ function check_dkim_dns( $name, $domain, $pk_text, $txt_resolver = null ) {
 
 	$response = [
 		'host'     => $host,
-		'warnings' => [],
+		'warnings' => [], // Note: Array of HTML strings.
 	];
 
 	if ( ! $pk ) {

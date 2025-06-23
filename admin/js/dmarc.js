@@ -37,6 +37,7 @@ jQuery(($) => {
 		};
 	}
 
+	// Note: Returned object's desc value is an HTML string.
 	async function runAlignmentCheck(
 		name,
 		result,
@@ -44,12 +45,17 @@ jQuery(($) => {
 		fromDomain,
 		relaxed
 	) {
+		const escapedName = EmailAuthPlugin.escapeHtml(name);
+
 		if (result === false) {
-			return { level: 'error', desc: `${name} check failed.` };
+			return { level: 'error', desc: `${escapedName} check failed.` };
 		}
 
 		if (validateDomain === null) {
-			return { level: 'unknown', desc: `${name} alignment unknown.` };
+			return {
+				level: 'unknown',
+				desc: `${escapedName} alignment unknown.`,
+			};
 		}
 
 		try {
@@ -68,15 +74,15 @@ jQuery(($) => {
 		if (validateDomain !== fromDomain) {
 			return {
 				level: 'error',
-				desc: `${name} alignment failed: ${validateDomain} does not match from domain ${fromDomain}.`,
+				desc: `${escapedName} alignment failed: ${EmailAuthPlugin.escapeHtml(validateDomain)} does not match from domain ${EmailAuthPlugin.escapeHtml(fromDomain)}.`,
 			};
 		}
 
 		if (result === null) {
-			return { level: 'unknown', desc: `${name} result unknown.` };
+			return { level: 'unknown', desc: `${escapedName} result unknown.` };
 		}
 
-		return { level: 'pass', desc: `${name} alignment passed.` };
+		return { level: 'pass', desc: `${escapedName} alignment passed.` };
 	}
 
 	function addAlignmentCheck(
