@@ -35,7 +35,7 @@ class TxtResolver extends \EmailAuthPlugin\DNS\NetDns2Wrapper {
 			);
 		} catch ( \Net_DNS2_Exception $e ) {
 			require_once __DIR__ . '/class-missingexception.php';
-			throw new MissingException( 'Could not retrieve DNS record. ' . esc_html( $e->getMessage() ) );
+			throw new MissingException( 'Could not retrieve DNS record. ' . $e->getMessage() );
 		}
 	}
 }

@@ -54,7 +54,7 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 				}
 
 				require_once __DIR__ . '/class-malformedexception.php';
-				throw new MalformedException( 'Malformed tag-value pair.', esc_html( $record ) );
+				throw new MalformedException( 'Malformed tag-value pair.', $record );
 			}
 
 			$key = trim( substr( $part, 0, $pos ) );
@@ -63,8 +63,8 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 			if ( array_key_exists( $key, $tags ) ) {
 				require_once __DIR__ . '/class-malformedexception.php';
 				throw new MalformedException(
-					'Multiple tag-values pairs with the same key (' . esc_html( $key ) . ').',
-					esc_html( $record )
+					'Multiple tag-values pairs with the same key (' . $key . ').',
+					$record
 				);
 			}
 
