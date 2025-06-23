@@ -110,10 +110,10 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 	}
 
 	$response['relaxed']['dkim'] = ( $dmarc['adkim'] ?? 'r' ) === 'r';
-	$response['infos'][]         = 'adkim: DKIM domain and "From" domain ' . ( $response['relaxed']['dkim'] ? 'need only share a common registered domain' : 'must be identical' ) . '.';
+	$response['infos'][]         = '<code>adkim</code>: DKIM domain and "From" domain ' . ( $response['relaxed']['dkim'] ? 'need only share a common registered domain' : 'must be identical' ) . '.';
 
 	$response['relaxed']['spf'] = ( $dmarc['aspf'] ?? 'r' ) === 'r';
-	$response['infos'][]        = 'aspf: Bounce domain and "From" domain ' . ( $response['relaxed']['spf'] ? 'need only share a common registered domain' : 'must be identical' ) . '.';
+	$response['infos'][]        = '<code>aspf</code>: Bounce domain and "From" domain ' . ( $response['relaxed']['spf'] ? 'need only share a common registered domain' : 'must be identical' ) . '.';
 
 	return api_pass( (bool) $response['warnings'], $response );
 }
