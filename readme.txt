@@ -3,7 +3,7 @@ Contributors: brandonxlf
 Tags: email
 Donate link: https://www.brandonfowler.me/donate/
 Tested up to: 6.8
-Stable tag: 1.4.0
+Stable tag: 1.5.0
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -59,12 +59,19 @@ Check out [the GitHub repository](https://github.com/BrandonXLF/email-auth) to l
 
 == Changelog ==
 
+= 1.5.0 =
+
+- Show DMARC alignment checks
+- Show current DNS TXT record for all check types
+- Optimize plugin file loading
+- Use configured sever IP for recommended SPF record
+
 = 1.4.0 =
 
 - Warn about non (soft) fail all SPF terms
 - Resolve DNS with popular DNS servers directly
 - Show the SPF server IP being tested
-- Make the SPF server IP to be configurable
+- Allow the SPF server IP to be configured
 - Add buttons to recheck sections
 
 = 1.3.0 =
