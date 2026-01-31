@@ -142,11 +142,11 @@ class MailerHooksTest extends \WP_UnitTestCase {
 
 		wp_mail( 'test@domain.test', 'Test', 'Testing 1 2 3' );
 
+		$phpmailer_addresses = $phpmailer->getReplyToAddresses();
+		$this->assertCount( 1, $phpmailer_addresses );
 		$this->assertEquals(
-			[
-				'me@reply.test' => [ 'me@reply.test', '' ],
-			],
-			$phpmailer->getReplyToAddresses()
+			[ 'me@reply.test', '' ],
+			reset( $phpmailer_addresses )
 		);
 
 		delete_option( 'eauth_reply_to' );
@@ -160,11 +160,11 @@ class MailerHooksTest extends \WP_UnitTestCase {
 
 		wp_mail( 'test@domain.test', 'Test', 'Testing 1 2 3' );
 
+		$phpmailer_addresses = $phpmailer->getReplyToAddresses();
+		$this->assertCount( 1, $phpmailer_addresses );
 		$this->assertEquals(
-			[
-				'me@reply.test' => [ 'me@reply.test', 'My Inbox' ],
-			],
-			$phpmailer->getReplyToAddresses()
+			[ 'me@reply.test', 'My Inbox' ],
+			reset( $phpmailer_addresses )
 		);
 
 		delete_option( 'eauth_reply_to' );
