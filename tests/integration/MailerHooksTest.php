@@ -171,7 +171,6 @@ class MailerHooksTest extends \WP_UnitTestCase {
 		delete_option( 'eauth_reply_to_name' );
 	}
 
-
 	public function testIgnoreUnusedBounceAddress() {
 		global $phpmailer;
 
