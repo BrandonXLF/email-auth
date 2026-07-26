@@ -3,7 +3,7 @@ Contributors: brandonxlf
 Tags: email
 Donate link: https://www.brandonfowler.me/donate/
 Tested up to: 7.0
-Stable tag: 1.5.0
+Stable tag: 1.5.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -58,6 +58,10 @@ Check out [the GitHub repository](https://github.com/BrandonXLF/email-auth) to l
 4. Visit "Settings" > "Email Auth" to configure the plugin
 
 == Changelog ==
+
+= 1.5.1 =
+
+Fixed settings page wording.
 
 = 1.5.0 =
 
