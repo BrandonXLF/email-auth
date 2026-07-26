@@ -165,10 +165,9 @@ add_section(
 add_section(
 	'Bounce Address',
 	function () {
-		$choice = get_option( 'eauth_bounce_address_mode' );
 		?>
 		<div>
-			The bounce address is the address of the email as used by SMTP. Think of the bounce address as the address on the envelope and the from address as the address on the top of the letter. It is import for SPF.
+			The bounce address is the address of the email as used by SMTP. It's not typically seen by users, but it's important for SPF. Think of the bounce address as the address on the envelope and the from address as the address on the top of the letter.
 		</div>
 		<?php
 		radio_inputs(
