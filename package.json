@@ -2,10 +2,28 @@
 	"devDependencies": {
 		"@wordpress/eslint-plugin": "^22.0.0",
 		"eslint": "^8.57.1",
-		"prettier": "^3.4.2"
+		"prettier": "^3.4.2",
+		"stylelint": "^16.14.1",
+		"stylelint-config-standard": "^36.0.1"
 	},
 	"scripts": {
-		"lint": "eslint admin/js/**",
-		"lint:fix": "eslint admin/js/** --fix"
+		"lint": "npm run lint:js && npm run lint:css",
+		"lint:js": "eslint admin/js/**",
+		"lint:css": "stylelint \"admin/css/**/*.css\"",
+		"lint:php": "composer lint:php",
+		"phpstan": "composer phpstan",
+		"phpcs": "composer phpcs",
+		"phpcs:wpcs": "composer phpcs:wpcs",
+		"lint:fix": "eslint admin/js/** --fix",
+		"lint:css:fix": "stylelint \"admin/css/**/*.css\" --fix",
+		"prelint:php": "composer install --no-interaction",
+		"prephpstan": "composer install --no-interaction",
+		"prephpcs": "composer install --no-interaction",
+		"prephpcs:wpcs": "composer install --no-interaction",
+		"makepot": "wp i18n make-pot . languages/email-auth.pot --domain=email-auth",
+		"makemo": "wp i18n make-mo languages",
+		"makejson": "wp i18n make-json languages",
+		"makejson:keep": "wp i18n make-json languages --no-purge",
+		"makei18n": "npm run makemo && npm run makejson"
 	}
 }

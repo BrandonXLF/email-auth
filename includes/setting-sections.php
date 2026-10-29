@@ -18,15 +18,38 @@ $eauth_sections = [];
  *
  * @param string   $title The title.
  * @param callable $callback A callback the generates the section's content.
+ * @param string   $id Optional stable section id for in-page links (defaults from English slug).
  */
-function add_section( $title, $callback ) {
+function add_section( $title, $callback, $id = null ) {
 	global $eauth_sections;
+
+	if ( null === $id ) {
+		$id = str_replace( ' ', '-', strtolower( $title ) );
+	}
 
 	$eauth_sections[] = [
 		'title'    => $title,
-		'id'       => str_replace( ' ', '-', strtolower( $title ) ),
+		'id'       => $id,
 		'callback' => $callback,
 	];
+}
+
+/**
+ * Enqueue an admin script and load script translations.
+ *
+ * @param string $handle Script handle.
+ * @param string $file Path under the plugin root, e.g. admin/js/spf.js.
+ */
+function enqueue_admin_script( $handle, $file ) {
+	wp_enqueue_script(
+		$handle,
+		plugin_dir_url( EAUTH_PLUGIN_FILE ) . $file,
+		[ 'jquery', 'eauth_common' ],
+		EAUTH_PLUGIN_VERSION,
+		[ 'in_footer' => true ]
+	);
+
+	wp_set_script_translations( $handle, 'email-auth' );
 }
 
 /**
@@ -94,14 +117,20 @@ function email_input( $addr_name, $addr_placeholder = null, $display_name = null
 	<div class="eauth-email-input">
 		<div class="eauth-address-input">
 			<input name="<?php echo esc_attr( $addr_name ); ?>" value="<?php echo esc_attr( $addr ); ?>" type="text" <?php placeholder( $addr_placeholder ); ?>>
-			Default domain: @<?php echo esc_html( get_domain() ); ?>
+			<?php
+			printf(
+				/* translators: %s: default email domain hostname */
+				\esc_html__( 'Default domain: @%s', 'email-auth' ),
+				esc_html( get_domain() )
+			);
+			?>
 		</div>
 		<div>
 			<?php
 			if ( $display_name ) {
 				$name = get_option( $display_name );
 				?>
-				Display name:
+				<?php \esc_html_e( 'Display name:', 'email-auth' ); ?>
 				<input name="<?php echo esc_attr( $display_name ); ?>" value="<?php echo esc_attr( $name ); ?>" type="text" <?php placeholder( $display_placeholder ); ?>>
 			<?php } ?>
 		</div>
@@ -112,10 +141,10 @@ function email_input( $addr_name, $addr_placeholder = null, $display_name = null
 /**
  * Print radio inputs.
  *
- * @param string                $name The name of the setting.
- * @param array[string]callable $inputs The radio inputs.
+ * @param string                          $name   The name of the setting.
+ * @param array<string, callable(): void> $inputs Map of stored value to label markup callback.
  */
-function radio_inputs( $name, $inputs ) {
+function radio_inputs( string $name, array $inputs ) {
 	$choice = get_option( $name );
 	?>
 	<div class="eauth-radio-options">
@@ -136,11 +165,18 @@ function radio_inputs( $name, $inputs ) {
 }
 
 add_section(
-	'From Address',
+	\__( 'From Address', 'email-auth' ),
 	function () {
 		?>
 		<div>
-			<?php email_input( 'eauth_from_address', 'wordpress@' . get_domain(), 'eauth_from_address_name', 'WordPress' ); ?>
+			<?php
+			email_input(
+				'eauth_from_address',
+				'wordpress@' . get_domain(),
+				'eauth_from_address_name',
+				\__( 'WordPress', 'email-auth' )
+			);
+			?>
 		</div>
 		<?php
 		$force = get_option( 'eauth_from_address_force' );
@@ -148,26 +184,27 @@ add_section(
 		<div>
 			<label>
 				<input name="eauth_from_address_force" type="checkbox" value="1" <?php checked( true, $force ); ?>>
-				Force the use of the address above and ignore other plugins.
+				<?php \esc_html_e( 'Force the use of the address above and ignore other plugins.', 'email-auth' ); ?>
 			</label>
 		</div>
-		<h3>Reply-To Address</h3>
+		<h3><?php \esc_html_e( 'Reply-To Address', 'email-auth' ); ?></h3>
 		<div>
-			Email address where replies are sent. Leave blank to use the "From" address.
+			<?php \esc_html_e( 'Email address where replies are sent. Leave blank to use the "From" address.', 'email-auth' ); ?>
 		</div>
 		<div>
 			<?php email_input( 'eauth_reply_to', null, 'eauth_reply_to_name' ); ?>
 		</div>
 		<?php
-	}
+	},
+	'from-address'
 );
 
 add_section(
-	'Bounce Address',
+	\__( 'Bounce Address', 'email-auth' ),
 	function () {
 		?>
 		<div>
-			The bounce address is the address of the email as used by SMTP. It's not typically seen by users, but it's important for SPF. Think of the bounce address as the address on the envelope and the from address as the address on the top of the letter.
+			<?php \esc_html_e( 'The bounce address is the address of the email as used by SMTP. It\'s not typically seen by users, but it\'s important for SPF. Think of the bounce address as the address on the envelope and the from address as the address on the top of the letter.', 'email-auth' ); ?>
 		</div>
 		<?php
 		radio_inputs(
@@ -175,12 +212,12 @@ add_section(
 			[
 				''       => function () {
 					?>
-					<span>Don't set</span>
+					<span><?php \esc_html_e( 'Don\'t set', 'email-auth' ); ?></span>
 					<?php
 				},
 				'from'   => function () {
 					?>
-					<span>Use the from address<i class="eauth-variable" data-prefix=" - " data-variable="fromAddress"></i></span>
+					<span><?php \esc_html_e( 'Use the from address', 'email-auth' ); ?><i class="eauth-variable" data-prefix=" - " data-variable="fromAddress"></i></span>
 					<?php
 				},
 				'custom' => function () {
@@ -188,21 +225,16 @@ add_section(
 				},
 			]
 		);
-	}
+	},
+	'bounce-address'
 );
 
 add_section(
-	'DKIM',
+	\__( 'DKIM', 'email-auth' ),
 	function () {
 		$selector = get_option( 'eauth_dkim_selector' );
 
-		wp_enqueue_script(
-			'eauth_dkim_script',
-			plugin_dir_url( EAUTH_PLUGIN_FILE ) . 'admin/js/dkim.js',
-			[ 'jquery', 'eauth_common' ],
-			EAUTH_PLUGIN_VERSION,
-			[ 'in_footer' => true ]
-		);
+		enqueue_admin_script( 'eauth_dkim_script', 'admin/js/dkim.js' );
 
 		wp_localize_script(
 			'eauth_dkim_script',
@@ -213,25 +245,25 @@ add_section(
 		<div id="eauth-dkim-status" class="eauth-status"></div>
 		<div class="eauth-pre-output-static">
 			<label>
-				Selector:
+				<?php \esc_html_e( 'Selector:', 'email-auth' ); ?>
 				<select name="eauth_dkim_selector">
-					<option value="">Disabled</option>
+					<option value=""><?php \esc_html_e( 'Disabled', 'email-auth' ); ?></option>
 					<option selected><?php echo esc_html( $selector ); ?></option>
 				</select>
 			</label>
 		</div>
 		<div id="eauth-dkim-dns" class="eauth-output"></div>
-		<h3>Manage Keys</h3>
+		<h3><?php \esc_html_e( 'Manage Keys', 'email-auth' ); ?></h3>
 		<div id="eauth-dkim-manager-error" class="error inline multiline"></div>
 		<ul id="eauth-dkim-manager"></ul>
 		<div>
-			<input name="eauth_dkim_new_selector" id="dkim-new-name" type="text" <?php placeholder_label( 'Selector name' ); ?>>
-			<button type="button" id="eauth-dkim-upload" class="button">Upload Key</button>
-			<button type="button" id="eauth-dkim-create" class="button">Create Key</button>
+			<input name="eauth_dkim_new_selector" id="dkim-new-name" type="text" <?php placeholder_label( \__( 'Selector name', 'email-auth' ) ); ?>>
+			<button type="button" id="eauth-dkim-upload" class="button"><?php \esc_html_e( 'Upload Key', 'email-auth' ); ?></button>
+			<button type="button" id="eauth-dkim-create" class="button"><?php \esc_html_e( 'Create Key', 'email-auth' ); ?></button>
 		</div>
-		<h3 id="dkim-domain">DKIM Domain</h3>
+		<h3 id="dkim-domain"><?php \esc_html_e( 'DKIM Domain', 'email-auth' ); ?></h3>
 		<div>
-			The DKIM domain is the domain that is verified through the DKIM check. If it does not match the "From" address, then the email may be rejected or displayed differently.
+			<?php \esc_html_e( 'The DKIM domain is the domain that is verified through the DKIM check. If it does not match the "From" address, then the email may be rejected or displayed differently.', 'email-auth' ); ?>
 		</div>
 		<?php
 		radio_inputs(
@@ -239,17 +271,20 @@ add_section(
 			[
 				'wp'     => function () {
 					?>
-					<span>Use WordPress's domain - <span class="eauth-value"><?php echo esc_html( get_domain() ); ?></span></span>
+					<span>
+						<?php \esc_html_e( 'Use WordPress\'s domain -', 'email-auth' ); ?>
+						<span class="eauth-value"><?php echo esc_html( get_domain() ); ?></span>
+					</span>
 					<?php
 				},
 				'from'   => function () {
 					?>
-					<span>Use the from address's domain<span class="eauth-variable" data-prefix=" - " data-variable="fromDomain"></span></span>
+					<span><?php \esc_html_e( 'Use the from address\'s domain', 'email-auth' ); ?><span class="eauth-variable" data-prefix=" - " data-variable="fromDomain"></span></span>
 					<?php
 				},
 				'bounce' => function () {
 					?>
-					<span>Use the bounce address's domain<span class="eauth-variable" data-prefix=" - " data-variable="bounceDomain"></span></span>
+					<span><?php \esc_html_e( 'Use the bounce address\'s domain', 'email-auth' ); ?><span class="eauth-variable" data-prefix=" - " data-variable="bounceDomain"></span></span>
 					<?php
 				},
 				'custom' => function () {
@@ -260,19 +295,14 @@ add_section(
 				},
 			]
 		);
-	}
+	},
+	'dkim'
 );
 
 add_section(
-	'SPF',
+	\__( 'SPF', 'email-auth' ),
 	function () {
-		wp_enqueue_script(
-			'eauth_spf_script',
-			plugin_dir_url( EAUTH_PLUGIN_FILE ) . 'admin/js/spf.js',
-			[ 'jquery', 'eauth_common' ],
-			EAUTH_PLUGIN_VERSION,
-			[ 'in_footer' => true ]
-		);
+		enqueue_admin_script( 'eauth_spf_script', 'admin/js/spf.js' );
 
 		wp_localize_script(
 			'eauth_spf_script',
@@ -286,9 +316,9 @@ add_section(
 		<div id="eauth-spf-status" class="eauth-status"></div>
 		<div id="eauth-spf-checker" class="eauth-output"></div>
 		<dialog id="eauth-spf-set-ip-dialog" class="eauth-dialog">
-			<h3>Email Server IP Address for SPF Checks</h3>
+			<h3><?php \esc_html_e( 'Email Server IP Address for SPF Checks', 'email-auth' ); ?></h3>
 			<p>
-				To get accurate SPF checks, this must be the IP address of the server that sends outbound emails.
+				<?php \esc_html_e( 'To get accurate SPF checks, this must be the IP address of the server that sends outbound emails.', 'email-auth' ); ?>
 			</p>
 			<?php
 			radio_inputs(
@@ -297,14 +327,14 @@ add_section(
 					'wp'     => function () {
 						?>
 						<span>
-							Use WordPress's server's IP address - Emails are sent from the same server as WordPress
+							<?php \esc_html_e( 'Use WordPress\'s server\'s IP address - Emails are sent from the same server as WordPress', 'email-auth' ); ?>
 						</span>
 						<?php
 					},
 					'bounce' => function () {
 						?>
 						<span>
-							Use the bounce address's mail exchange IP - Same server is used for inbound and outbound emails
+							<?php \esc_html_e( 'Use the bounce address\'s mail exchange IP - Same server is used for inbound and outbound emails', 'email-auth' ); ?>
 						</span>
 						<?php
 					},
@@ -312,7 +342,7 @@ add_section(
 						$custom = get_option( 'eauth_spf_server_ip_custom' );
 						?>
 						<input name="eauth_spf_server_ip_custom" value="<?php echo esc_attr( $custom ); ?>" type="text">
-						<a target="_blank" href="https://www.youtube.com/watch?v=_QNxGwEFTS4">Guide video</a>
+						<a target="_blank" href="https://www.youtube.com/watch?v=_QNxGwEFTS4"><?php \esc_html_e( 'Guide video', 'email-auth' ); ?></a>
 						<?php
 					},
 				]
@@ -320,27 +350,22 @@ add_section(
 		?>
 			<div id="eauth-spf-set-ip-buttons">
 				<button type="button" id="eauth-spf-set-ip" class="button">
-					Save IP Configuration
+					<?php \esc_html_e( 'Save IP Configuration', 'email-auth' ); ?>
 				</button>
 				<button type="button" id="eauth-spf-set-ip-close" class="button-link">
-					Close
+					<?php \esc_html_e( 'Close', 'email-auth' ); ?>
 				</button>
 			</div>
 		</dialog>
 		<?php
-	}
+	},
+	'spf'
 );
 
 add_section(
-	'DMARC',
+	\__( 'DMARC', 'email-auth' ),
 	function () {
-		wp_enqueue_script(
-			'eauth_dmarc_script',
-			plugin_dir_url( EAUTH_PLUGIN_FILE ) . 'admin/js/dmarc.js',
-			[ 'jquery', 'eauth_common' ],
-			EAUTH_PLUGIN_VERSION,
-			[ 'in_footer' => true ]
-		);
+		enqueue_admin_script( 'eauth_dmarc_script', 'admin/js/dmarc.js' );
 
 		wp_localize_script(
 			'eauth_spf_script',
@@ -354,20 +379,22 @@ add_section(
 		<div id="eauth-dmarc-status" class="eauth-status"></div>
 		<div id="eauth-dmarc-checker" class="eauth-output"></div>
 		<?php
-	}
+	},
+	'dmarc'
 );
 
 add_section(
-	'Save Changes',
+	\__( 'Save Changes', 'email-auth' ),
 	function () {
 		?>
 		<div>
-			<input id="eauth-test-to" name="eauth_test_to" type="email" <?php placeholder_label( 'Test email address' ); ?>>
-			<input type="submit" name="eauth_send_test" value="Save & Send Test" class="button">
+			<input id="eauth-test-to" name="eauth_test_to" type="email" <?php placeholder_label( \__( 'Test email address', 'email-auth' ) ); ?>>
+			<input type="submit" name="eauth_send_test" value="<?php echo \esc_attr__( 'Save & Send Test', 'email-auth' ); ?>" class="button">
 		</div>
 		<div>
-			<input type="submit" value="<?php echo esc_attr( 'Save Changes' ); ?>" class="button button-primary">
+			<input type="submit" value="<?php echo \esc_attr__( 'Save Changes', 'email-auth' ); ?>" class="button button-primary">
 		</div>
 		<?php
-	}
+	},
+	'save-changes'
 );

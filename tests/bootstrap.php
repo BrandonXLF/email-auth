@@ -32,7 +32,7 @@ if ( ! file_exists( "{$_tests_dir}/includes/functions.php" ) ) {
 	require_once "{$_tests_dir}/includes/functions.php";
 
 	// Manually load the plugin.
-	tests_add_filter(
+	\tests_add_filter(
 		'muplugins_loaded',
 		function () {
 			require dirname( __DIR__ ) . '/email-auth.php';

@@ -58,13 +58,13 @@ register_rest_route(
 			$obj  = $request->get_json_params();
 
 			if ( ! $name ) {
-				return dkim_create_error( 'No selector name given.' );
+				return dkim_create_error( \__( 'No selector name given.', 'email-auth' ) );
 			}
 
 			$keys = get_keys();
 
 			if ( array_key_exists( $name, $keys ) ) {
-				return dkim_create_error( 'A key with that name already exists.' );
+				return dkim_create_error( \__( 'A key with that name already exists.', 'email-auth' ) );
 			}
 
 			$pk = array_key_exists( 'key', $obj )
@@ -78,13 +78,13 @@ register_rest_route(
 				);
 
 			if ( ! $pk ) {
-				return dkim_create_error( 'Failed to create private key.', true );
+				return dkim_create_error( \__( 'Failed to create private key.', 'email-auth' ), true );
 			}
 
 			$exported = openssl_pkey_export( $pk, $private_string );
 
 			if ( ! $exported ) {
-				return dkim_create_error( 'Failed to export private key.', true );
+				return dkim_create_error( \__( 'Failed to export private key.', 'email-auth' ), true );
 			}
 
 			$keys = array_merge(

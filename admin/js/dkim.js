@@ -1,5 +1,7 @@
 /* global eauthDkimApi */
 
+const { __, sprintf } = wp.i18n;
+
 jQuery(($) => {
 	const selectorSelect = $('[name="eauth_dkim_selector"]');
 
@@ -16,14 +18,17 @@ jQuery(($) => {
 			if (!selectorSelect.val()) {
 				return {
 					pass: false,
-					reason: 'No DKIM selector.',
+					reason: __('No DKIM selector.', 'email-auth'),
 				};
 			}
 
 			if (EmailAuthPlugin.instance.extra.dkimDomain === null) {
 				return {
 					pass: null,
-					reason: 'Unknown DKIM domain. DKIM will only be applied if the domain can be figured out by WordPress.',
+					reason: __(
+						'Unknown DKIM domain. DKIM will only be applied if the domain can be figured out by WordPress.',
+						'email-auth'
+					),
 				};
 			}
 		},
@@ -33,20 +38,20 @@ jQuery(($) => {
 					level: 'warning',
 					desc,
 				})),
-				'Warnings'
+				__('Warnings', 'email-auth')
 			),
-			res.dns && $('<h3>').text('Generated DNS Record'),
+			res.dns && $('<h3>').text(__('Generated DNS Record', 'email-auth')),
 			res.dns &&
 				$('<details>').append(
 					$('<summary>')
 						.addClass('button-link')
-						.append('Show Generated DNS Record'),
+						.append(__('Show Generated DNS Record', 'email-auth')),
 					EmailAuthPlugin.createTxtRecord(res.host, res.dns)
 				),
 		],
 		{
 			get: (res) => res.host,
-			type: 'DKIM Domain',
+			type: __('DKIM Domain', 'email-auth'),
 			link: '#dkim-domain',
 			typeHasDomain: true,
 		},
@@ -97,7 +102,7 @@ jQuery(($) => {
 	}
 
 	async function loadKeys() {
-		$('#eauth-dkim-manager').text('Loading keys...');
+		$('#eauth-dkim-manager').text(__('Loading keys…', 'email-auth'));
 
 		const keys = await (
 			await EmailAuthPlugin.request(eauthDkimApi.keys)
@@ -106,7 +111,7 @@ jQuery(($) => {
 		const selectorValue = selectorSelect.val();
 
 		selectorSelect.empty().append(
-			$('<option value="">Disabled</option>'),
+			$('<option value="">').text(__('Disabled', 'email-auth')),
 			keys.map((key) => $('<option>').text(key))
 		);
 
@@ -124,21 +129,27 @@ jQuery(($) => {
 					$('<li class="eauth-dkim-key">').append(
 						selector,
 						' ',
-						$('<button type="button">[Download]</button>').on(
-							'click',
-							async () => {
+						$('<button type="button">')
+							.text(__('Download', 'email-auth'))
+							.on('click', async () => {
 								window.open(
 									`${eauthDkimApi.keys}/${selector}/download?_wpnonce=${eauthCommonConfig.nonce}`
 								);
-							}
-						),
+							}),
 						' ',
-						$('<button type="button">[Delete]</button>').on(
-							'click',
-							async () => {
+						$('<button type="button">')
+							.text(__('Delete', 'email-auth'))
+							.on('click', async () => {
 								if (
 									!confirm(
-										`Are you sure you want to delete the key with selector ${selector}?`
+										sprintf(
+											/* translators: %s: DKIM selector name */
+											__(
+												'Are you sure you want to delete the key with selector %s?',
+												'email-auth'
+											),
+											selector
+										)
 									)
 								) {
 									return;
@@ -152,8 +163,7 @@ jQuery(($) => {
 								);
 
 								await loadKeys();
-							}
-						)
+							})
 					)
 				)
 			);
@@ -166,7 +176,14 @@ jQuery(($) => {
 
 		if (!compliantSelectorPattern.test(selector)) {
 			const ignoreNonCompliant = confirm(
-				`Selector "${selector}" is non-standard. A valid selector must contain ASCII letters and numbers with optional hyphens in-between. Dots can be used to separate subdomains. Would you like to continue anyway?`
+				sprintf(
+					/* translators: %s: DKIM selector name */
+					__(
+						'Selector "%s" is non-standard. A valid selector must contain ASCII letters and numbers with optional hyphens in-between. Dots can be used to separate subdomains. Would you like to continue anyway?',
+						'email-auth'
+					),
+					selector
+				)
 			);
 
 			if (!ignoreNonCompliant) {

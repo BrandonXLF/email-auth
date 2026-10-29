@@ -1,3 +1,5 @@
+const { __, sprintf } = wp.i18n;
+
 class EAUTHRadioDependentListener {
 	name;
 	callback;
@@ -44,19 +46,24 @@ class EAUTHChecker {
 		const el = jQuery('<div>');
 
 		el.append(
-			'Domain: ',
+			__('Domain:', 'email-auth'),
+			' ',
 			jQuery('<span>').addClass('eauth-value').text(domain)
 		);
 
 		if (fallbackDomain) {
 			el.append(
-				' with fallback ',
+				' ',
+				__('with fallback', 'email-auth'),
+				' ',
 				jQuery('<span>').addClass('eauth-value').text(fallbackDomain)
 			);
 		}
 
 		el.append(
-			' (from ',
+			' (',
+			__('from', 'email-auth'),
+			' ',
 			jQuery('<a>').attr('href', sourceLink).text(sourceName),
 			')'
 		);
@@ -131,18 +138,27 @@ class EAUTHChecker {
 				jQuery('<a>')
 					.attr('href', this.domain.link)
 					.text(this.domain.type),
-				this.domain.typeHasDomain ? '' : ' domain',
+				this.domain.typeHasDomain
+					? ''
+					: ' ' + __('domain', 'email-auth'),
 				' (',
 				jQuery('<span>').addClass('eauth-value').text(alignmentDomain),
-				') and ',
+				`) ${__('and', 'email-auth')} `,
 				jQuery('<a>')
 					.attr('href', '#from-address')
-					.text('From Address'),
-				' domain (',
+					.text(__('From Address', 'email-auth')),
+				` ${__('domain', 'email-auth')} (`,
 				jQuery('<span>')
 					.addClass('eauth-value')
 					.text(this.plugin.fromDomain),
-				`) do not match, so the from address domain cannot be strictly verified through ${this.checkType}.`
+				`) ${sprintf(
+					/* translators: %s: check type such as SPF or DKIM */
+					__(
+						'do not match, so the from address domain cannot be strictly verified through %s.',
+						'email-auth'
+					),
+					this.checkType
+				)}`
 			)
 		);
 	}
@@ -183,7 +199,7 @@ class EAUTHChecker {
 			return this.alignmentStatus(
 				getCheckedDomain(),
 				'partial',
-				'Configured with warnings.',
+				__('Configured with warnings.', 'email-auth'),
 				setStatusInfo
 			);
 		}
@@ -191,7 +207,7 @@ class EAUTHChecker {
 		return this.alignmentStatus(
 			getCheckedDomain(),
 			'pass',
-			'Configured.',
+			__('Configured.', 'email-auth'),
 			setStatusInfo
 		);
 	}
@@ -202,17 +218,25 @@ class EAUTHChecker {
 
 		const button = jQuery('<button>')
 			.attr('type', 'button')
-			.text('Expand')
+			.text(__('Expand', 'email-auth'))
 			.addClass('button-link eauth-current-record-expand')
 			.on('click', () => {
 				cnt.toggleClass(expandedClass);
 				const isExpanded = cnt.hasClass(expandedClass);
-				button.text(isExpanded ? 'Collapse' : 'Expand');
+				button.text(
+					isExpanded
+						? __('Collapse', 'email-auth')
+						: __('Expand', 'email-auth')
+				);
 			});
 
 		this.currentRecord = jQuery('<div>')
 			.addClass('eauth-current-record')
-			.append('Current record: ', jQuery('<code>').text(record));
+			.append(
+				__('Current record:', 'email-auth'),
+				' ',
+				jQuery('<code>').text(record)
+			);
 
 		this.currentRecordObserver.observe(this.currentRecord[0]);
 
@@ -237,7 +261,13 @@ class EAUTHChecker {
 			return;
 		}
 
-		this.status.text(`Loading ${this.checkType} record...`);
+		this.status.text(
+			sprintf(
+				/* translators: %s: record type such as SPF or DKIM */
+				__('Loading %s record…', 'email-auth'),
+				this.checkType
+			)
+		);
 		this.heading.attr('data-status', '');
 
 		this.requestAborter = new AbortController();
@@ -264,7 +294,10 @@ class EAUTHChecker {
 						.attr('type', 'button')
 						.attr(
 							'title',
-							'Recheck. Note that DNS changes may take a few minutes to show depending on their TTL.'
+							__(
+								'Recheck. Note that DNS changes may take a few minutes to show depending on their TTL.',
+								'email-auth'
+							)
 						)
 						.on('click', this.boundCheck)
 				);
@@ -352,7 +385,8 @@ class EmailAuthPlugin extends EventTarget {
 			.addClass('eauth-dns-record')
 			.append(
 				jQuery('<dt>').append(
-					'TXT record for ',
+					__('TXT record for', 'email-auth'),
+					' ',
 					jQuery('<code>').text(host)
 				),
 				jQuery('<dd>').text(record)

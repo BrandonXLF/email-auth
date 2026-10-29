@@ -48,13 +48,13 @@ function check_dkim_dns( $name, $domain, $pk_text, $txt_resolver = null ) {
 	];
 
 	if ( ! $pk ) {
-		return api_failure( 'Failed to read private key from store.' . get_openssl_errors( ' - ' ), $response );
+		return api_failure( \__( 'Failed to read private key from store.', 'email-auth' ) . get_openssl_errors( ' - ' ), $response );
 	}
 
 	$pub = openssl_pkey_get_details( $pk );
 
 	if ( ! $pub ) {
-		return api_failure( 'Failed to get public key.' . get_openssl_errors( ' - ' ), $response );
+		return api_failure( \__( 'Failed to get public key.', 'email-auth' ) . get_openssl_errors( ' - ' ), $response );
 	}
 
 	$pub = $pub['key'];
@@ -71,7 +71,7 @@ function check_dkim_dns( $name, $domain, $pk_text, $txt_resolver = null ) {
 	$dkim           = null;
 
 	if ( ! preg_match( EAUTH_DKIM_SELECTOR_REGEX, $name ) ) {
-		$response['warnings'][] = 'Selector name is non-standard.';
+		$response['warnings'][] = \__( 'Selector name is non-standard.', 'email-auth' );
 	}
 
 	try {
@@ -85,29 +85,29 @@ function check_dkim_dns( $name, $domain, $pk_text, $txt_resolver = null ) {
 	}
 
 	if ( empty( $dkim['p'] ) ) {
-		return api_failure( 'Public key is missing.', $response );
+		return api_failure( \__( 'Public key is missing.', 'email-auth' ), $response );
 	}
 
 	if ( $dkim['p'] !== $pub ) {
-		return api_failure( 'Public key is incorrect.', $response );
+		return api_failure( \__( 'Public key is incorrect.', 'email-auth' ), $response );
 	}
 
 	if ( array_key_exists( 'v', $dkim ) ) {
 		if ( array_key_first( $dkim ) !== 'v' ) {
-			return api_failure( 'Version identifier must be the first tag if present.', $response );
+			return api_failure( \__( 'Version identifier must be the first tag if present.', 'email-auth' ), $response );
 		}
 
 		if ( 'DKIM1' !== $dkim['v'] ) {
-			return api_failure( 'Version identifier must be v=DKIM1 if present.', $response );
+			return api_failure( \__( 'Version identifier must be v=DKIM1 if present.', 'email-auth' ), $response );
 		}
 	}
 
 	if ( isset( $dkim['s'] ) && ! array_intersect( [ '*', 'email' ], parse_colon_list( $dkim['s'] ) ) ) {
-		return api_failure( 'Record service type must include email (or *).', $response );
+		return api_failure( \__( 'Record service type must include email (or *).', 'email-auth' ), $response );
 	}
 
 	if ( isset( $dkim['t'] ) && in_array( 'y', parse_colon_list( $dkim['t'] ), true ) ) {
-		$response['warnings'][] = 'Test mode is enabled, DKIM policy might be ignored.';
+		$response['warnings'][] = \__( 'Test mode is enabled, DKIM policy might be ignored.', 'email-auth' );
 	}
 
 	return api_pass( (bool) $response['warnings'], $response );

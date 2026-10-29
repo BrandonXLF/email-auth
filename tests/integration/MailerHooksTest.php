@@ -9,13 +9,16 @@
 
 namespace EmailAuthPlugin;
 
+require_once dirname( __DIR__ ) . '/stubs/wp-tests-classes.php';
+require_once dirname( __DIR__ ) . '/stubs/wp-tests-functions.php';
+
 /**
  * Tests for check_dkim_dns.
  */
 class MailerHooksTest extends \WP_UnitTestCase {
 	public function set_up(): void {
 		parent::set_up();
-		reset_phpmailer_instance();
+		\reset_phpmailer_instance();
 	}
 
 	public function testNoneSet() {

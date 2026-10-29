@@ -21,7 +21,7 @@ wp_enqueue_style(
 ?>
 
 <div class="wrap" id="eauth-wrap">
-	<h1>Email Auth</h1>
+	<h1><?php \esc_html_e( 'Email Auth', 'email-auth' ); ?></h1>
 	<form action="options.php" method="post" id="eauth-options">
 		<?php settings_fields( 'eauth_settings' ); ?>
 		<?php show_toc(); ?>

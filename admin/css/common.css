@@ -10,24 +10,24 @@
 	margin: 3em 0 1em;
 	padding: 0.5em;
 	border-bottom: 1px solid black;
-	background: linear-gradient(0.25turn, #ffffff, #00000000);
+	background: linear-gradient(0.25turn, #fff, #0000);
 }
 
 #eauth-wrap h2[data-status="pass"] {
-	background: linear-gradient(0.25turn, #00ff0020, #00000000);
+	background: linear-gradient(0.25turn, #00ff0020, #0000);
 }
 
 #eauth-wrap h2[data-status="error"] {
-	background: linear-gradient(0.25turn, #ff000020, #00000000);
+	background: linear-gradient(0.25turn, #ff000020, #0000);
 }
 
 #eauth-wrap h2[data-status="partial"] {
-	background: linear-gradient(0.25turn, #ffff0020, #00000000);
+	background: linear-gradient(0.25turn, #ffff0020, #0000);
 }
 
 #eauth-wrap h2[data-status="incomplete"],
 #eauth-wrap h2[data-status="unknown"] {
-	background: linear-gradient(0.25turn, #88888820, #00000000);
+	background: linear-gradient(0.25turn, #88888820, #0000);
 }
 
 #eauth-wrap h3 {
@@ -67,7 +67,7 @@
 	margin: 0;
 }
 
-#eauth-toc li:before {
+#eauth-toc li::before {
 	display: none;
 }
 
@@ -84,8 +84,8 @@
 	word-break: break-all;
 }
 
-#eauth-options > :not(h1):not(h2):not(h3):not(dialog),
-.eauth-dialog > :not(h1):not(h2):not(h3){
+#eauth-options > :not(h1, h2, h3, dialog),
+.eauth-dialog > :not(h1, h2, h3){
 	margin: 1em 0;
 }
 
@@ -143,7 +143,7 @@
 	padding: 1em 2em;
 	border: 1px solid black;
 	border-radius: 4px;
-	box-shadow: 2px 2px 7px 0px #00000090;
+	box-shadow: 2px 2px 7px 0 #00000090;
 }
 
 #eauth-wrap .eauth-dialog h3 {
@@ -176,8 +176,7 @@
 
 .eauth-current-record-container {
 	display: flex;
-	column-gap: 1em;
-	row-gap: 0.5em;
+	gap: 0.5em 1em;
 	align-items: start;
 }
 

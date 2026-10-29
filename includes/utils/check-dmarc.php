@@ -20,15 +20,15 @@ if ( ! defined( 'ABSPATH' ) ) {
  */
 function is_dmarc_record( $tags ) {
 	if ( ! array_key_exists( 'v', $tags ) ) {
-		return 'Version identifier (v=DMARC1) is missing.';
+		return \__( 'Version identifier (v=DMARC1) is missing.', 'email-auth' );
 	}
 
 	if ( array_key_first( $tags ) !== 'v' ) {
-		return 'First tag must be the version identifier (v).';
+		return \__( 'First tag must be the version identifier (v).', 'email-auth' );
 	}
 
 	if ( 'DMARC1' !== $tags['v'] ) {
-		return 'Version identifier must be v=DMARC1.';
+		return \__( 'Version identifier must be v=DMARC1.', 'email-auth' );
 	}
 
 	return null;
@@ -97,23 +97,35 @@ function _check_dmarc( $domain, $is_org, $org_domain_failure, $txt_resolver, $fa
 	if ( 'none' === $policy ) {
 		$term_type              = isset( $dmarc['sp'] ) ? 'sp' : 'p';
 		$escaped_term_type      = esc_html( $term_type );
-		$response['warnings'][] = "DMARC will pass regardless of DKIM and SPF alignment. Add a <code>$escaped_term_type=quarantine</code> or <code>$escaped_term_type=reject</code> term.";
+		$response['warnings'][] = sprintf(
+			/* translators: %s: DMARC policy tag name (p or sp) */
+			\__( 'DMARC will pass regardless of DKIM and SPF alignment. Add a <code>%1$s=quarantine</code> or <code>%1$s=reject</code> term.', 'email-auth' ),
+			$escaped_term_type
+		);
 	} elseif ( 'quarantine' === $policy ) {
-		$response['infos'][] = 'Failures will be treated as suspicious, but will not be outright rejected.';
+		$response['infos'][] = \__( 'Failures will be treated as suspicious, but will not be outright rejected.', 'email-auth' );
 	}
 
 	$pct = intval( $dmarc['pct'] ?? '100' );
 
 	if ( $pct < 100 ) {
 		$escaped_pct            = esc_html( $pct );
-		$response['warnings'][] = "DMARC will only fail for $escaped_pct% of failures.";
+		$response['warnings'][] = sprintf(
+			/* translators: %s: percentage of failures DMARC applies to */
+			\__( 'DMARC will only fail for %s%% of failures.', 'email-auth' ),
+			$escaped_pct
+		);
 	}
 
 	$response['relaxed']['dkim'] = ( $dmarc['adkim'] ?? 'r' ) === 'r';
-	$response['infos'][]         = '<code>adkim</code>: DKIM domain and "From" domain ' . ( $response['relaxed']['dkim'] ? 'need only share a common registered domain' : 'must be identical' ) . '.';
+	$response['infos'][]         = $response['relaxed']['dkim']
+		? \__( '<code>adkim</code>: DKIM domain and "From" domain need only share a common registered domain.', 'email-auth' )
+		: \__( '<code>adkim</code>: DKIM domain and "From" domain must be identical.', 'email-auth' );
 
 	$response['relaxed']['spf'] = ( $dmarc['aspf'] ?? 'r' ) === 'r';
-	$response['infos'][]        = '<code>aspf</code>: Bounce domain and "From" domain ' . ( $response['relaxed']['spf'] ? 'need only share a common registered domain' : 'must be identical' ) . '.';
+	$response['infos'][]        = $response['relaxed']['spf']
+		? \__( '<code>aspf</code>: Bounce domain and "From" domain need only share a common registered domain.', 'email-auth' )
+		: \__( '<code>aspf</code>: Bounce domain and "From" domain must be identical.', 'email-auth' );
 
 	return api_pass( (bool) $response['warnings'], $response );
 }

@@ -1,5 +1,7 @@
 /* global eauthDmarcApi */
 
+const { __, sprintf } = wp.i18n;
+
 jQuery(($) => {
 	const orgDomainCache = {};
 	class OrgDomainError extends Error {}
@@ -23,16 +25,24 @@ jQuery(($) => {
 
 	function makeStatusSetter(hasWarnings, setStatusInfo) {
 		return (alignmentStatus, alignmentText, conjunction) => {
-			conjunction = conjunction ?? (hasWarnings ? 'and' : 'with');
+			conjunction =
+				conjunction ??
+				(hasWarnings
+					? __('and', 'email-auth')
+					: __('with', 'email-auth'));
 
 			const statusCode =
 				alignmentStatus === 'pass' && hasWarnings
 					? 'partial'
 					: alignmentStatus;
 
+			const configuredPart = hasWarnings
+				? __('Configured with warnings', 'email-auth')
+				: __('Configured', 'email-auth');
+
 			setStatusInfo(
 				statusCode,
-				`Configured${hasWarnings ? ' with warnings' : ''} ${conjunction} ${alignmentText}.`
+				`${configuredPart} ${conjunction} ${alignmentText}.`
 			);
 		};
 	}
@@ -48,13 +58,24 @@ jQuery(($) => {
 		const escapedName = EmailAuthPlugin.escapeHtml(name);
 
 		if (result === false) {
-			return { level: 'error', desc: `${escapedName} check failed.` };
+			return {
+				level: 'error',
+				desc: sprintf(
+					/* translators: %s: alignment check name (DKIM or SPF) */
+					__('%s check failed.', 'email-auth'),
+					escapedName
+				),
+			};
 		}
 
 		if (validateDomain === null) {
 			return {
 				level: 'unknown',
-				desc: `${escapedName} alignment unknown.`,
+				desc: sprintf(
+					/* translators: %s: alignment check name (DKIM or SPF) */
+					__('%s alignment unknown.', 'email-auth'),
+					escapedName
+				),
 			};
 		}
 
@@ -74,15 +95,38 @@ jQuery(($) => {
 		if (validateDomain !== fromDomain) {
 			return {
 				level: 'error',
-				desc: `${escapedName} alignment failed: ${EmailAuthPlugin.escapeHtml(validateDomain)} does not match from domain ${EmailAuthPlugin.escapeHtml(fromDomain)}.`,
+				desc: sprintf(
+					/* translators: 1: validated domain, 2: from domain */
+					__(
+						'%1$s alignment failed: %2$s does not match from domain %3$s.',
+						'email-auth'
+					),
+					escapedName,
+					EmailAuthPlugin.escapeHtml(validateDomain),
+					EmailAuthPlugin.escapeHtml(fromDomain)
+				),
 			};
 		}
 
 		if (result === null) {
-			return { level: 'unknown', desc: `${escapedName} result unknown.` };
+			return {
+				level: 'unknown',
+				desc: sprintf(
+					/* translators: %s: alignment check name (DKIM or SPF) */
+					__('%s result unknown.', 'email-auth'),
+					escapedName
+				),
+			};
 		}
 
-		return { level: 'pass', desc: `${escapedName} alignment passed.` };
+		return {
+			level: 'pass',
+			desc: sprintf(
+				/* translators: %s: alignment check name (DKIM or SPF) */
+				__('%s alignment passed.', 'email-auth'),
+				escapedName
+			),
+		};
 	}
 
 	function addAlignmentCheck(
@@ -121,8 +165,14 @@ jQuery(($) => {
 
 	function addAlignmentChecks(relaxed, setAlignmentStatus) {
 		const results = {
-			dkim: { level: 'unknown', desc: `Check in progress...` },
-			spf: { level: 'unknown', desc: `Check in progress...` },
+			dkim: {
+				level: 'unknown',
+				desc: __('Check in progress…', 'email-auth'),
+			},
+			spf: {
+				level: 'unknown',
+				desc: __('Check in progress…', 'email-auth'),
+			},
 		};
 
 		const onRun = (checkId, result) => {
@@ -133,7 +183,7 @@ jQuery(($) => {
 				.replaceWith(
 					EmailAuthPlugin.createCommentList(
 						Object.values(results),
-						'Alignment Checks'
+						__('Alignment Checks', 'email-auth')
 					).addClass('eauth-dmarc-alignment-check-component')
 				)
 				.end()
@@ -143,7 +193,7 @@ jQuery(($) => {
 				({ level }) => level === 'pass'
 			);
 			if (pass) {
-				setAlignmentStatus('pass', 'alignment');
+				setAlignmentStatus('pass', __('alignment', 'email-auth'));
 				return;
 			}
 
@@ -151,11 +201,18 @@ jQuery(($) => {
 				({ level }) => level === 'unknown'
 			);
 			if (unknown) {
-				setAlignmentStatus('incomplete', 'unknown alignment');
+				setAlignmentStatus(
+					'incomplete',
+					__('unknown alignment', 'email-auth')
+				);
 				return;
 			}
 
-			setAlignmentStatus('error', 'alignment checks failed', 'but');
+			setAlignmentStatus(
+				'error',
+				__('alignment checks failed', 'email-auth'),
+				__('but', 'email-auth')
+			);
 		};
 
 		const disposeDKIMCheck = addAlignmentCheck(
@@ -202,18 +259,18 @@ jQuery(($) => {
 						level: 'warning',
 						desc,
 					})),
-					'Warnings'
+					__('Warnings', 'email-auth')
 				),
 				EmailAuthPlugin.createCommentList(
 					res.infos.map((desc) => ({ desc })),
-					'Comments'
+					__('Comments', 'email-auth')
 				),
 			];
 		},
 		{
 			get: () => `_dmarc.${EmailAuthPlugin.instance.fromDomain}`,
 			getFallback: (res) => res.org && `_dmarc.${res.org}`,
-			type: 'From Address',
+			type: __('From Address', 'email-auth'),
 			link: '#from-address',
 		},
 		(res, setStatusInfo) => {
@@ -226,7 +283,10 @@ jQuery(($) => {
 				res.pass === 'partial',
 				setStatusInfo
 			);
-			setAlignmentStatus('incomplete', 'unknown alignments');
+			setAlignmentStatus(
+				'incomplete',
+				__('unknown alignments', 'email-auth')
+			);
 
 			return addAlignmentChecks(res.relaxed, setAlignmentStatus);
 		}

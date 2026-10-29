@@ -15,12 +15,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 /**
  * Get the DNS tag-value map for a given domain for DKIM and DMARC.
  *
- * @param string      $domain The domain to get the DNS records from.
- * @param callable    $filter Function that filters out records with invalid tag-value pairs. If specified, malformed records are also ignored.
- *                            Returns HTML reason for filtering out the record, or null if the record is valid.
- * @param array       $filter_reasons Array of HTML strings to store reasons for filtering out records.
- * @param TxtResolver $txt_resolver Function to get TXT records with.
- * @return [string, string]
+ * @param string                                   $domain         The domain to get the DNS records from.
+ * @param callable(array<string, string>): ?string $filter         Optional record validator; returns an HTML reason or null if valid.
+ * @param array<int, string>                       $filter_reasons Reasons for filtered records (by reference).
+ * @param TxtResolver|null                         $txt_resolver   DNS TXT resolver.
+ * @return array{array<string, string>, string}                     Tag map and raw TXT record text.
  *
  * @throws MissingException Record could not be fetch or no record present.
  * @throws InvalidException DNS retrieval returned results, but the result are invalid. Eg: Multiple DNS records.
@@ -49,12 +48,12 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 
 			if ( false === $pos ) {
 				if ( $filter ) {
-					$filter_reasons[] = 'Potential record ignored: Malformed tag-value pair.';
+					$filter_reasons[] = \__( 'Potential record ignored: Malformed tag-value pair.', 'email-auth' );
 					continue 2;
 				}
 
 				require_once __DIR__ . '/class-malformedexception.php';
-				throw new MalformedException( 'Malformed tag-value pair.', $record );
+				throw new MalformedException( \__( 'Malformed tag-value pair.', 'email-auth' ), $record );
 			}
 
 			$key = trim( substr( $part, 0, $pos ) );
@@ -63,7 +62,11 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 			if ( array_key_exists( $key, $tags ) ) {
 				require_once __DIR__ . '/class-malformedexception.php';
 				throw new MalformedException(
-					'Multiple tag-values pairs with the same key (' . $key . ').',
+					sprintf(
+						/* translators: %s: duplicate DNS tag key */
+						\__( 'Multiple tag-values pairs with the same key (%s).', 'email-auth' ),
+						$key
+					),
 					$record
 				);
 			}
@@ -75,7 +78,11 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 			$filter_reason = call_user_func( $filter, $tags );
 
 			if ( null !== $filter_reason ) {
-				$filter_reasons[] = 'Potential record ignored: ' . $filter_reason;
+				$filter_reasons[] = sprintf(
+					/* translators: %s: reason the DNS record was ignored */
+					\__( 'Potential record ignored: %s', 'email-auth' ),
+					$filter_reason
+				);
 				continue;
 			}
 		}
@@ -83,7 +90,7 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 		if ( $valid_return ) {
 			// Per RFC 6376 3.6.2.2 and RFC 7489 6.6.3.
 			require_once __DIR__ . '/class-invalidexception.php';
-			throw new InvalidException( 'Multiple TXT records found, only one should be present.' );
+			throw new InvalidException( \__( 'Multiple TXT records found, only one should be present.', 'email-auth' ) );
 		}
 
 		$valid_return = [ $tags, $record ];
@@ -93,7 +100,7 @@ function get_map( $domain, $filter = null, &$filter_reasons = [], $txt_resolver 
 
 	if ( ! $valid_return ) {
 		require_once __DIR__ . '/class-missingexception.php';
-		throw new MissingException( 'No TXT record found.' );
+		throw new MissingException( \__( 'No TXT record found.', 'email-auth' ) );
 	}
 
 	return $valid_return;

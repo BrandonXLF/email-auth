@@ -17,10 +17,12 @@ add_action(
 		wp_register_script(
 			'eauth_common',
 			plugin_dir_url( EAUTH_PLUGIN_FILE ) . 'admin/js/common.js',
-			[ 'jquery' ],
+			[ 'jquery', 'wp-i18n' ],
 			EAUTH_PLUGIN_VERSION,
 			[ 'in_footer' => true ]
 		);
+
+		wp_set_script_translations( 'eauth_common', 'email-auth' );
 
 		wp_localize_script(
 			'eauth_common',
@@ -37,8 +39,8 @@ add_action(
 	'admin_menu',
 	function () {
 		add_options_page(
-			'Configure Email Authentication',
-			'Email Auth',
+			\__( 'Configure Email Authentication', 'email-auth' ),
+			\__( 'Email Auth', 'email-auth' ),
 			'manage_options',
 			'email-auth',
 			function () {
@@ -60,9 +62,9 @@ add_action(
 /**
  * Add an error associated with test email sending.
  *
- * @param array[array] &$errors The arary of errors.
- * @param string       $type The type of the error.
- * @param string       $message The error message.
+ * @param array<int, array<string, string>> $errors WordPress settings error list.
+ * @param string                            $type   Error level (e.g. error, success).
+ * @param string                            $message The error message.
  */
 function add_email_error( &$errors, $type, $message ) {
 	$errors[] = [
@@ -84,20 +86,20 @@ add_action(
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $option_page ) && 'eauth_settings' === $option_page && ! empty( $_REQUEST['eauth_send_test'] ) ) {
 			if ( empty( $_REQUEST['eauth_test_to'] ) ) {
-				add_email_error( $value, 'error', 'No email address given.' );
+				add_email_error( $value, 'error', \__( 'No email address given.', 'email-auth' ) );
 				return $value;
 			}
 
 			$success = wp_mail(
 				sanitize_email( wp_unslash( $_REQUEST['eauth_test_to'] ) ),
-				'Email Auth Test',
-				'This is a test email from the Email Auth WordPress plugin.'
+				\__( 'Email Auth Test', 'email-auth' ),
+				\__( 'This is a test email from the Email Auth WordPress plugin.', 'email-auth' )
 			);
 
 			if ( ! $success ) {
-				add_email_error( $value, 'error', 'Test email failed.' );
+				add_email_error( $value, 'error', \__( 'Test email failed.', 'email-auth' ) );
 			} else {
-				add_email_error( $value, 'success', 'Test email sent.' );
+				add_email_error( $value, 'success', \__( 'Test email sent.', 'email-auth' ) );
 			}
 
 			return $value;

@@ -1,0 +1,61 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Function EmailAuthPlugin\\check_dkim_dns\(\) should return array\{pass\: bool, reason\: string\|null\} but returns array\{pass\: string, reason\: null\}\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/utils/check-dkim.php
+
+		-
+			message: '#^Function EmailAuthPlugin\\check_dkim_dns\(\) should return array\{pass\: bool, reason\: string\|null\} but returns array\{pass\: string, reason\: string\}\.$#'
+			identifier: return.type
+			count: 9
+			path: includes/utils/check-dkim.php
+
+		-
+			message: '#^Parameter \#1 \$partial of function EmailAuthPlugin\\api_pass expects string, bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/utils/check-dkim.php
+
+		-
+			message: '#^Parameter \#1 \$partial of function EmailAuthPlugin\\api_pass expects string, bool given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/utils/check-dmarc.php
+
+		-
+			message: '#^Parameter \#1 \$text of function esc_html expects string, int\<min, 99\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: includes/utils/check-dmarc.php
+
+		-
+			message: '#^Function EmailAuthPlugin\\api_pass\(\) should return array\{pass\: string, reason\: null\} but returns array\{pass\: string, reason\: string\|null\}\.$#'
+			identifier: return.type
+			count: 1
+			path: includes/utils/common.php
+
+		-
+			message: '#^Path in require_once\(\) "/Users/stein/Library/CloudStorage/Dropbox/GitHub/email\-auth/phpstan/wordpress\-root/wp\-admin/includes/class\-wp\-filesystem\-base\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: includes/utils/common.php
+
+		-
+			message: '#^Path in require_once\(\) "/Users/stein/Library/CloudStorage/Dropbox/GitHub/email\-auth/phpstan/wordpress\-root/wp\-admin/includes/class\-wp\-filesystem\-direct\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: includes/utils/common.php
+
+		-
+			message: '#^Path in require_once\(\) "/Users/stein/Library/CloudStorage/Dropbox/GitHub/email\-auth/phpstan/wordpress\-root/wp\-admin/includes/file\.php" is not a file or it does not exist\.$#'
+			identifier: requireOnce.fileNotFound
+			count: 1
+			path: includes/utils/common.php
+
+		-
+			message: '#^Call to static method parseAddressString\(\) on an unknown class IPLIB\\Factory\.$#'
+			identifier: class.notFound
+			count: 1
+			path: includes/utils/spf/class-dnsresolver.php

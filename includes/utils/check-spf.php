@@ -51,7 +51,11 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	} catch ( \SPFLib\Exception\InvalidIPAddressException $e ) {
 		$response['code_reasons'][] = [
 			'level' => 'error',
-			'desc'  => 'Configured IP address (' . esc_html( $ip ) . ') is invalid. Using <code>0.0.0.0</code>.',
+			'desc'  => sprintf(
+				/* translators: %s: configured IP address */
+				\__( 'Configured IP address (%1$s) is invalid. Using <code>0.0.0.0</code>.', 'email-auth' ),
+				esc_html( $ip )
+			),
 		];
 
 		$ip          = '0.0.0.0';
@@ -79,7 +83,11 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 	if ( $full_non_pass && $check_result->getMatchedMechanism() ) {
 		$response['code_reasons'][] = [
-			'desc' => 'Non-pass caused by: <code>' . esc_html( $check_result->getMatchedMechanism() ) . '</code>',
+			'desc' => sprintf(
+				/* translators: %s: SPF mechanism that caused non-pass */
+				\__( 'Non-pass caused by: <code>%s</code>', 'email-auth' ),
+				esc_html( $check_result->getMatchedMechanism() )
+			),
 		];
 	}
 
@@ -88,7 +96,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	try {
 		$record_txt = $decoder->getTXTRecordFromDomain( $domain );
 	} catch ( \Exception $e ) {
-		return api_failure( 'Could not fetch SPF record.', $response );
+		return api_failure( \__( 'Could not fetch SPF record.', 'email-auth' ), $response );
 	}
 
 	$response['record'] = $record_txt;
@@ -96,11 +104,11 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 	try {
 		$record = $decoder->getRecordFromTXT( $record_txt );
 	} catch ( \Exception $e ) {
-		return api_failure( 'Could not decode SPF record.', $response );
+		return api_failure( \__( 'Could not decode SPF record.', 'email-auth' ), $response );
 	}
 
 	if ( ! $record ) {
-		return api_failure( 'No SPF record found.', $response );
+		return api_failure( \__( 'No SPF record found.', 'email-auth' ), $response );
 	}
 
 	$invalid              = false;
@@ -172,8 +180,18 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 		$response['rec_reasons'][] = [
 			'level' => $full_non_pass ? 'error' : 'warning',
 			'desc'  => $full_non_pass
-				? 'Server (' . esc_html( $ip ) . ' or ' . esc_html( $server_domain ) . ') is not included in a pass case of the SPF record.'
-				: 'Server (' . esc_html( $ip ) . ' or ' . esc_html( $server_domain ) . ') is only matched by an <code>all</code> term in the SPF record.',
+				? sprintf(
+					/* translators: 1: server IP, 2: server domain */
+					\__( 'Server (%1$s or %2$s) is not included in a pass case of the SPF record.', 'email-auth' ),
+					esc_html( $ip ),
+					esc_html( $server_domain )
+				)
+				: sprintf(
+					/* translators: 1: server IP, 2: server domain */
+					\__( 'Server (%1$s or %2$s) is only matched by an <code>all</code> term in the SPF record.', 'email-auth' ),
+					esc_html( $ip ),
+					esc_html( $server_domain )
+				),
 		];
 	} else {
 		$rec_record = clone $record;
@@ -193,7 +211,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 		$response['rec_reasons'][] = [
 			'level' => 'warning',
-			'desc'  => 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.',
+			'desc'  => \__( 'An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers.', 'email-auth' ),
 		];
 	}
 
@@ -201,7 +219,7 @@ function check_spf( $domain, $ip, $server_domain, $dns_resolver = null ) {
 
 	return api_response(
 		'pass' === $code ? ( $invalid || $response['rec_reasons'] ? 'partial' : true ) : false,
-		'pass' !== $code ? 'SPF check did not pass.' : null,
+		'pass' !== $code ? \__( 'SPF check did not pass.', 'email-auth' ) : null,
 		$response
 	);
 }

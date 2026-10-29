@@ -54,7 +54,7 @@ function get_domain() {
 /**
  * Get the known private keys from storage.
  *
- * @return array[string]string $keys The private keys.
+ * @return array<string, string> Selector => PEM private key.
  */
 function get_keys() {
 	if ( defined( 'EAUTH_PRIVATE_KEYS' ) ) {
@@ -73,9 +73,9 @@ function get_keys() {
 /**
  * Save the given of private keys for subsequent page loads.
  *
- * @param array[string]string $keys The private keys.
+ * @param array<string, string> $keys Selector => PEM private key.
  */
-function save_keys( $keys ) {
+function save_keys( array $keys ) {
 	$keys_path = get_config_dir( 'dkim-keys.php' );
 
 	if ( empty( $keys ) ) {

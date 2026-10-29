@@ -1,0 +1,617 @@
+# Copyright (C) 2026 Brandon Fowler
+# This file is distributed under the GPLv2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Email Auth 1.5.1\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/email-auth\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2026-10-28T10:23:00+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.12.0\n"
+"X-Domain: email-auth\n"
+
+#. Plugin Name of the plugin
+#: email-auth.php
+#: includes/admin-interface.php:43
+#: includes/menu-page.php:24
+msgid "Email Auth"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: email-auth.php
+msgid "https://www.brandonfowler.me/email-auth/"
+msgstr ""
+
+#. Description of the plugin
+#: email-auth.php
+msgid "Enable email authentication/validation for the default WordPress PHPMailer."
+msgstr ""
+
+#. Author of the plugin
+#: email-auth.php
+msgid "Brandon Fowler"
+msgstr ""
+
+#. Author URI of the plugin
+#: email-auth.php
+msgid "https://www.brandonfowler.me/wordpress-plugins/"
+msgstr ""
+
+#: includes/admin-interface.php:42
+msgid "Configure Email Authentication"
+msgstr ""
+
+#: includes/admin-interface.php:89
+msgid "No email address given."
+msgstr ""
+
+#: includes/admin-interface.php:95
+msgid "Email Auth Test"
+msgstr ""
+
+#: includes/admin-interface.php:96
+msgid "This is a test email from the Email Auth WordPress plugin."
+msgstr ""
+
+#: includes/admin-interface.php:100
+msgid "Test email failed."
+msgstr ""
+
+#: includes/admin-interface.php:102
+msgid "Test email sent."
+msgstr ""
+
+#: includes/api-routes.php:61
+msgid "No selector name given."
+msgstr ""
+
+#: includes/api-routes.php:67
+msgid "A key with that name already exists."
+msgstr ""
+
+#: includes/api-routes.php:81
+msgid "Failed to create private key."
+msgstr ""
+
+#: includes/api-routes.php:87
+msgid "Failed to export private key."
+msgstr ""
+
+#. translators: %s: default email domain hostname
+#: includes/setting-sections.php:123
+#, php-format
+msgid "Default domain: @%s"
+msgstr ""
+
+#: includes/setting-sections.php:133
+msgid "Display name:"
+msgstr ""
+
+#: includes/setting-sections.php:168
+#: admin/js/common.js:149
+#: admin/js/dmarc.js:273
+msgid "From Address"
+msgstr ""
+
+#: includes/setting-sections.php:177
+msgid "WordPress"
+msgstr ""
+
+#: includes/setting-sections.php:187
+msgid "Force the use of the address above and ignore other plugins."
+msgstr ""
+
+#: includes/setting-sections.php:190
+msgid "Reply-To Address"
+msgstr ""
+
+#: includes/setting-sections.php:192
+msgid "Email address where replies are sent. Leave blank to use the \"From\" address."
+msgstr ""
+
+#: includes/setting-sections.php:203
+#: admin/js/spf.js:96
+msgid "Bounce Address"
+msgstr ""
+
+#: includes/setting-sections.php:207
+msgid "The bounce address is the address of the email as used by SMTP. It's not typically seen by users, but it's important for SPF. Think of the bounce address as the address on the envelope and the from address as the address on the top of the letter."
+msgstr ""
+
+#: includes/setting-sections.php:215
+msgid "Don't set"
+msgstr ""
+
+#: includes/setting-sections.php:220
+msgid "Use the from address"
+msgstr ""
+
+#: includes/setting-sections.php:233
+msgid "DKIM"
+msgstr ""
+
+#: includes/setting-sections.php:248
+msgid "Selector:"
+msgstr ""
+
+#: includes/setting-sections.php:250
+#: admin/js/dkim.js:114
+msgid "Disabled"
+msgstr ""
+
+#: includes/setting-sections.php:256
+msgid "Manage Keys"
+msgstr ""
+
+#: includes/setting-sections.php:260
+msgid "Selector name"
+msgstr ""
+
+#: includes/setting-sections.php:261
+msgid "Upload Key"
+msgstr ""
+
+#: includes/setting-sections.php:262
+msgid "Create Key"
+msgstr ""
+
+#: includes/setting-sections.php:264
+#: admin/js/dkim.js:54
+msgid "DKIM Domain"
+msgstr ""
+
+#: includes/setting-sections.php:266
+msgid "The DKIM domain is the domain that is verified through the DKIM check. If it does not match the \"From\" address, then the email may be rejected or displayed differently."
+msgstr ""
+
+#: includes/setting-sections.php:275
+msgid "Use WordPress's domain -"
+msgstr ""
+
+#: includes/setting-sections.php:282
+msgid "Use the from address's domain"
+msgstr ""
+
+#: includes/setting-sections.php:287
+msgid "Use the bounce address's domain"
+msgstr ""
+
+#: includes/setting-sections.php:303
+msgid "SPF"
+msgstr ""
+
+#: includes/setting-sections.php:319
+msgid "Email Server IP Address for SPF Checks"
+msgstr ""
+
+#: includes/setting-sections.php:321
+msgid "To get accurate SPF checks, this must be the IP address of the server that sends outbound emails."
+msgstr ""
+
+#: includes/setting-sections.php:330
+msgid "Use WordPress's server's IP address - Emails are sent from the same server as WordPress"
+msgstr ""
+
+#: includes/setting-sections.php:337
+msgid "Use the bounce address's mail exchange IP - Same server is used for inbound and outbound emails"
+msgstr ""
+
+#: includes/setting-sections.php:345
+msgid "Guide video"
+msgstr ""
+
+#: includes/setting-sections.php:353
+msgid "Save IP Configuration"
+msgstr ""
+
+#: includes/setting-sections.php:356
+msgid "Close"
+msgstr ""
+
+#: includes/setting-sections.php:366
+msgid "DMARC"
+msgstr ""
+
+#: includes/setting-sections.php:387
+#: includes/setting-sections.php:395
+msgid "Save Changes"
+msgstr ""
+
+#: includes/setting-sections.php:391
+msgid "Test email address"
+msgstr ""
+
+#: includes/setting-sections.php:392
+msgid "Save & Send Test"
+msgstr ""
+
+#: includes/utils/check-dkim.php:51
+msgid "Failed to read private key from store."
+msgstr ""
+
+#: includes/utils/check-dkim.php:57
+msgid "Failed to get public key."
+msgstr ""
+
+#: includes/utils/check-dkim.php:74
+msgid "Selector name is non-standard."
+msgstr ""
+
+#: includes/utils/check-dkim.php:88
+msgid "Public key is missing."
+msgstr ""
+
+#: includes/utils/check-dkim.php:92
+msgid "Public key is incorrect."
+msgstr ""
+
+#: includes/utils/check-dkim.php:97
+msgid "Version identifier must be the first tag if present."
+msgstr ""
+
+#: includes/utils/check-dkim.php:101
+msgid "Version identifier must be v=DKIM1 if present."
+msgstr ""
+
+#: includes/utils/check-dkim.php:106
+msgid "Record service type must include email (or *)."
+msgstr ""
+
+#: includes/utils/check-dkim.php:110
+msgid "Test mode is enabled, DKIM policy might be ignored."
+msgstr ""
+
+#: includes/utils/check-dmarc.php:23
+msgid "Version identifier (v=DMARC1) is missing."
+msgstr ""
+
+#: includes/utils/check-dmarc.php:27
+msgid "First tag must be the version identifier (v)."
+msgstr ""
+
+#: includes/utils/check-dmarc.php:31
+msgid "Version identifier must be v=DMARC1."
+msgstr ""
+
+#. translators: %s: DMARC policy tag name (p or sp)
+#: includes/utils/check-dmarc.php:102
+#, php-format
+msgid "DMARC will pass regardless of DKIM and SPF alignment. Add a <code>%1$s=quarantine</code> or <code>%1$s=reject</code> term."
+msgstr ""
+
+#: includes/utils/check-dmarc.php:106
+msgid "Failures will be treated as suspicious, but will not be outright rejected."
+msgstr ""
+
+#. translators: %s: percentage of failures DMARC applies to
+#: includes/utils/check-dmarc.php:115
+#, php-format
+msgid "DMARC will only fail for %s%% of failures."
+msgstr ""
+
+#: includes/utils/check-dmarc.php:122
+msgid "<code>adkim</code>: DKIM domain and \"From\" domain need only share a common registered domain."
+msgstr ""
+
+#: includes/utils/check-dmarc.php:123
+msgid "<code>adkim</code>: DKIM domain and \"From\" domain must be identical."
+msgstr ""
+
+#: includes/utils/check-dmarc.php:127
+msgid "<code>aspf</code>: Bounce domain and \"From\" domain need only share a common registered domain."
+msgstr ""
+
+#: includes/utils/check-dmarc.php:128
+msgid "<code>aspf</code>: Bounce domain and \"From\" domain must be identical."
+msgstr ""
+
+#. translators: %s: configured IP address
+#: includes/utils/check-spf.php:56
+#, php-format
+msgid "Configured IP address (%1$s) is invalid. Using <code>0.0.0.0</code>."
+msgstr ""
+
+#. translators: %s: SPF mechanism that caused non-pass
+#: includes/utils/check-spf.php:88
+#, php-format
+msgid "Non-pass caused by: <code>%s</code>"
+msgstr ""
+
+#: includes/utils/check-spf.php:99
+msgid "Could not fetch SPF record."
+msgstr ""
+
+#: includes/utils/check-spf.php:107
+msgid "Could not decode SPF record."
+msgstr ""
+
+#: includes/utils/check-spf.php:111
+msgid "No SPF record found."
+msgstr ""
+
+#. translators: 1: server IP, 2: server domain
+#: includes/utils/check-spf.php:185
+#, php-format
+msgid "Server (%1$s or %2$s) is not included in a pass case of the SPF record."
+msgstr ""
+
+#. translators: 1: server IP, 2: server domain
+#: includes/utils/check-spf.php:191
+#, php-format
+msgid "Server (%1$s or %2$s) is only matched by an <code>all</code> term in the SPF record."
+msgstr ""
+
+#: includes/utils/check-spf.php:214
+msgid "An <code>~all</code> or <code>-all</code> term is recommended to (soft) fail all other servers."
+msgstr ""
+
+#: includes/utils/check-spf.php:222
+msgid "SPF check did not pass."
+msgstr ""
+
+#. translators: %s: underlying DNS error message
+#: includes/utils/dns-tag-value/class-txtresolver.php:41
+#, php-format
+msgid "Could not retrieve DNS record. %s"
+msgstr ""
+
+#: includes/utils/dns-tag-value/dns-tag-value.php:51
+msgid "Potential record ignored: Malformed tag-value pair."
+msgstr ""
+
+#: includes/utils/dns-tag-value/dns-tag-value.php:56
+msgid "Malformed tag-value pair."
+msgstr ""
+
+#. translators: %s: duplicate DNS tag key
+#: includes/utils/dns-tag-value/dns-tag-value.php:67
+#, php-format
+msgid "Multiple tag-values pairs with the same key (%s)."
+msgstr ""
+
+#. translators: %s: reason the DNS record was ignored
+#: includes/utils/dns-tag-value/dns-tag-value.php:83
+#, php-format
+msgid "Potential record ignored: %s"
+msgstr ""
+
+#: includes/utils/dns-tag-value/dns-tag-value.php:93
+msgid "Multiple TXT records found, only one should be present."
+msgstr ""
+
+#: includes/utils/dns-tag-value/dns-tag-value.php:103
+msgid "No TXT record found."
+msgstr ""
+
+#: admin/js/common.js:49
+msgid "Domain:"
+msgstr ""
+
+#: admin/js/common.js:57
+msgid "with fallback"
+msgstr ""
+
+#: admin/js/common.js:65
+msgid "from"
+msgstr ""
+
+#: admin/js/common.js:143
+#: admin/js/common.js:150
+msgid "domain"
+msgstr ""
+
+#: admin/js/common.js:146
+#: admin/js/dmarc.js:31
+msgid "and"
+msgstr ""
+
+#. translators: %s: check type such as SPF or DKIM
+#: admin/js/common.js:156
+#, js-format
+msgid "do not match, so the from address domain cannot be strictly verified through %s."
+msgstr ""
+
+#: admin/js/common.js:202
+msgid "Configured with warnings."
+msgstr ""
+
+#: admin/js/common.js:210
+msgid "Configured."
+msgstr ""
+
+#: admin/js/common.js:221
+#: admin/js/common.js:229
+msgid "Expand"
+msgstr ""
+
+#: admin/js/common.js:228
+msgid "Collapse"
+msgstr ""
+
+#: admin/js/common.js:236
+msgid "Current record:"
+msgstr ""
+
+#. translators: %s: record type such as SPF or DKIM
+#: admin/js/common.js:267
+#, js-format
+msgid "Loading %s record…"
+msgstr ""
+
+#: admin/js/common.js:297
+msgid "Recheck. Note that DNS changes may take a few minutes to show depending on their TTL."
+msgstr ""
+
+#: admin/js/common.js:388
+msgid "TXT record for"
+msgstr ""
+
+#: admin/js/dkim.js:21
+msgid "No DKIM selector."
+msgstr ""
+
+#: admin/js/dkim.js:28
+msgid "Unknown DKIM domain. DKIM will only be applied if the domain can be figured out by WordPress."
+msgstr ""
+
+#: admin/js/dkim.js:41
+#: admin/js/dmarc.js:262
+msgid "Warnings"
+msgstr ""
+
+#: admin/js/dkim.js:43
+msgid "Generated DNS Record"
+msgstr ""
+
+#: admin/js/dkim.js:48
+msgid "Show Generated DNS Record"
+msgstr ""
+
+#: admin/js/dkim.js:105
+msgid "Loading keys…"
+msgstr ""
+
+#: admin/js/dkim.js:133
+msgid "Download"
+msgstr ""
+
+#: admin/js/dkim.js:141
+msgid "Delete"
+msgstr ""
+
+#. translators: %s: DKIM selector name
+#: admin/js/dkim.js:147
+#, js-format
+msgid "Are you sure you want to delete the key with selector %s?"
+msgstr ""
+
+#. translators: %s: DKIM selector name
+#: admin/js/dkim.js:181
+#, js-format
+msgid "Selector \"%s\" is non-standard. A valid selector must contain ASCII letters and numbers with optional hyphens in-between. Dots can be used to separate subdomains. Would you like to continue anyway?"
+msgstr ""
+
+#: admin/js/dmarc.js:32
+msgid "with"
+msgstr ""
+
+#: admin/js/dmarc.js:40
+msgid "Configured with warnings"
+msgstr ""
+
+#: admin/js/dmarc.js:41
+msgid "Configured"
+msgstr ""
+
+#. translators: %s: alignment check name (DKIM or SPF)
+#: admin/js/dmarc.js:65
+#, js-format
+msgid "%s check failed."
+msgstr ""
+
+#. translators: %s: alignment check name (DKIM or SPF)
+#: admin/js/dmarc.js:76
+#, js-format
+msgid "%s alignment unknown."
+msgstr ""
+
+#. translators: 1: validated domain, 2: from domain
+#: admin/js/dmarc.js:100
+#, js-format
+msgid "%1$s alignment failed: %2$s does not match from domain %3$s."
+msgstr ""
+
+#. translators: %s: alignment check name (DKIM or SPF)
+#: admin/js/dmarc.js:116
+#, js-format
+msgid "%s result unknown."
+msgstr ""
+
+#. translators: %s: alignment check name (DKIM or SPF)
+#: admin/js/dmarc.js:126
+#, js-format
+msgid "%s alignment passed."
+msgstr ""
+
+#: admin/js/dmarc.js:170
+#: admin/js/dmarc.js:174
+msgid "Check in progress…"
+msgstr ""
+
+#: admin/js/dmarc.js:186
+msgid "Alignment Checks"
+msgstr ""
+
+#: admin/js/dmarc.js:196
+msgid "alignment"
+msgstr ""
+
+#: admin/js/dmarc.js:206
+msgid "unknown alignment"
+msgstr ""
+
+#: admin/js/dmarc.js:213
+msgid "alignment checks failed"
+msgstr ""
+
+#: admin/js/dmarc.js:214
+msgid "but"
+msgstr ""
+
+#: admin/js/dmarc.js:266
+msgid "Comments"
+msgstr ""
+
+#: admin/js/dmarc.js:288
+msgid "unknown alignments"
+msgstr ""
+
+#: admin/js/spf.js:14
+msgid "Unknown bounce address domain."
+msgstr ""
+
+#: admin/js/spf.js:20
+msgid "SPF Check Result"
+msgstr ""
+
+#: admin/js/spf.js:22
+msgid "Result code:"
+msgstr ""
+
+#: admin/js/spf.js:26
+msgid "for server"
+msgstr ""
+
+#: admin/js/spf.js:32
+msgid "Configure Server IP"
+msgstr ""
+
+#: admin/js/spf.js:40
+msgid "Details"
+msgstr ""
+
+#: admin/js/spf.js:47
+#: admin/js/spf.js:57
+#: admin/js/spf.js:69
+msgid "Validity Check"
+msgstr ""
+
+#: admin/js/spf.js:49
+msgid "No syntactically valid record found."
+msgstr ""
+
+#: admin/js/spf.js:59
+msgid "Current record is schematically valid."
+msgstr ""
+
+#: admin/js/spf.js:76
+msgid "Suggested DNS Record"
+msgstr ""
+
+#: admin/js/spf.js:86
+msgid "Reasons"
+msgstr ""
